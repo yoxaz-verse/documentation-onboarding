@@ -1,7 +1,9 @@
 {
   "index": "Introduction",
-  "problems": "Problems in Industry",
-  "values": "Our Values",
+  "products": "Product Details",
+  "setup": "Setting Up Account",
+  "pitch": "Getting Ready",
+  "conversation": "Conversation Guide",
   "about": {
     "title": "Website",
     "type": "page",
