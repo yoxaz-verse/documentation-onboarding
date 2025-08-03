@@ -1,0 +1,17 @@
+{
+  "index": "Introduction",
+  "problems": "Problems in Industry",
+  "values": "Our Values",
+  "about": {
+    "title": "Website",
+    "type": "page",
+    "href": "https://obaol.com",
+    "newWindow": true
+  },
+  "contact": {
+    "title": "Internal Site",
+    "type": "page",
+    "href": "https://automate.obaol.com",
+    "newWindow": true
+  }
+}
