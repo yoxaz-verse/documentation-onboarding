@@ -1,5 +1,5 @@
 const withNextra = require("nextra")({
-  theme: "Obaol",
+  theme: "nextra-theme-docs",
   themeConfig: "./theme.config.tsx",
 });
 
