@@ -1,16 +1,16 @@
 {
   "index": "Introduction",
   "setup": "Setting Up Account",
+  "pitch": "Getting Ready",
   "core_elements": "5 Core Elements",
   "designation_guide": "Designation Guide",
-  "pitch": "Getting Ready",
   "conversation": "Conversation Guide",
   "about": {
     "title": "Website",
     "type": "page",
     "href": "https://obaol.com",
     "newWindow": true,
- "rs": "Research Specialist"
+    "rs": "Research Specialist"
   },
   "contact": {
     "title": "Internal Site",
