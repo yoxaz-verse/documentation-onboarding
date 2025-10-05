@@ -1,18 +1,16 @@
 {
   "index": "Introduction",
-  "setup": "Setting Up Account",
-  "pitch": "Getting Ready",
   "about": {
-    "title": "Website",
+    "title": "Designations",
     "type": "page",
-    "href": "https://obaol.com",
+    "href": "https://designation.obaol.com",
     "newWindow": true,
     "rs": "Research Specialist"
   },
   "contact": {
-    "title": "Internal Site",
+    "title": "Obaol Guide",
     "type": "page",
-    "href": "https://automate.obaol.com",
+    "href": "https://guide.obaol.com",
     "newWindow": true
   }
 }
