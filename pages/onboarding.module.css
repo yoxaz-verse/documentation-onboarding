@@ -1,0 +1,1344 @@
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.kpiCard {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--surface-border-strong) 70%, transparent);
+  border-radius: 1.2rem;
+  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
+  padding: 1rem;
+  min-width: 0;
+  box-shadow: var(--elev-shadow), var(--inset-highlight);
+}
+
+.kpiCard::after {
+  content: '';
+  position: absolute;
+  width: 7rem;
+  height: 7rem;
+  top: -3rem;
+  right: -2rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent-soft) 85%, transparent);
+}
+
+.kpiLabel {
+  position: relative;
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 800;
+}
+
+.kpiValue {
+  position: relative;
+  margin: 0.45rem 0 0;
+  color: var(--ink-strong);
+  font-size: clamp(1.08rem, 2vw, 1.32rem);
+  font-weight: 800;
+  line-height: 1.22;
+  overflow-wrap: anywhere;
+}
+
+.callout {
+  margin-top: 0.2rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--surface-border));
+  border-radius: 1.3rem;
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--accent-soft) 80%, transparent) 0, transparent 28%),
+    linear-gradient(165deg, color-mix(in srgb, var(--accent-soft) 34%, var(--surface-strong)), var(--surface));
+  padding: 1.15rem;
+  box-shadow: var(--elev-shadow), var(--inset-highlight);
+}
+
+.calloutTitle {
+  margin: 0;
+  color: var(--ink-strong);
+  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.calloutText {
+  margin: 0.48rem 0 0;
+  color: var(--ink);
+  line-height: 1.62;
+}
+
+.cta,
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-top: 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--accent-strong) 68%, black 8%);
+  border-radius: 0.95rem;
+  min-height: 2.95rem;
+  padding: 0.78rem 1.08rem;
+  color: var(--accent-ink);
+  text-decoration: none;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  box-shadow: 0 14px 30px color-mix(in srgb, var(--accent) 28%, transparent);
+  transition: background-color 170ms ease, border-color 170ms ease, transform 170ms ease, box-shadow 170ms ease;
+  white-space: normal;
+  cursor: pointer;
+}
+
+.cta:hover,
+.primaryButton:hover:enabled {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 34px color-mix(in srgb, var(--accent) 32%, transparent);
+}
+
+.cta:focus-visible,
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible,
+.chipButton:focus-visible,
+.textInput:focus-visible,
+.textArea:focus-visible,
+.wizardInput:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--control-focus) 30%, transparent);
+}
+
+.calloutHint {
+  margin: 0.55rem 0 0;
+  color: var(--ink-muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.homeIdentityRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  padding: 0.05rem 0.1rem;
+}
+
+.homeIdentityText {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.homeHeroCard {
+  padding: clamp(1.35rem, 2.6vw, 1.8rem);
+  border-color: color-mix(in srgb, var(--accent) 26%, var(--surface-border));
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--accent-soft) 52%, transparent) 0, transparent 22%),
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-strong) 96%, white 4%), var(--surface));
+}
+
+.homeHeroEyebrow {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.homeHeroTitle {
+  margin: 0.45rem 0 0;
+  color: var(--ink-strong);
+  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+}
+
+.homeHeroProgress {
+  margin: 0.6rem 0 0;
+  color: var(--accent-strong);
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.homeSummaryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.homeSummaryCard {
+  border: 1px solid color-mix(in srgb, var(--surface-border) 82%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--surface-strong) 92%, transparent);
+  padding: 0.95rem 1rem;
+}
+
+.homeSummaryLabel {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.homeSummaryValue {
+  margin: 0.45rem 0 0;
+  color: var(--ink-strong);
+  font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.stepList {
+  margin: 0;
+  padding: 1rem 1rem 1rem 2rem;
+  border: 1px solid color-mix(in srgb, var(--surface-border) 76%, transparent);
+  border-radius: 1.2rem;
+  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
+  color: color-mix(in srgb, var(--ink) 82%, var(--ink-muted));
+  display: grid;
+  gap: 0.48rem;
+  line-height: 1.6;
+  box-shadow: var(--elev-shadow), var(--inset-highlight);
+}
+
+.infoStrip {
+  margin: 0;
+  border: 1px solid color-mix(in srgb, var(--info-border) 76%, var(--surface-border));
+  border-radius: 1rem;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--info-bg) 70%, var(--surface-strong)), var(--surface));
+  padding: 0.85rem 0.95rem;
+  color: var(--ink);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.embedWrap,
+.wizardCard,
+.formSection,
+.profileCard,
+.sidebarPanel,
+.leaderboardPanel,
+.sidebarStack,
+.lessonRail,
+.lessonStage,
+.trainingIntro,
+.codePanel {
+  border: 1px solid var(--surface-border);
+  border-radius: 1.25rem;
+  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
+  box-shadow: var(--elev-shadow), var(--inset-highlight);
+}
+
+.embedWrap {
+  overflow: hidden;
+}
+
+.embed {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+}
+
+.actionRow {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.82rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled,
+.chipButton:disabled {
+  opacity: 0.62;
+  cursor: not-allowed;
+}
+
+.message {
+  margin: 0;
+  border: 1px solid var(--surface-border);
+  border-radius: 0.96rem;
+  background: var(--surface);
+  padding: 0.78rem 0.9rem;
+  color: var(--ink);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.messageSuccess {
+  border-color: var(--success-border);
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.messageError {
+  border-color: var(--error-border);
+  background: var(--error-bg);
+  color: var(--error);
+}
+
+.brandBanner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.1rem;
+}
+
+.brandLogo {
+  border-radius: 0.86rem;
+  border: 1px solid var(--surface-border);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent-soft) 90%, white 10%), color-mix(in srgb, var(--accent-secondary) 12%, var(--surface)));
+  color: var(--ink-strong);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  padding: 0.52rem 0.72rem;
+}
+
+.brandCaption {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.wizardCard {
+  padding: 1.2rem;
+}
+
+.wizardProgress {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.wizardTitle {
+  margin: 0.62rem 0 0.95rem;
+  color: var(--ink-strong);
+  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.wizardInput,
+.textInput,
+.textArea {
+  width: 100%;
+  border: 1px solid var(--control-border);
+  border-radius: 1rem;
+  min-height: 3rem;
+  padding: 0.78rem 0.9rem;
+  background: var(--control-surface-strong);
+  color: var(--control-text);
+  font-size: 0.98rem;
+  box-shadow: var(--inset-highlight);
+}
+
+.textArea {
+  resize: vertical;
+  min-height: 7.6rem;
+}
+
+.chipGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.chipButton {
+  border: 1px solid var(--surface-border-strong);
+  border-radius: 999px;
+  min-height: 2.55rem;
+  padding: 0.5rem 1rem;
+  background: var(--surface-strong);
+  color: var(--ink-strong);
+  font-size: 0.92rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 170ms ease, border-color 170ms ease, background-color 170ms ease;
+}
+
+.chipButton:hover:enabled {
+  transform: translateY(-1px);
+  border-color: var(--control-border-hover);
+  background: color-mix(in srgb, var(--surface-strong) 74%, var(--accent-soft));
+}
+
+.chipButtonActive {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-soft) 82%, var(--surface));
+  color: var(--ink-strong);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+.secondaryButton {
+  border: 1px solid var(--surface-border-strong);
+  border-radius: 0.95rem;
+  min-height: 2.95rem;
+  padding: 0.78rem 1rem;
+  font-weight: 800;
+  background: var(--surface-strong);
+  color: var(--ink-strong);
+  cursor: pointer;
+  transition: transform 170ms ease, border-color 170ms ease, background-color 170ms ease;
+}
+
+.secondaryButton:hover:enabled {
+  transform: translateY(-1px);
+  border-color: var(--control-border-hover);
+  background: color-mix(in srgb, var(--surface-strong) 78%, var(--accent-soft));
+}
+
+.profileCard {
+  padding: 1.15rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.profileGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.78rem;
+  color: var(--ink);
+}
+
+.profileGrid > div {
+  border: 1px solid color-mix(in srgb, var(--surface-border) 78%, transparent);
+  border-radius: 1rem;
+  padding: 0.85rem;
+  background: color-mix(in srgb, var(--surface-strong) 92%, transparent);
+  line-height: 1.5;
+}
+
+.trainingIntro {
+  margin-bottom: 1rem;
+  padding: 0.9rem 1rem;
+  color: var(--ink);
+}
+
+.trainingIntro p {
+  margin: 0;
+}
+
+.catalogGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.courseCard {
+  overflow: hidden;
+  border: 1px solid var(--surface-border);
+  border-radius: 1.35rem;
+  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
+  box-shadow: var(--elev-shadow), var(--inset-highlight);
+}
+
+.courseCover,
+.classroomHero {
+  position: relative;
+  overflow: hidden;
+  color: #eff4ff;
+}
+
+.courseCoverBuilds,
+.classroomHero.courseCoverBuilds {
+  background: linear-gradient(135deg, #1c1b4b 0%, #2f3f90 46%, #249cb8 100%);
+}
+
+.courseCoverCode,
+.classroomHero.courseCoverCode {
+  background: linear-gradient(135deg, #0a2840 0%, #125f69 50%, #4abf9d 100%);
+}
+
+.courseCoverProduct,
+.classroomHero.courseCoverProduct {
+  background: linear-gradient(135deg, #47217f 0%, #6d42d6 48%, #cb6fa6 100%);
+}
+
+.courseCoverCalls,
+.classroomHero.courseCoverCalls {
+  background: linear-gradient(135deg, #713117 0%, #d66821 48%, #d6b442 100%);
+}
+
+.courseCover::before,
+.classroomHero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(140deg, rgba(7, 15, 34, 0.12), rgba(7, 15, 34, 0.04)),
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.12) 0, transparent 30%),
+    radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.09) 0, transparent 28%);
+}
+
+.courseCoverInner {
+  position: relative;
+  z-index: 1;
+  min-height: 12.5rem;
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.8rem;
+}
+
+.courseIcon {
+  align-self: flex-start;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 0.35rem 0.62rem;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.courseCoverTitle {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  font-weight: 800;
+  line-height: 1.02;
+}
+
+.courseCoverSubtitle {
+  margin: 0.34rem 0 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.82rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.courseCardBody {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+}
+
+.courseCardHeader,
+.sectionHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.courseCardTitle,
+.sideTitleLike {
+  margin: 0;
+  color: var(--ink-strong);
+  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-size: 1.02rem;
+  line-height: 1.25;
+}
+
+.courseBadge,
+.pointsBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.24rem 0.62rem;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.courseBadge {
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  background: color-mix(in srgb, var(--accent-soft) 84%, var(--surface));
+  color: var(--accent-strong);
+}
+
+.pointsBadge {
+  border: 1px solid color-mix(in srgb, var(--accent-secondary) 32%, var(--surface-border));
+  background: color-mix(in srgb, var(--accent-soft) 46%, var(--surface-strong));
+  color: var(--ink-strong);
+}
+
+.courseCardText,
+.sectionHint,
+.classroomHeroText {
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.58;
+}
+
+.courseCardMeta,
+.leaderboardStats,
+.lessonStatus,
+.lessonOrder,
+.classroomEyebrow,
+.codeLabel {
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.progressTrack {
+  width: 100%;
+  height: 0.72rem;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--surface-border);
+  background: color-mix(in srgb, var(--surface-strong) 74%, var(--bg-c) 26%);
+}
+
+.progressFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-secondary) 100%);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.cardActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.leaderboardPanel,
+.sidebarPanel {
+  padding: 1rem;
+}
+
+.leaderboardList,
+.leaderboardGrid,
+.lessonList,
+.sidebarStack {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.sidebarStack {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.leaderboardItem {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--surface-border) 80%, transparent);
+  border-radius: 1rem;
+  padding: 0.78rem 0.82rem;
+  background: color-mix(in srgb, var(--surface-strong) 88%, transparent);
+}
+
+.leaderboardItemCurrent {
+  border-color: color-mix(in srgb, var(--accent) 44%, var(--surface-border));
+  background: color-mix(in srgb, var(--accent-soft) 76%, var(--surface-strong));
+}
+
+.leaderboardRank {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--accent-soft) 80%, var(--surface));
+  color: var(--accent-strong);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.leaderboardMeta {
+  min-width: 0;
+}
+
+.leaderboardName {
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.leaderboardPoints {
+  color: var(--ink-strong);
+  font-weight: 900;
+}
+
+.classroomHero {
+  border-radius: 1.3rem;
+  padding: 1rem;
+  box-shadow: var(--elev-shadow), var(--inset-highlight);
+}
+
+.classroomHeroInner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.9fr);
+  align-items: end;
+  gap: 1rem;
+}
+
+.classroomHeroContent {
+  display: grid;
+  gap: 0.72rem;
+}
+
+.classroomEyebrow {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.76);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.classroomHeroTitle {
+  margin: 0;
+  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  color: #ffffff;
+  font-size: clamp(1.5rem, 2.6vw, 2.15rem);
+  line-height: 1.02;
+}
+
+.classroomHeroText {
+  color: rgba(255, 255, 255, 0.82);
+  max-width: 52ch;
+}
+
+.heroMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.48rem;
+}
+
+.heroStatPill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  padding: 0.38rem 0.72rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.heroAside {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.heroProgressCard {
+  width: min(100%, 20rem);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1.05rem;
+  padding: 0.88rem 0.92rem 0.92rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.07));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+}
+
+.heroProgressHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-bottom: 0.72rem;
+}
+
+.heroProgressLabel,
+.heroProgressHint {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.heroProgressValue {
+  margin: 0.18rem 0 0;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.heroProgressPercent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.15rem;
+  min-height: 2rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 900;
+}
+
+.heroProgressHint {
+  margin-top: 0.68rem;
+}
+
+.classroomLayout {
+  display: grid;
+  grid-template-columns: minmax(15rem, 17rem) minmax(0, 1.5fr);
+  gap: 1rem;
+}
+
+.desktopOnly {}
+
+.mobileOnly {
+  display: none;
+}
+
+.lessonRail,
+.lessonStage {
+  padding: 1rem;
+}
+
+.classroomSummaryStrip {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.summaryStatCard {
+  border: 1px solid var(--surface-border);
+  border-radius: 1.1rem;
+  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
+  box-shadow: var(--elev-shadow), var(--inset-highlight);
+}
+
+.summaryStatCard {
+  padding: 0.9rem 0.95rem;
+  display: grid;
+  gap: 0.62rem;
+}
+
+.summaryStatCardFeature {
+  gap: 0.75rem;
+}
+
+.summaryStatHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.72rem;
+  flex-wrap: wrap;
+}
+
+.currentLessonCard {
+  border: 1px solid var(--surface-border);
+  border-radius: 1.1rem;
+  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
+  box-shadow: var(--elev-shadow), var(--inset-highlight);
+  padding: 0.95rem 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.currentLessonHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.72rem;
+}
+
+.mobileLessonStage {
+  display: grid;
+}
+
+.mobileAccordion {
+  border: 1px solid var(--surface-border);
+  border-radius: 1.1rem;
+  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
+  box-shadow: var(--elev-shadow), var(--inset-highlight);
+  overflow: hidden;
+}
+
+.mobileAccordionSummary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.95rem 1rem;
+  cursor: pointer;
+}
+
+.mobileAccordionSummary::-webkit-details-marker {
+  display: none;
+}
+
+.mobileAccordionSummary::after {
+  content: '+';
+  flex-shrink: 0;
+  color: var(--accent-strong);
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.mobileAccordion[open] .mobileAccordionSummary::after {
+  content: '−';
+}
+
+.mobileAccordionEyebrow {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: var(--ink-muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.mobileAccordionTitle {
+  display: block;
+  color: var(--ink-strong);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.mobileAccordionMeta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.9rem;
+  padding: 0.22rem 0.72rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--surface-border-strong) 72%, transparent);
+  background: color-mix(in srgb, var(--surface-strong) 90%, transparent);
+  color: var(--ink-strong);
+  font-size: 0.76rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.mobileAccordionContent {
+  padding: 0 1rem 1rem;
+}
+
+.mobileAccordionPanel {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.mobileProgressStack {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.leaderboardGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.inlineLink {
+  color: var(--accent);
+  font-size: 0.84rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.lessonItem {
+  border: 1px solid color-mix(in srgb, var(--surface-border-strong) 72%, transparent);
+  border-radius: 1rem;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-strong) 96%, transparent), color-mix(in srgb, var(--surface) 92%, transparent));
+  padding: 0.92rem 0.96rem;
+  color: var(--ink-strong);
+  text-align: left;
+  cursor: pointer;
+  display: grid;
+  gap: 0.42rem;
+  box-shadow: 0 12px 26px rgba(78, 95, 160, 0.08);
+  transition: transform 170ms ease, border-color 170ms ease, background-color 170ms ease, box-shadow 170ms ease;
+}
+
+.lessonItem:hover:enabled {
+  transform: translateY(-1px);
+  border-color: var(--control-border-hover);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-strong) 88%, var(--accent-soft)), var(--surface));
+  box-shadow: 0 16px 28px rgba(78, 95, 160, 0.12);
+}
+
+.lessonItemActive {
+  border-color: color-mix(in srgb, var(--accent) 48%, var(--surface-border));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 82%, var(--surface-strong)), var(--surface));
+  box-shadow: 0 18px 32px color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.lessonItemCurrent {
+  border-color: color-mix(in srgb, var(--accent-secondary) 32%, var(--surface-border));
+}
+
+.lessonItemPassed {
+  border-color: color-mix(in srgb, var(--success-border) 70%, var(--surface-border));
+}
+
+.lessonItemLocked {
+  opacity: 0.72;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.lessonItemRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.lessonTitle {
+  color: var(--ink-strong);
+  font-weight: 800;
+  line-height: 1.42;
+}
+
+.lessonStatus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.7rem;
+  padding: 0.22rem 0.58rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--surface-border-strong) 72%, transparent);
+  background: color-mix(in srgb, var(--surface-strong) 90%, transparent);
+  color: var(--ink-muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lessonStatusCurrent {
+  border-color: color-mix(in srgb, var(--accent-secondary) 42%, var(--surface-border));
+  background: color-mix(in srgb, var(--accent-soft) 72%, var(--surface));
+  color: var(--accent-strong);
+}
+
+.lessonStatusPassed {
+  border-color: color-mix(in srgb, var(--success-border) 72%, var(--surface-border));
+  background: color-mix(in srgb, var(--success-bg) 82%, var(--surface));
+  color: var(--success);
+}
+
+.lessonStatusLocked {
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+}
+
+.codePanel {
+  padding: 1.25rem;
+  min-height: 18rem;
+  display: grid;
+  align-content: center;
+  gap: 0.18rem;
+}
+
+.codeLabel {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.codeValue {
+  margin: 0.45rem 0 0;
+  color: var(--ink-strong);
+  font-size: 1.06rem;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.formSection {
+  padding: 1rem;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.82rem;
+}
+
+.inputGroup {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.inputLabel {
+  color: var(--ink-strong);
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.homePrimaryCallout,
+.homeKpiGrid,
+.homeSecondaryCallout,
+.homeStepList {
+  order: initial;
+}
+
+@media (max-width: 960px) {
+  .catalogGrid,
+  .classroomSummaryStrip,
+  .classroomLayout,
+  .kpiGrid,
+  .homeSummaryGrid,
+  .formGrid,
+  .profileGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .classroomHeroInner,
+  .cardActions {
+    grid-template-columns: 1fr;
+  }
+
+  .heroAside {
+    justify-content: flex-start;
+  }
+
+  .leaderboardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .homePrimaryCallout {
+    order: 1;
+  }
+
+  .homeKpiGrid {
+    order: 2;
+  }
+
+  .homeSecondaryCallout {
+    order: 3;
+  }
+
+  .homeStepList {
+    order: 4;
+  }
+}
+
+@media (max-width: 640px) {
+  .desktopOnly {
+    display: none;
+  }
+
+  .mobileOnly {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .kpiCard,
+  .callout,
+  .wizardCard,
+  .formSection,
+  .profileCard,
+  .lessonRail,
+  .lessonStage,
+  .leaderboardPanel,
+  .sidebarPanel,
+  .summaryStatCard,
+  .classroomHero {
+    border-radius: 1.05rem;
+  }
+
+  .cta,
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+  }
+
+  .actionRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .kpiGrid {
+    gap: 0.7rem;
+  }
+
+  .classroomHero {
+    padding: 0.92rem;
+  }
+
+  .heroProgressCard,
+  .heroAside {
+    width: 100%;
+  }
+
+  .classroomSummaryStrip {
+    gap: 0.68rem;
+  }
+
+  .summaryStatCard {
+    padding: 0.86rem;
+  }
+
+  .currentLessonCard,
+  .mobileAccordion {
+    border-radius: 1.05rem;
+  }
+
+  .currentLessonCard {
+    padding: 0.88rem 0.92rem;
+  }
+
+  .currentLessonHeader {
+    gap: 0.6rem;
+  }
+
+  .mobileAccordionSummary {
+    padding: 0.88rem 0.92rem;
+  }
+
+  .mobileAccordionContent {
+    padding: 0 0.92rem 0.92rem;
+  }
+
+  .mobileAccordionMeta {
+    font-size: 0.72rem;
+    max-width: 8.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobileAccordionTitle {
+    font-size: 0.96rem;
+  }
+
+  .kpiCard {
+    padding: 0.85rem;
+    border-radius: 1rem;
+  }
+
+  .kpiValue {
+    font-size: 1rem;
+  }
+
+  .callout {
+    padding: 0.96rem;
+    border-radius: 1.05rem;
+  }
+
+  .calloutTitle {
+    font-size: 0.98rem;
+  }
+
+  .calloutText,
+  .calloutHint,
+  .infoStrip,
+  .message {
+    font-size: 0.86rem;
+    line-height: 1.48;
+  }
+
+  .homeIdentityText {
+    font-size: 0.86rem;
+  }
+
+  .stepList {
+    display: none;
+  }
+}
+
+.checkboxList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.2rem;
+}
+
+.checkboxItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid var(--surface-border);
+  border-radius: 1rem;
+  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 170ms ease, background-color 170ms ease, transform 170ms ease;
+  box-shadow: var(--elev-shadow), var(--inset-highlight);
+}
+
+.checkboxItem:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-soft) 8%, var(--surface));
+  transform: translateY(-1px);
+}
+
+.checkboxInput {
+  margin-top: 0.2rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.checkboxLabel {
+  font-size: 0.94rem;
+  line-height: 1.5;
+  font-weight: 500;
+  user-select: none;
+}
+
+.railHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.2rem;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  color: var(--accent);
+  font-size: 0.84rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform 170ms ease, opacity 170ms ease;
+  align-self: flex-start;
+}
+
+.backLink:hover {
+  transform: translateX(-2px);
+  opacity: 0.9;
+}
+
+.railTitle {
+  margin: 0.2rem 0 0;
+  color: var(--ink-strong);
+  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.railDesc {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}

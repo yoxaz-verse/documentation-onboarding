@@ -1,0 +1,513 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap');
+
+.page {
+  --control-height: 3.2rem;
+  --control-radius: 1rem;
+  --card-border: var(--surface-border);
+
+  position: relative;
+  min-height: 100dvh;
+  display: grid;
+  align-items: center;
+  padding: clamp(1rem, 2.4vw, 1.8rem);
+  z-index: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  font-family: 'Inter', system-ui, sans-serif;
+  background:
+    radial-gradient(42rem 42rem at 10% 14%, color-mix(in srgb, var(--accent-soft) 100%, transparent), transparent 72%),
+    radial-gradient(34rem 34rem at 90% 82%, color-mix(in srgb, var(--accent-secondary) 12%, transparent), transparent 72%),
+    linear-gradient(135deg, var(--bg-a) 0%, var(--bg-b) 42%, var(--bg-c) 74%, var(--bg-d) 100%);
+}
+
+.glowA,
+.glowB {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.glowA {
+  width: 32rem;
+  height: 32rem;
+  top: -11rem;
+  right: -6rem;
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.glowB {
+  width: 28rem;
+  height: 28rem;
+  bottom: -10rem;
+  left: -7rem;
+  background: color-mix(in srgb, var(--accent-secondary) 14%, transparent);
+}
+
+.topControls {
+  position: absolute;
+  top: 1.6rem;
+  right: 1.6rem;
+  z-index: 10;
+}
+
+.heroLayout {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 80rem);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(21.5rem, 28rem);
+  align-items: center;
+  gap: clamp(1.35rem, 2.8vw, 2.6rem);
+}
+
+.heroPanel {
+  max-width: 33rem;
+}
+
+.brand {
+  margin: 0;
+  font-family: 'Sora', sans-serif;
+  color: var(--accent);
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.heroKicker {
+  margin: 0.4rem 0 0;
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.heroTitle {
+  margin: 0.82rem 0 0;
+  font-family: 'Sora', sans-serif;
+  color: var(--ink-strong);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.heroTitle span:first-child {
+  background: linear-gradient(130deg, var(--ink-strong) 24%, var(--accent) 88%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.heroSubtitle {
+  margin: 0.78rem 0 0;
+  color: var(--ink);
+  font-size: 0.98rem;
+  line-height: 1.54;
+  max-width: 35ch;
+}
+
+.timeline {
+  margin-top: 1.3rem;
+  display: grid;
+  gap: 0.62rem;
+}
+
+.timelineItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.78rem;
+  padding: 0.76rem 0.88rem;
+  border-radius: 1rem;
+  border: 1px solid var(--surface-border);
+  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
+  box-shadow: var(--elev-shadow), var(--inset-highlight);
+}
+
+.timelineBadge {
+  width: 2.15rem;
+  height: 2.15rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+  color: #ffffff;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 800;
+  box-shadow: 0 14px 30px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.timelineBadgeIcon,
+.cardHeaderIcon,
+.buttonIcon,
+.editButtonIcon,
+.statusIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.inputIcon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.timelineContent {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.timelineStepTitle {
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.timelineStepDesc {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  line-height: 1.4;
+}
+
+.authCard {
+  width: min(100%, 31rem);
+  justify-self: end;
+  border: 1px solid var(--card-border);
+  border-radius: 1.3rem;
+  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--elev-shadow-strong), var(--inset-highlight);
+  padding: clamp(1.1rem, 2vw, 1.55rem);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+}
+
+.cardHeaderIcon {
+  color: var(--accent);
+}
+
+.kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  font-weight: 800;
+  text-align: center;
+}
+
+.title {
+  margin: 0.22rem 0 0;
+  font-family: 'Sora', sans-serif;
+  font-size: 1.62rem;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--ink-strong);
+  font-weight: 800;
+  text-align: center;
+}
+
+.subtitle {
+  margin: 0.42rem auto 0.92rem;
+  color: var(--ink);
+  line-height: 1.46;
+  font-size: 0.86rem;
+  text-align: center;
+  max-width: 31ch;
+}
+
+.stepperContainer {
+  width: 100%;
+  height: 0.42rem;
+  background: var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 0.95rem;
+}
+
+.stepperBar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-secondary) 100%);
+  border-radius: 999px;
+  transition: width 0.35s ease;
+}
+
+.form,
+.stepPanel {
+  display: grid;
+  gap: 0.68rem;
+}
+
+.stepMeta {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+.labelRow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.label {
+  color: var(--ink-strong);
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.hint,
+.resendHint,
+.identityEmail {
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-muted);
+  pointer-events: none;
+}
+
+.input,
+.otpInput {
+  width: 100%;
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  background: var(--control-surface);
+  color: var(--control-text);
+  box-shadow: var(--inset-highlight);
+}
+
+.input {
+  min-height: var(--control-height);
+  font-size: 0.98rem;
+  padding: 0.72rem 1rem 0.72rem 2.8rem;
+}
+
+.input::placeholder {
+  color: var(--control-placeholder);
+}
+
+.input:hover,
+.otpInput:hover {
+  border-color: var(--control-border-hover);
+  background: var(--control-surface-strong);
+}
+
+.input:focus,
+.otpInput:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent), var(--inset-highlight);
+  background: var(--control-surface-strong);
+}
+
+.button {
+  border: 0;
+  min-height: var(--control-height);
+  border-radius: var(--control-radius);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+  color: #ffffff;
+  font-size: 0.96rem;
+  font-weight: 800;
+  padding: 0.76rem 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 170ms ease, box-shadow 170ms ease;
+  box-shadow: 0 16px 30px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.button:hover:enabled {
+  transform: translateY(-1px);
+}
+
+.button:disabled,
+.resendButton:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+.identityBlock {
+  margin: 0;
+  padding: 1rem;
+  border-radius: 1.15rem;
+  border: 1px solid var(--card-border);
+  background: color-mix(in srgb, var(--control-surface) 92%, transparent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.avatar {
+  width: 2.9rem;
+  height: 2.9rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Sora', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.identityDetails {
+  display: grid;
+  gap: 0.1rem;
+  text-align: center;
+}
+
+.identityName {
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.editButton,
+.resendButton {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.otpGrid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.48rem;
+}
+
+.otpInput {
+  height: 3.2rem;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+  caret-color: var(--accent);
+}
+
+.resendRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.status {
+  margin-top: 0.2rem;
+  border-radius: 0.95rem;
+  border: 1px solid transparent;
+  padding: 0.82rem 0.95rem;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.statusInfo {
+  background: var(--info-bg);
+  border-color: var(--info-border);
+  color: var(--info);
+}
+
+.statusSuccess {
+  background: var(--success-bg);
+  border-color: var(--success-border);
+  color: var(--success);
+}
+
+.statusError {
+  background: var(--error-bg);
+  border-color: var(--error-border);
+  color: var(--error);
+}
+
+@media (max-width: 1024px) {
+  .page {
+    position: relative;
+    padding: 2.5rem 1.4rem;
+    overflow-y: auto;
+  }
+
+  .heroLayout {
+    grid-template-columns: 1fr;
+    width: 100%;
+    max-width: 36rem;
+    gap: 1.6rem;
+  }
+
+  .heroPanel,
+  .authCard {
+    max-width: none;
+    width: 100%;
+    justify-self: stretch;
+  }
+}
+
+@media (max-width: 1280px) and (min-width: 1025px) {
+  .heroLayout {
+    grid-template-columns: minmax(0, 1fr) minmax(21rem, 26rem);
+    gap: 1.4rem;
+  }
+
+  .heroPanel {
+    max-width: 30rem;
+  }
+
+  .heroTitle {
+    font-size: clamp(1.92rem, 3.2vw, 3rem);
+  }
+
+  .heroSubtitle {
+    max-width: 33ch;
+  }
+}
+
+@media (max-width: 640px) {
+  .topControls {
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .heroTitle {
+    font-size: 2rem;
+  }
+
+  .authCard,
+  .timelineItem {
+    border-radius: 1.15rem;
+  }
+}

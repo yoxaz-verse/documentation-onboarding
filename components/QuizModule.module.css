@@ -1,0 +1,230 @@
+.wrap {
+  display: grid;
+  gap: 0.82rem;
+}
+
+.head,
+.question {
+  border: 1px solid var(--surface-border);
+  border-radius: 1.2rem;
+  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
+  box-shadow: var(--elev-shadow), var(--inset-highlight);
+}
+
+.head {
+  padding: 0.96rem;
+}
+
+.title {
+  margin: 0;
+  color: var(--ink-strong);
+  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-size: 1.22rem;
+  line-height: 1.2;
+}
+
+.description {
+  margin: 0.4rem 0 0;
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+.videoWrap {
+  border: 1px solid var(--surface-border);
+  border-radius: 1.25rem;
+  overflow: hidden;
+  background: var(--surface-solid);
+  box-shadow: var(--elev-shadow), var(--inset-highlight);
+}
+
+.video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  display: block;
+}
+
+.form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.question {
+  padding: 0.82rem;
+}
+
+.legend {
+  color: var(--ink-strong);
+  font-size: 0.98rem;
+  font-weight: 800;
+  line-height: 1.45;
+  padding: 0 0.2rem;
+}
+
+.option {
+  margin-top: 0.42rem;
+  display: flex;
+  align-items: center;
+  gap: 0.58rem;
+  border: 1px solid var(--surface-border);
+  border-radius: 0.92rem;
+  padding: 0.7rem 0.76rem;
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 170ms ease, background-color 170ms ease, transform 170ms ease;
+  background: color-mix(in srgb, var(--surface-strong) 92%, transparent);
+}
+
+.option:hover {
+  border-color: var(--control-border-hover);
+  background: color-mix(in srgb, var(--surface-strong) 76%, var(--accent-soft));
+  transform: translateY(-1px);
+}
+
+.option input {
+  accent-color: var(--accent);
+}
+
+.option:has(input:focus-visible) {
+  border-color: var(--control-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--control-focus) 24%, transparent);
+}
+
+.submit,
+.secondary {
+  min-height: 2.95rem;
+  border-radius: 0.95rem;
+  padding: 0.74rem 1rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.submit {
+  border: 0;
+  color: var(--accent-ink);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+  box-shadow: 0 14px 28px color-mix(in srgb, var(--accent) 32%, transparent);
+}
+
+.secondary {
+  border: 1px solid var(--surface-border-strong);
+  color: var(--ink-strong);
+  background: var(--surface-strong);
+}
+
+.secondary:hover:enabled,
+.submit:hover:enabled {
+  transform: translateY(-1px);
+}
+
+.actionRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 0.7rem;
+}
+
+.submit:focus-visible,
+.secondary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--control-focus) 30%, transparent);
+}
+
+.submit:disabled,
+.secondary:disabled {
+  opacity: 0.62;
+  cursor: not-allowed;
+}
+
+.message {
+  margin: 0;
+  border: 1px solid var(--surface-border);
+  border-radius: 0.95rem;
+  background: var(--surface);
+  padding: 0.78rem 0.88rem;
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
+.messageError {
+  border-color: var(--error-border);
+  background: var(--error-bg);
+  color: var(--error);
+}
+
+.messageSuccess {
+  border-color: var(--success-border);
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+@media (max-width: 640px) {
+  .head,
+  .question,
+  .videoWrap {
+    border-radius: 1rem;
+  }
+
+  .actionRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.optionDisabled {
+  cursor: default;
+  opacity: 0.85;
+}
+
+.optionDisabled:hover {
+  transform: none;
+  border-color: var(--surface-border);
+  background: color-mix(in srgb, var(--surface-strong) 92%, transparent);
+}
+
+.optionPassedChecked {
+  border-color: var(--success-border) !important;
+  background: color-mix(in srgb, var(--success) 8%, var(--surface)) !important;
+}
+
+.passedBanner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--success-border);
+  border-radius: 1rem;
+  background: var(--success-bg);
+  color: var(--success);
+  margin-top: 0.8rem;
+  box-shadow: var(--elev-shadow);
+}
+
+.passedIcon {
+  font-size: 1.5rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--success) 15%, transparent);
+}
+
+.passedText {
+  display: flex;
+  flex-direction: column;
+}
+
+.passedTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--success);
+}
+
+.passedDesc {
+  margin: 0.15rem 0 0;
+  font-size: 0.9rem;
+  opacity: 0.95;
+  color: var(--success);
+}

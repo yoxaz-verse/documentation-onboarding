@@ -3,6 +3,11 @@ import { DocsThemeConfig } from "nextra-theme-docs";
 
 const config: DocsThemeConfig = {
   logo: <span>OBAOL Supreme</span>,
+  darkMode: true,
+  nextThemes: {
+    defaultTheme: "system",
+    storageKey: "obaol-theme",
+  },
   // project: {
   //   link: "https://www.instagram.com/obaol_supreme/",
   // },

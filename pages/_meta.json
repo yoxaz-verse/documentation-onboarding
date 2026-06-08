@@ -1,5 +1,6 @@
 {
-  "index": "Introduction",
+  "index": "Home",
+  "onboarding": "Onboarding",
   "about": {
     "title": "Designations",
     "type": "page",

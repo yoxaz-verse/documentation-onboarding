@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap');
+
+.loadingPage {
+  position: fixed;
+  inset: 0;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 2.5vw, 1.75rem);
+  z-index: 999;
+  overflow: hidden;
+  font-family: 'Inter', 'Avenir Next', 'Segoe UI', sans-serif;
+  background:
+    radial-gradient(38rem 38rem at 14% 12%, color-mix(in srgb, var(--accent) 34%, transparent), transparent 72%),
+    radial-gradient(30rem 30rem at 88% 86%, color-mix(in srgb, var(--accent-strong) 26%, transparent), transparent 70%),
+    linear-gradient(145deg, var(--bg-a) 0%, var(--bg-b) 48%, var(--bg-c) 100%);
+}
+
+.glowA,
+.glowB {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(58px);
+  pointer-events: none;
+}
+
+.glowA {
+  width: 22rem;
+  height: 22rem;
+  top: -7rem;
+  right: -4rem;
+  background: color-mix(in srgb, var(--accent-strong) 30%, transparent);
+}
+
+.glowB {
+  width: 18rem;
+  height: 18rem;
+  bottom: -8rem;
+  left: -5rem;
+  background: color-mix(in srgb, var(--info) 28%, transparent);
+}
+
+.statusCard {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 29rem);
+  border: 1px solid var(--surface-border);
+  border-radius: 1.25rem;
+  background: linear-gradient(160deg, var(--surface-grad-start), var(--surface-grad-end)), var(--surface-solid);
+  box-shadow: var(--elev-shadow-strong), var(--inset-highlight);
+  padding: clamp(1.5rem, 2.5vw, 2.1rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.1rem;
+  animation: cardIn 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.72rem;
+  width: 100%;
+}
+
+.themeToggleWrapper {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+}
+
+.logoContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+  margin-bottom: 0.1rem;
+  width: 100%;
+}
+
+.logoBadge {
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 0.95rem;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow:
+    0 8px 20px color-mix(in srgb, var(--accent) 22%, transparent),
+    var(--inset-highlight);
+  border: 1px solid var(--surface-border);
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease;
+}
+
+.logoBadge:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow:
+    0 10px 24px color-mix(in srgb, var(--accent) 28%, transparent),
+    var(--inset-highlight);
+}
+
+.logoSvg {
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+.logoText {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.spinner {
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 999px;
+  border: 2px solid var(--line);
+  border-top-color: var(--line-strong);
+  animation: spin 900ms linear infinite;
+  flex-shrink: 0;
+}
+
+.heading {
+  margin: 0;
+  color: var(--ink-strong);
+  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-size: clamp(1rem, 1.6vw, 1.15rem);
+  line-height: 1.2;
+}
+
+.message {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(7px) scale(0.99);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .statusCard {
+    border-radius: 0.85rem;
+    padding: 1rem;
+  }
+
+  .heading {
+    font-size: 1rem;
+  }
+
+  .message {
+    font-size: 0.88rem;
+  }
+}
