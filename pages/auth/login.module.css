@@ -135,7 +135,7 @@
   display: grid;
   place-items: center;
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
-  color: #ffffff;
+  color: var(--accent-ink);
   font-family: 'Sora', sans-serif;
   font-size: 0.8rem;
   font-weight: 800;
@@ -335,7 +335,7 @@
   min-height: var(--control-height);
   border-radius: var(--control-radius);
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
-  color: #ffffff;
+  color: var(--accent-ink);
   font-size: 0.96rem;
   font-weight: 800;
   padding: 0.76rem 1.2rem;
@@ -374,7 +374,7 @@
   height: 2.9rem;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
-  color: #ffffff;
+  color: var(--accent-ink);
   display: flex;
   align-items: center;
   justify-content: center;

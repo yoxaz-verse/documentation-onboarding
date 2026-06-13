@@ -457,22 +457,22 @@
 
 .courseCoverBuilds,
 .classroomHero.courseCoverBuilds {
-  background: linear-gradient(135deg, #1c1b4b 0%, #2f3f90 46%, #249cb8 100%);
+  background: linear-gradient(135deg, #111111 0%, #4a3212 48%, #d0933a 100%);
 }
 
 .courseCoverCode,
 .classroomHero.courseCoverCode {
-  background: linear-gradient(135deg, #0a2840 0%, #125f69 50%, #4abf9d 100%);
+  background: linear-gradient(135deg, #050505 0%, #2b261f 50%, #b98230 100%);
 }
 
 .courseCoverProduct,
 .classroomHero.courseCoverProduct {
-  background: linear-gradient(135deg, #47217f 0%, #6d42d6 48%, #cb6fa6 100%);
+  background: linear-gradient(135deg, #24170a 0%, #7a5620 48%, #e4b463 100%);
 }
 
 .courseCoverCalls,
 .classroomHero.courseCoverCalls {
-  background: linear-gradient(135deg, #713117 0%, #d66821 48%, #d6b442 100%);
+  background: linear-gradient(135deg, #3b250c 0%, #9b6b24 48%, #f1c777 100%);
 }
 
 .courseCover::before,

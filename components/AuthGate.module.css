@@ -89,7 +89,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
+  color: var(--accent-ink);
   box-shadow:
     0 8px 20px color-mix(in srgb, var(--accent) 22%, transparent),
     var(--inset-highlight);
