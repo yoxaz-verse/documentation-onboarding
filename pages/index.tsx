@@ -140,43 +140,42 @@ function HomeContent({ user, onSessionExpired }: HomeContentProps) {
       progress={progress}
       courseProgress={courseProgress}
     >
-      <section className={styles.homeIdentityRow}>
-        <p className={styles.homeIdentityText}>
-          Signed in as <strong>{user.email}</strong>
-        </p>
-        <p className={styles.homeIdentityText}>
-          {coursesUnlocked ? 'Training unlocked' : `${remainingMilestones} step${remainingMilestones === 1 ? '' : 's'} remaining`}
-        </p>
-      </section>
-
       {message ? <p className={`${styles.message} ${styles.messageError}`}>{message}</p> : null}
 
       <section className={`${styles.callout} ${styles.homeHeroCard}`}>
-        <p className={styles.homeHeroEyebrow}>Next required action</p>
-        <h2 className={styles.homeHeroTitle}>{nextActionTitle}</h2>
-        <p className={styles.homeHeroProgress}>
-          {completedMilestones}/{MILESTONES.length} onboarding checkpoints completed
-        </p>
+        <div className={styles.homeHeroHeader}>
+          <div>
+            <p className={styles.homeHeroEyebrow}>Next required action</p>
+            <h2 className={styles.homeHeroTitle}>{nextActionTitle}</h2>
+          </div>
+          <span className={styles.homeStatusPill}>{coursesUnlocked ? 'Training unlocked' : `${remainingMilestones} remaining`}</span>
+        </div>
         <p className={styles.calloutText}>{nextActionText}</p>
-        <Link href={nextActionHref} className={styles.cta}>
-          {nextActionLabel}
-        </Link>
-        <p className={styles.calloutHint}>{nextActionReason}</p>
+        <div className={styles.homeActionRow}>
+          <Link href={nextActionHref} className={styles.cta}>
+            {nextActionLabel}
+          </Link>
+          <p className={styles.calloutHint}>{nextActionReason}</p>
+        </div>
       </section>
 
-      <section className={styles.homeSummaryGrid} aria-label="Onboarding summary">
-        <article className={styles.homeSummaryCard}>
-          <p className={styles.homeSummaryLabel}>Completed</p>
-          <p className={styles.homeSummaryValue}>{completedMilestones}</p>
-        </article>
-        <article className={styles.homeSummaryCard}>
-          <p className={styles.homeSummaryLabel}>Next</p>
-          <p className={styles.homeSummaryValue}>{nextMilestone ? `Step ${nextMilestone.number}` : 'Courses'}</p>
-        </article>
-        <article className={styles.homeSummaryCard}>
-          <p className={styles.homeSummaryLabel}>Remaining</p>
-          <p className={styles.homeSummaryValue}>{remainingMilestones}</p>
-        </article>
+      <section className={styles.homeProgressPanel} aria-label="Onboarding summary">
+        <div className={styles.homeProgressMeta}>
+          <p className={styles.homeIdentityText}>
+            Signed in as <strong>{user.email}</strong>
+          </p>
+          <p className={styles.homeHeroProgress}>
+            {completedMilestones}/{MILESTONES.length} checkpoints complete
+          </p>
+        </div>
+        <div className={styles.progressTrack} aria-hidden="true">
+          <span className={styles.progressFill} style={{ width: `${(completedMilestones / MILESTONES.length) * 100}%` }} />
+        </div>
+        <div className={styles.homeSummaryGrid}>
+          <span>Completed: {completedMilestones}</span>
+          <span>Next: {nextMilestone ? `Step ${nextMilestone.number}` : 'Courses'}</span>
+          <span>Remaining: {remainingMilestones}</span>
+        </div>
       </section>
     </OnboardingLayout>
   );

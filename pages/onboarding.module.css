@@ -8,22 +8,15 @@
   position: relative;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--surface-border-strong) 70%, transparent);
-  border-radius: 1.2rem;
-  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
-  padding: 1rem;
+  border-radius: 0.9rem;
+  background: var(--surface-strong);
+  padding: 0.9rem;
   min-width: 0;
-  box-shadow: var(--elev-shadow), var(--inset-highlight);
+  box-shadow: var(--inset-highlight);
 }
 
 .kpiCard::after {
-  content: '';
-  position: absolute;
-  width: 7rem;
-  height: 7rem;
-  top: -3rem;
-  right: -2rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--accent-soft) 85%, transparent);
+  content: none;
 }
 
 .kpiLabel {
@@ -49,12 +42,10 @@
 .callout {
   margin-top: 0.2rem;
   border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--surface-border));
-  border-radius: 1.3rem;
-  background:
-    radial-gradient(circle at top right, color-mix(in srgb, var(--accent-soft) 80%, transparent) 0, transparent 28%),
-    linear-gradient(165deg, color-mix(in srgb, var(--accent-soft) 34%, var(--surface-strong)), var(--surface));
-  padding: 1.15rem;
-  box-shadow: var(--elev-shadow), var(--inset-highlight);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--accent-softer) 62%, var(--surface-solid));
+  padding: 1rem;
+  box-shadow: var(--inset-highlight);
 }
 
 .calloutTitle {
@@ -80,7 +71,7 @@
   gap: 0.45rem;
   margin-top: 0.9rem;
   border: 1px solid color-mix(in srgb, var(--accent-strong) 68%, black 8%);
-  border-radius: 0.95rem;
+  border-radius: 0.78rem;
   min-height: 2.95rem;
   padding: 0.78rem 1.08rem;
   color: var(--accent-ink);
@@ -98,6 +89,19 @@
 .primaryButton:hover:enabled {
   transform: translateY(-1px);
   box-shadow: 0 18px 34px color-mix(in srgb, var(--accent) 32%, transparent);
+}
+
+.followUpButton {
+  border-color: var(--surface-border-strong);
+  background: var(--surface-strong);
+  color: var(--ink-strong);
+  box-shadow: var(--inset-highlight);
+}
+
+.followUpButton:hover:enabled {
+  border-color: var(--control-border-hover);
+  background: color-mix(in srgb, var(--surface-strong) 78%, var(--accent-soft));
+  box-shadow: var(--inset-highlight);
 }
 
 .cta:focus-visible,
@@ -136,11 +140,16 @@
 }
 
 .homeHeroCard {
-  padding: clamp(1.35rem, 2.6vw, 1.8rem);
-  border-color: color-mix(in srgb, var(--accent) 26%, var(--surface-border));
-  background:
-    radial-gradient(circle at top right, color-mix(in srgb, var(--accent-soft) 52%, transparent) 0, transparent 22%),
-    linear-gradient(180deg, color-mix(in srgb, var(--surface-strong) 96%, white 4%), var(--surface));
+  padding: clamp(1.1rem, 2vw, 1.45rem);
+  border-color: color-mix(in srgb, var(--accent) 32%, var(--surface-border));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-softer) 70%, var(--surface-solid)), var(--surface-strong));
+}
+
+.homeHeroHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .homeHeroEyebrow {
@@ -156,67 +165,93 @@
   margin: 0.45rem 0 0;
   color: var(--ink-strong);
   font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
-  font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
   line-height: 1.12;
   letter-spacing: -0.03em;
 }
 
 .homeHeroProgress {
-  margin: 0.6rem 0 0;
+  margin: 0;
   color: var(--accent-strong);
-  font-size: 0.95rem;
+  font-size: 0.84rem;
   font-weight: 800;
   line-height: 1.45;
 }
 
-.homeSummaryGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.homeStatusPill {
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--surface-border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-strong) 80%, var(--accent-soft));
+  color: var(--accent-strong);
+  padding: 0.3rem 0.62rem;
+  font-size: 0.72rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.homeActionRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 0.75rem;
+  margin-top: 0.9rem;
 }
 
-.homeSummaryCard {
-  border: 1px solid color-mix(in srgb, var(--surface-border) 82%, transparent);
-  border-radius: 1rem;
-  background: color-mix(in srgb, var(--surface-strong) 92%, transparent);
-  padding: 0.95rem 1rem;
+.homeActionRow .cta {
+  margin-top: 0;
 }
 
-.homeSummaryLabel {
-  margin: 0;
+.homeActionRow .calloutHint {
+  margin-top: 0;
+}
+
+.homeProgressPanel {
+  border: 1px solid var(--surface-border);
+  border-radius: 0.9rem;
+  background: var(--surface-strong);
+  padding: 0.95rem;
+  display: grid;
+  gap: 0.72rem;
+  box-shadow: var(--inset-highlight);
+}
+
+.homeProgressMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.homeSummaryGrid {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.8rem;
   color: var(--ink-muted);
-  font-size: 0.76rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-}
-
-.homeSummaryValue {
-  margin: 0.45rem 0 0;
-  color: var(--ink-strong);
-  font-size: clamp(1.05rem, 1.6vw, 1.2rem);
-  font-weight: 800;
-  line-height: 1.2;
+  font-size: 0.82rem;
+  font-weight: 750;
 }
 
 .stepList {
   margin: 0;
   padding: 1rem 1rem 1rem 2rem;
   border: 1px solid color-mix(in srgb, var(--surface-border) 76%, transparent);
-  border-radius: 1.2rem;
-  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
+  border-radius: 0.9rem;
+  background: var(--surface-strong);
   color: color-mix(in srgb, var(--ink) 82%, var(--ink-muted));
   display: grid;
   gap: 0.48rem;
   line-height: 1.6;
-  box-shadow: var(--elev-shadow), var(--inset-highlight);
+  box-shadow: var(--inset-highlight);
 }
 
 .infoStrip {
   margin: 0;
   border: 1px solid color-mix(in srgb, var(--info-border) 76%, var(--surface-border));
-  border-radius: 1rem;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--info-bg) 70%, var(--surface-strong)), var(--surface));
+  border-radius: 0.82rem;
+  background: color-mix(in srgb, var(--info-bg) 64%, var(--surface-strong));
   padding: 0.85rem 0.95rem;
   color: var(--ink);
   font-size: 0.92rem;
@@ -235,9 +270,9 @@
 .trainingIntro,
 .codePanel {
   border: 1px solid var(--surface-border);
-  border-radius: 1.25rem;
-  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
-  box-shadow: var(--elev-shadow), var(--inset-highlight);
+  border-radius: 0.95rem;
+  background: var(--surface-strong);
+  box-shadow: var(--inset-highlight);
 }
 
 .embedWrap {
@@ -269,7 +304,7 @@
 .message {
   margin: 0;
   border: 1px solid var(--surface-border);
-  border-radius: 0.96rem;
+  border-radius: 0.82rem;
   background: var(--surface);
   padding: 0.78rem 0.9rem;
   color: var(--ink);
@@ -339,7 +374,7 @@
 .textArea {
   width: 100%;
   border: 1px solid var(--control-border);
-  border-radius: 1rem;
+  border-radius: 0.78rem;
   min-height: 3rem;
   padding: 0.78rem 0.9rem;
   background: var(--control-surface-strong);
@@ -387,7 +422,7 @@
 
 .secondaryButton {
   border: 1px solid var(--surface-border-strong);
-  border-radius: 0.95rem;
+  border-radius: 0.78rem;
   min-height: 2.95rem;
   padding: 0.78rem 1rem;
   font-weight: 800;
@@ -418,7 +453,7 @@
 
 .profileGrid > div {
   border: 1px solid color-mix(in srgb, var(--surface-border) 78%, transparent);
-  border-radius: 1rem;
+  border-radius: 0.82rem;
   padding: 0.85rem;
   background: color-mix(in srgb, var(--surface-strong) 92%, transparent);
   line-height: 1.5;
@@ -443,9 +478,9 @@
 .courseCard {
   overflow: hidden;
   border: 1px solid var(--surface-border);
-  border-radius: 1.35rem;
-  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
-  box-shadow: var(--elev-shadow), var(--inset-highlight);
+  border-radius: 0.95rem;
+  background: var(--surface-strong);
+  box-shadow: var(--inset-highlight);
 }
 
 .courseCover,
@@ -616,6 +651,244 @@
   justify-content: space-between;
   gap: 0.8rem;
   flex-wrap: wrap;
+}
+
+.journeyHero {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.journeyStartGrid,
+.journeyStatsGrid,
+.journeyMilestoneGrid {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.journeyStartGrid {
+  grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.65fr);
+  align-items: start;
+}
+
+.journeyStatsGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.journeyChecklist,
+.journeyStartPanel,
+.journeyTodayPanel,
+.journeyTimelinePanel,
+.journeyMilestoneCard {
+  border: 1px solid var(--surface-border);
+  border-radius: 0.95rem;
+  background: var(--surface-strong);
+  box-shadow: var(--inset-highlight);
+}
+
+.journeyChecklist,
+.journeyStartPanel,
+.journeyTodayPanel,
+.journeyTimelinePanel {
+  padding: 1rem;
+}
+
+.journeyCheckList,
+.journeyAsideStack {
+  display: grid;
+  gap: 0.72rem;
+}
+
+.journeyCheckList {
+  margin-top: 0.9rem;
+}
+
+.journeyCheckItem {
+  border: 1px solid color-mix(in srgb, var(--surface-border-strong) 72%, transparent);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--surface-strong) 92%, transparent);
+  padding: 0.85rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: flex-start;
+  cursor: pointer;
+}
+
+.journeyCheckItem input {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.16rem;
+  accent-color: var(--accent);
+}
+
+.journeyCheckItem strong,
+.journeyCheckItem small {
+  display: block;
+}
+
+.journeyCheckItem strong {
+  color: var(--ink-strong);
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.journeyCheckItem small {
+  margin-top: 0.22rem;
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+  line-height: 1.48;
+}
+
+.journeyCheckItemDone {
+  border-color: color-mix(in srgb, var(--success-border) 78%, var(--surface-border));
+  background: color-mix(in srgb, var(--success-bg) 28%, var(--surface-strong));
+}
+
+.journeyStartPanel {
+  position: sticky;
+  top: 1rem;
+}
+
+.journeyMilestoneGrid {
+  margin-top: 0.9rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.journeyMilestoneCard {
+  padding: 0.95rem;
+  display: grid;
+  gap: 0.72rem;
+}
+
+.journeyMilestoneCardDone {
+  border-color: color-mix(in srgb, var(--success-border) 78%, var(--surface-border));
+  background: color-mix(in srgb, var(--success-bg) 22%, var(--surface-strong));
+}
+
+.journeyMilestoneHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.journeyDayBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.8rem;
+  border-radius: 999px;
+  padding: 0.22rem 0.66rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--surface-border));
+  background: color-mix(in srgb, var(--accent-soft) 68%, var(--surface));
+  color: var(--accent-strong);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.journeyMilestoneTitle {
+  margin: 0;
+  color: var(--ink-strong);
+  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-size: 1rem;
+  line-height: 1.28;
+}
+
+.journeyTimelinePanel {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.journeyTimelineGrid {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 0.48rem;
+}
+
+.journeyTimelineItem {
+  min-width: 0;
+  min-height: 4.2rem;
+  border: 1px solid color-mix(in srgb, var(--surface-border-strong) 72%, transparent);
+  border-radius: 0.78rem;
+  background: color-mix(in srgb, var(--surface-strong) 88%, transparent);
+  color: var(--ink-muted);
+  display: grid;
+  place-items: center;
+  gap: 0.16rem;
+  padding: 0.45rem 0.3rem;
+  cursor: pointer;
+  transition: transform 170ms ease, border-color 170ms ease, background-color 170ms ease;
+}
+
+.journeyTimelineItem:hover:enabled,
+.journeyTimelineItem:focus-visible {
+  transform: translateY(-1px);
+  border-color: var(--control-border-hover);
+  background: color-mix(in srgb, var(--surface-strong) 78%, var(--accent-soft));
+  outline: none;
+}
+
+.journeyTimelineItem span,
+.journeyTimelineItem strong {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.journeyTimelineItem span {
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.journeyTimelineItem strong {
+  color: var(--ink-strong);
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.journeyTimelineItemDone {
+  border-color: color-mix(in srgb, var(--success-border) 76%, var(--surface-border));
+  background: color-mix(in srgb, var(--success-bg) 34%, var(--surface-strong));
+  color: var(--success);
+}
+
+.journeyTimelineItemToday {
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--surface-border));
+  background: color-mix(in srgb, var(--accent-soft) 78%, var(--surface));
+}
+
+.journeyTimelineItemDue {
+  border-color: color-mix(in srgb, var(--warning-border) 76%, var(--surface-border));
+  background: color-mix(in srgb, var(--warning-bg) 40%, var(--surface-strong));
+}
+
+.journeyAsideStack {
+  margin-top: 0.85rem;
+}
+
+.journeyAsideItem {
+  border: 1px solid color-mix(in srgb, var(--surface-border) 80%, transparent);
+  border-radius: 0.82rem;
+  background: color-mix(in srgb, var(--surface-strong) 88%, transparent);
+  padding: 0.78rem 0.82rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.journeyAsideItem span {
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.journeyAsideItem strong {
+  color: var(--ink-strong);
+  font-size: 0.86rem;
+  font-weight: 900;
+  text-align: right;
 }
 
 .leaderboardPanel,
@@ -1275,12 +1548,12 @@
   gap: 0.85rem;
   padding: 1rem;
   border: 1px solid var(--surface-border);
-  border-radius: 1rem;
-  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
+  border-radius: 0.82rem;
+  background: var(--surface-strong);
   color: var(--ink);
   cursor: pointer;
   transition: border-color 170ms ease, background-color 170ms ease, transform 170ms ease;
-  box-shadow: var(--elev-shadow), var(--inset-highlight);
+  box-shadow: var(--inset-highlight);
 }
 
 .checkboxItem:hover {

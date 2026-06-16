@@ -63,6 +63,7 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [operatorPageOpened, setOperatorPageOpened] = useState(false);
 
   const [experienceForm, setExperienceForm] = useState({
     full_name: '',
@@ -90,11 +91,14 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
   );
 
   const canContinue = useMemo(() => {
+    if (step === 2) {
+      return operatorPageOpened;
+    }
     if (step === 3) {
       return expectationsChecked.notSalaried && expectationsChecked.noGuarantees && expectationsChecked.agriSystem;
     }
     return true;
-  }, [step, expectationsChecked]);
+  }, [step, operatorPageOpened, expectationsChecked]);
 
   const load = async () => {
     const [bundle, currentProfile] = await Promise.all([getProgressBundle(), getProfile()]);
@@ -362,9 +366,10 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
           <p className={styles.calloutText}>
             You are being introduced as part of the operator system. Review how the role works, what operators are expected to do, and where the practical guidance lives before you continue.
           </p>
+          <p className={styles.calloutHint}>Required first: open and review the operator role page. Then return here to continue.</p>
           <div className={styles.actionRow}>
-            <a href="https://www.obaol.com/roles/operator" className={styles.cta} target="_blank" rel="noreferrer">
-              Open operator page
+            <a href="https://www.obaol.com/roles/operator" className={styles.cta} target="_blank" rel="noreferrer" onClick={() => setOperatorPageOpened(true)}>
+              1. Open operator role page
             </a>
           </div>
         </section>
@@ -644,8 +649,8 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
       <>
         {infoCards[step]}
         <div className={styles.actionRow}>
-          <button type="button" className={styles.primaryButton} onClick={advance} disabled={saving || !canContinue}>
-            {saving ? 'Saving...' : step === 5 ? 'I am comfortable, continue' : 'Continue'}
+          <button type="button" className={step === 2 ? `${styles.primaryButton} ${styles.followUpButton}` : styles.primaryButton} onClick={advance} disabled={saving || !canContinue}>
+            {saving ? 'Saving...' : step === 2 ? '2. I reviewed it, continue' : step === 5 ? 'I am comfortable, continue' : 'Continue'}
           </button>
         </div>
       </>

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { areCoursesUnlocked, canAccessStep, getCompletedMilestoneCount, isMilestoneCompleted, MILESTONES, type MilestoneNumber } from '../lib/onboarding';
 import type { CourseProgressSummary, ProgressRecord } from '../lib/types';
 import ThemeToggle from './theme/ThemeToggle';
@@ -32,6 +32,8 @@ type MobileTabDef = {
   meta: string;
   icon: MobileTabIcon;
 };
+
+const SIDEBAR_STORAGE_KEY = 'obaol:onboarding-sidebar-collapsed';
 
 function getCourseStatusLabel(status: 'locked' | 'in_progress' | 'passed') {
   if (status === 'passed') return 'Passed';
@@ -88,6 +90,7 @@ function MobileTabIconGlyph({ icon }: { icon: MobileTabIcon }) {
 export default function OnboardingLayout({ title, subtitle, children, progress, courseProgress, aside }: Props) {
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const inClassroom = router.pathname === '/courses' || router.pathname.startsWith('/courses/');
   const inProfile = router.pathname === '/profile';
   const activeStep = MILESTONES.find((milestone) => router.pathname === milestone.route) || null;
@@ -131,40 +134,55 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
     { key: 'profile', label: 'Profile', href: '/profile', active: inProfile, meta: 'Account', icon: 'profile' },
   ];
 
+  useEffect(() => {
+    try {
+      setSidebarCollapsed(window.localStorage.getItem(SIDEBAR_STORAGE_KEY) === 'true');
+    } catch {
+      setSidebarCollapsed(false);
+    }
+  }, []);
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed((current) => {
+      const next = !current;
+      try {
+        window.localStorage.setItem(SIDEBAR_STORAGE_KEY, String(next));
+      } catch {
+        // Non-critical preference; keep the in-memory state even if storage is unavailable.
+      }
+      return next;
+    });
+  };
+
   return (
     <main className={styles.shell}>
-      <div className={styles.glowA} aria-hidden="true" />
-      <div className={styles.glowB} aria-hidden="true" />
-
       <div className={styles.container}>
-        <header className={styles.topBar}>
-          <div>
-            <p className={styles.brand}>
-              <Link href="/" className={styles.homeLink}>
-                OBAOL Operator Workspace
+        <section className={`${styles.layout} ${sidebarCollapsed ? styles.layoutCollapsed : ''}`}>
+          <nav className={`${styles.nav} ${sidebarCollapsed ? styles.navCollapsed : ''}`} aria-label="Onboarding and courses">
+            <div className={styles.sidebarHeader}>
+              <Link href="/" className={styles.sidebarBrand} aria-label="OBAOL Operator Workspace home">
+                <span className={styles.brandMark}>OB</span>
+                <span className={styles.brandText}>
+                  <span className={styles.brandName}>OBAOL</span>
+                  <span className={styles.brandSubline}>Operator workspace</span>
+                </span>
               </Link>
-            </p>
-            <p className={styles.stepMeta}>
-              Complete required onboarding, manage operator details, and access classroom courses from one guided operator workspace.
-            </p>
-          </div>
-          <div className={styles.topBarActions}>
-            <Link href="/profile" className={`${styles.profileLink} ${styles.desktopAction} ${router.pathname === '/profile' ? styles.profileLinkActive : ''}`}>
-              Profile
-            </Link>
-            <button type="button" className={`${styles.logoutButton} ${styles.desktopAction}`} onClick={handleLogout} disabled={loggingOut}>
-              {loggingOut ? 'Logging out...' : 'Log out'}
-            </button>
-            <div className={styles.desktopAction}>
-              <ThemeToggle size="sm" variant="surface" />
+              <button
+                type="button"
+                className={styles.sidebarToggle}
+                onClick={toggleSidebar}
+                aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d={sidebarCollapsed ? 'm9 6 6 6-6 6' : 'm15 6-6 6 6 6'} />
+                </svg>
+              </button>
             </div>
-          </div>
-        </header>
 
-        <section className={styles.layout}>
-          <nav className={styles.nav} aria-label="Onboarding and courses">
             <span className={styles.navGroupTitle}>Momentum</span>
             <div className={styles.navItem}>
+              <span className={styles.navDot} aria-hidden="true" />
               <span className={styles.navTitle}>Onboarding status</span>
               <span className={styles.navStateRow}>
                 <span className={styles.navState}>{onboardingSummary}</span>
@@ -172,6 +190,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
               </span>
             </div>
             <div className={styles.navItem}>
+              <span className={styles.navDot} aria-hidden="true" />
               <span className={styles.navTitle}>Course progress</span>
               <span className={styles.navStateRow}>
                 <span className={styles.navState}>{coursesUnlocked ? classroomSummary : trainingLockSummary}</span>
@@ -189,7 +208,8 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
 
               if (!isEnabled) {
                 return (
-                  <span key={step.href} className={className} aria-disabled="true">
+                  <span key={step.href} className={className} aria-disabled="true" title={step.label}>
+                    <span className={styles.navDot} aria-hidden="true" />
                     <span className={styles.navTitle}>{step.label}</span>
                     <span className={styles.navStateRow}>
                       <span className={styles.navState}>{stateLabel}</span>
@@ -199,7 +219,8 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
               }
 
               return (
-                <Link key={step.href} href={step.href} className={className}>
+                <Link key={step.href} href={step.href} className={className} title={step.label} aria-current={isActive ? 'page' : undefined}>
+                  <span className={styles.navDot} aria-hidden="true" />
                   <span className={styles.navTitle}>
                     {step.label}
                     {typeof step.key === 'number' ? ` · ${MILESTONES[step.key - 1]?.shortLabel || ''}` : ''}
@@ -217,6 +238,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
             {coursesUnlocked ? (
               <>
                 <Link href="/courses" className={`${styles.navItem} ${inClassroom ? styles.navActive : ''}`}>
+                  <span className={styles.navDot} aria-hidden="true" />
                   <span className={styles.navTitle}>Operator Training Library</span>
                   <span className={styles.navStateRow}>
                     <span className={styles.navState}>Unlocked</span>
@@ -229,7 +251,9 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                     key={course.id}
                     href={`/courses/${course.id}`}
                     className={`${styles.navItem} ${course.status === 'passed' ? styles.navDone : ''} ${router.asPath === `/courses/${course.id}` ? styles.navActive : ''}`}
+                    title={course.title}
                   >
+                    <span className={styles.navDot} aria-hidden="true" />
                     <span className={styles.navTitle}>{course.title}</span>
                     <span className={styles.navStateRow}>
                       <span className={styles.navState}>
@@ -242,6 +266,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
               </>
             ) : (
               <span className={`${styles.navItem} ${styles.navDisabled}`} aria-disabled="true">
+                <span className={styles.navDot} aria-hidden="true" />
                 <span className={styles.navTitle}>Operator Training Library</span>
                 <span className={styles.navStateRow}>
                   <span className={styles.navState}>Locked until Step 10</span>
@@ -251,8 +276,24 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
           </nav>
 
           <article className={styles.mainCard}>
-            <h1 className={styles.heading}>{title}</h1>
-            {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
+            <header className={styles.workspaceHeader}>
+              <div className={styles.workspaceTitleBlock}>
+                <p className={styles.workspaceEyebrow}>Operator workspace</p>
+                <h1 className={styles.heading}>{title}</h1>
+                {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
+              </div>
+              <div className={styles.topBarActions}>
+                <Link href="/profile" className={`${styles.profileLink} ${styles.desktopAction} ${router.pathname === '/profile' ? styles.profileLinkActive : ''}`}>
+                  Profile
+                </Link>
+                <button type="button" className={`${styles.logoutButton} ${styles.desktopAction}`} onClick={handleLogout} disabled={loggingOut}>
+                  {loggingOut ? 'Logging out...' : 'Log out'}
+                </button>
+                <div className={styles.desktopAction}>
+                  <ThemeToggle size="sm" variant="surface" />
+                </div>
+              </div>
+            </header>
             <div className={styles.content}>{children}</div>
             <section className={styles.supportingSection}>
               <div className={styles.supportingInner}>

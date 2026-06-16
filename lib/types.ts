@@ -1,5 +1,7 @@
 import type { CourseProgressSummary } from './courseProgress';
+import type { JourneySummary } from './operatorJourney';
 export type { CourseProgressSummary } from './courseProgress';
+export type { JourneySummary } from './operatorJourney';
 
 export type SessionUser = {
   email: string;
@@ -24,6 +26,12 @@ export type ProgressRecord = {
 export type ProgressResponse = {
   progress: ProgressRecord;
   courseProgress: CourseProgressSummary;
+};
+
+export type JourneyResponse = {
+  progress: ProgressRecord;
+  courseProgress: CourseProgressSummary;
+  journey: JourneySummary;
 };
 
 export type LeaderboardEntry = {
