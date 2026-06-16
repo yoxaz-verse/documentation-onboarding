@@ -18,6 +18,10 @@ export type AdminOperatorRow = {
   profileName: string | null;
   currentStep: number;
   completedMilestones: number;
+  journeyStartedAt: string | null;
+  journeyCurrentDay: number | null;
+  journeyCompletedMilestones: number;
+  journeyTotalMilestones: number;
   submissionStatus: string;
   hasCompletionCode: boolean;
   latestActivityAt: string | null;
@@ -69,6 +73,15 @@ export type AdminOperatorDetail = {
       completed: boolean;
     }>;
   } | null;
+  journey: {
+    startedAt: string | null;
+    currentDay: number | null;
+    completedMilestones: number;
+    totalMilestones: number;
+    completedChecks: number;
+    totalChecks: number;
+    latestActivityAt: string | null;
+  };
   stepSections: Array<{
     step: number;
     label: string;

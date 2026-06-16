@@ -59,6 +59,7 @@ function DetailContent() {
     return [
       { label: 'Current step', value: `Step ${detail.progress.currentStep}` },
       { label: 'Completed milestones', value: `${detail.progress.completedMilestones}/11` },
+      { label: 'Operator journey', value: detail.journey.startedAt ? `Day ${detail.journey.currentDay || 1}` : 'Not started' },
       { label: 'Latest activity', value: formatDate(detail.summary.latestActivityAt) },
       { label: 'Submission', value: toTitleCase(detail.submission?.status || 'missing') },
     ];
@@ -235,6 +236,31 @@ function DetailContent() {
                 ) : (
                   <p className={styles.meta}>No progress record.</p>
                 )}
+              </article>
+
+              <article className={styles.card}>
+                <div className={styles.sectionHeader}>
+                  <h2 className={styles.funnelTitle}>Operator journey</h2>
+                  <p className={styles.sectionMeta}>30-day milestone path</p>
+                </div>
+                <div className={styles.fieldGrid}>
+                  <div className={styles.fieldPair}>
+                    <span className={styles.fieldLabel}>Status</span>
+                    <span className={styles.fieldValue}>{detail.journey.startedAt ? `Started · Day ${detail.journey.currentDay || 1}` : 'Not started'}</span>
+                  </div>
+                  <div className={styles.fieldPair}>
+                    <span className={styles.fieldLabel}>Preflight checks</span>
+                    <span className={styles.fieldValue}>{detail.journey.completedChecks}/{detail.journey.totalChecks}</span>
+                  </div>
+                  <div className={styles.fieldPair}>
+                    <span className={styles.fieldLabel}>Journey milestones</span>
+                    <span className={styles.fieldValue}>{detail.journey.completedMilestones}/{detail.journey.totalMilestones}</span>
+                  </div>
+                  <div className={styles.fieldPair}>
+                    <span className={styles.fieldLabel}>Latest journey activity</span>
+                    <span className={styles.fieldValue}>{formatDate(detail.journey.latestActivityAt)}</span>
+                  </div>
+                </div>
               </article>
             </section>
 

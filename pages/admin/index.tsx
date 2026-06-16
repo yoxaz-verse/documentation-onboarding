@@ -162,6 +162,7 @@ function DashboardContent() {
                   <th>Operator</th>
                   <th>Current Step</th>
                   <th>Completion</th>
+                  <th>Journey</th>
                   <th>Submission</th>
                   <th>Last Activity</th>
                   <th>Detail</th>
@@ -184,6 +185,14 @@ function DashboardContent() {
                       </span>
                     </td>
                     <td>
+                      <span className={row.journeyStartedAt ? styles.badgeDone : styles.badgePending}>
+                        {row.journeyStartedAt ? `Day ${row.journeyCurrentDay || 1}` : 'Not started'}
+                      </span>
+                      <div className={styles.meta}>
+                        {row.journeyCompletedMilestones}/{row.journeyTotalMilestones} milestones
+                      </div>
+                    </td>
+                    <td>
                       <span className={row.submissionStatus === 'completed' ? styles.badgeDone : styles.badgePending}>
                         {row.submissionStatus === 'completed' ? 'Completed' : 'Pending'}
                       </span>
@@ -195,7 +204,7 @@ function DashboardContent() {
                 ))}
                 {!loading && operators.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className={styles.emptyState}>No operators found.</td>
+                    <td colSpan={7} className={styles.emptyState}>No operators found.</td>
                   </tr>
                 ) : null}
               </tbody>

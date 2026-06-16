@@ -2,6 +2,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { requireAdminSession } from '../../../../lib/adminAuth';
 import type { AdminOperatorRow } from '../../../../lib/adminTypes';
 import { getCompletedMilestoneCount, normalizeProgressRecord } from '../../../../lib/onboarding';
+import { JOURNEY_MILESTONES } from '../../../../config/operatorJourney';
+import { getJourneyCurrentDay } from '../../../../lib/operatorJourney';
 import { supabaseAdmin } from '../../../../lib/supabaseAdmin';
 
 function toSafePage(value: string | string[] | undefined, fallback: number) {
@@ -20,30 +22,51 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const page = toSafePage(req.query.page, 1);
   const pageSize = Math.min(100, toSafePage(req.query.pageSize, 20));
 
-  const [{ data: operators, error: operatorsError }, { data: profiles, error: profilesError }, { data: progressRows, error: progressError }, { data: submissions, error: submissionsError }] = await Promise.all([
+  const [
+    { data: operators, error: operatorsError },
+    { data: profiles, error: profilesError },
+    { data: progressRows, error: progressError },
+    { data: submissions, error: submissionsError },
+    { data: journeyRows, error: journeyError },
+    { data: journeyMilestoneRows, error: journeyMilestoneError },
+  ] = await Promise.all([
     supabaseAdmin.from('operators').select('email, name'),
     supabaseAdmin.from('operator_profiles').select('email, full_name'),
     supabaseAdmin
       .from('operator_progress')
       .select('email, current_step, updated_at'),
     supabaseAdmin.from('onboarding_submissions').select('email, status, completion_code, updated_at'),
+    supabaseAdmin.from('operator_journey_state').select('email, started_at, updated_at'),
+    supabaseAdmin.from('operator_journey_milestone_state').select('email, milestone_id, updated_at'),
   ]);
 
   if (operatorsError) return res.status(500).json({ error: operatorsError.message });
   if (profilesError) return res.status(500).json({ error: profilesError.message });
   if (progressError) return res.status(500).json({ error: progressError.message });
   if (submissionsError) return res.status(500).json({ error: submissionsError.message });
+  if (journeyError) return res.status(500).json({ error: journeyError.message });
+  if (journeyMilestoneError) return res.status(500).json({ error: journeyMilestoneError.message });
 
   const profileMap = new Map((profiles || []).map((profile) => [profile.email, profile]));
   const progressMap = new Map((progressRows || []).map((progress) => [progress.email, progress]));
   const submissionMap = new Map((submissions || []).map((submission) => [submission.email, submission]));
+  const journeyMap = new Map((journeyRows || []).map((journey) => [journey.email, journey]));
+  const journeyMilestoneCounts = (journeyMilestoneRows || []).reduce<Record<string, { count: number; latestActivityAt: string | null }>>((acc, row) => {
+    const current = acc[row.email] || { count: 0, latestActivityAt: null };
+    current.count += 1;
+    current.latestActivityAt = [current.latestActivityAt, row.updated_at].filter(Boolean).sort().reverse()[0] || null;
+    acc[row.email] = current;
+    return acc;
+  }, {});
 
   const allRows: AdminOperatorRow[] = (operators || []).map((operator) => {
     const progress = normalizeProgressRecord(progressMap.get(operator.email));
     const submission = submissionMap.get(operator.email);
     const profile = profileMap.get(operator.email);
+    const journey = journeyMap.get(operator.email);
+    const journeyMilestones = journeyMilestoneCounts[operator.email] || { count: 0, latestActivityAt: null };
 
-    const latestActivityAt = [progress?.updated_at, submission?.updated_at].filter(Boolean).sort().reverse()[0] || null;
+    const latestActivityAt = [progress?.updated_at, submission?.updated_at, journey?.updated_at, journeyMilestones.latestActivityAt].filter(Boolean).sort().reverse()[0] || null;
 
     return {
       email: operator.email,
@@ -51,6 +74,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       profileName: profile?.full_name || null,
       currentStep: progress?.current_step || 1,
       completedMilestones: getCompletedMilestoneCount(progress),
+      journeyStartedAt: journey?.started_at || null,
+      journeyCurrentDay: getJourneyCurrentDay(journey?.started_at || null),
+      journeyCompletedMilestones: journeyMilestones.count,
+      journeyTotalMilestones: JOURNEY_MILESTONES.length,
       submissionStatus: submission?.status || 'pending',
       hasCompletionCode: Boolean(submission?.completion_code),
       latestActivityAt,

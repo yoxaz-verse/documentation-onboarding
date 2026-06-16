@@ -39,6 +39,7 @@ cp .env.example .env.local
 - `supabase/migrations/20260603_operator_onboarding_profile_fields.sql`
 - `supabase/migrations/20260603_operator_progress_10_step_range.sql`
 - `supabase/migrations/20260608_onboarding_step_swap_guard.sql`
+- `supabase/migrations/20260616_operator_journey_milestones.sql`
 
 Do not apply `supabase/migrations/20260527_operator_onboarding.sql` to an existing
 email-keyed database. That migration targets the older `auth.users` / `user_id`

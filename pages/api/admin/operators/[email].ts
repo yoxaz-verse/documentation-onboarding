@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { requireAdminSession } from '../../../../lib/adminAuth';
 import type { AdminOperatorDetail } from '../../../../lib/adminTypes';
+import { buildJourneySummary, type JourneyCheckRecord, type JourneyMilestoneRecord, type JourneyStateRecord } from '../../../../lib/operatorJourney';
 import { getCompletedMilestoneCount, getMilestone, MILESTONES, normalizeProgressRecord } from '../../../../lib/onboarding';
 import { supabaseAdmin } from '../../../../lib/supabaseAdmin';
 
@@ -20,7 +21,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Valid operator email is required.' });
   }
 
-  const [{ data: operator, error: operatorError }, { data: profile, error: profileError }, { data: progress, error: progressError }, { data: submission, error: submissionError }, { data: quizRows, error: quizError }] = await Promise.all([
+  const [
+    { data: operator, error: operatorError },
+    { data: profile, error: profileError },
+    { data: progress, error: progressError },
+    { data: submission, error: submissionError },
+    { data: quizRows, error: quizError },
+    { data: journeyState, error: journeyStateError },
+    { data: journeyChecks, error: journeyChecksError },
+    { data: journeyMilestones, error: journeyMilestonesError },
+  ] = await Promise.all([
     supabaseAdmin
       .from('operators')
       .select('email, name, phone, role, company, timezone, created_at, updated_at')
@@ -45,6 +55,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .from('quiz_performance')
       .select('module_id, best_score, attempts, ever_passed, last_attempt_at')
       .eq('email', email),
+    supabaseAdmin
+      .from('operator_journey_state')
+      .select('email, started_at, created_at, updated_at')
+      .eq('email', email)
+      .maybeSingle(),
+    supabaseAdmin
+      .from('operator_journey_check_state')
+      .select('check_id, completed_at, updated_at')
+      .eq('email', email),
+    supabaseAdmin
+      .from('operator_journey_milestone_state')
+      .select('milestone_id, completed_at, updated_at')
+      .eq('email', email),
   ]);
 
   if (operatorError) return res.status(500).json({ error: operatorError.message });
@@ -52,6 +75,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (progressError) return res.status(500).json({ error: progressError.message });
   if (submissionError) return res.status(500).json({ error: submissionError.message });
   if (quizError) return res.status(500).json({ error: quizError.message });
+  if (journeyStateError) return res.status(500).json({ error: journeyStateError.message });
+  if (journeyChecksError) return res.status(500).json({ error: journeyChecksError.message });
+  if (journeyMilestonesError) return res.status(500).json({ error: journeyMilestonesError.message });
 
   if (!operator) return res.status(404).json({ error: 'Operator not found.' });
 
@@ -59,7 +85,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const completedMilestones = getCompletedMilestoneCount(progress);
   const currentStep = normalizedProgress?.current_step || 1;
   const latestActivityAt =
-    [normalizedProgress?.updated_at, profile?.updated_at, submission?.updated_at]
+    [normalizedProgress?.updated_at, profile?.updated_at, submission?.updated_at, journeyState?.updated_at]
+      .filter(Boolean)
+      .sort()
+      .reverse()[0] || null;
+  const journeySummary = buildJourneySummary(
+    journeyState as JourneyStateRecord | null,
+    (journeyChecks || []) as JourneyCheckRecord[],
+    (journeyMilestones || []) as JourneyMilestoneRecord[]
+  );
+  const journeyLatestActivityAt =
+    [
+      journeyState?.updated_at,
+      ...(journeyChecks || []).map((row) => row.updated_at),
+      ...(journeyMilestones || []).map((row) => row.updated_at),
+    ]
       .filter(Boolean)
       .sort()
       .reverse()[0] || null;
@@ -179,6 +219,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           })),
         }
       : null,
+    journey: {
+      startedAt: journeySummary.startedAt,
+      currentDay: journeySummary.currentDay,
+      completedMilestones: journeySummary.completedMilestoneCount,
+      totalMilestones: journeySummary.totalMilestoneCount,
+      completedChecks: journeySummary.completedCheckCount,
+      totalChecks: journeySummary.totalCheckCount,
+      latestActivityAt: journeyLatestActivityAt,
+    },
     stepSections,
     submission: submission
       ? {

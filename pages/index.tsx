@@ -123,15 +123,15 @@ function HomeContent({ user, onSessionExpired }: HomeContentProps) {
   const completedMilestones = getCompletedMilestoneCount(progress);
   const remainingMilestones = Math.max(MILESTONES.length - completedMilestones, 0);
   const coursesUnlocked = areCoursesUnlocked(progress);
-  const nextActionHref = nextMilestone?.route || '/courses';
-  const nextActionLabel = nextMilestone ? `Go to Step ${nextMilestone.number}` : 'Open operator courses';
-  const nextActionTitle = nextMilestone ? `Step ${nextMilestone.number}: ${nextMilestone.label}` : 'Training library unlocked';
+  const nextActionHref = nextMilestone?.route || '/journey';
+  const nextActionLabel = nextMilestone ? `Go to Step ${nextMilestone.number}` : 'Start operator journey';
+  const nextActionTitle = nextMilestone ? `Step ${nextMilestone.number}: ${nextMilestone.label}` : 'Operator journey unlocked';
   const nextActionText = nextMilestone
     ? `Complete ${nextMilestone.label} next so the onboarding path keeps moving and the training library unlocks in order.`
-    : 'Your required onboarding is complete, so you can move straight into the operator training library.';
+    : 'Your required onboarding is complete, so you can begin Day 1, track daily milestones, and keep courses tied to real operator actions.';
   const nextActionReason = nextMilestone
     ? 'This page stays focused on the one step you need right now.'
-    : 'This page now points you directly into training without extra decisions.';
+    : 'Courses remain available, and the journey now gives them a daily operating path.';
 
   return (
     <OnboardingLayout
@@ -173,7 +173,7 @@ function HomeContent({ user, onSessionExpired }: HomeContentProps) {
         </div>
         <div className={styles.homeSummaryGrid}>
           <span>Completed: {completedMilestones}</span>
-          <span>Next: {nextMilestone ? `Step ${nextMilestone.number}` : 'Courses'}</span>
+          <span>Next: {nextMilestone ? `Step ${nextMilestone.number}` : 'Journey'}</span>
           <span>Remaining: {remainingMilestones}</span>
         </div>
       </section>
