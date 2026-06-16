@@ -140,13 +140,21 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
   const trainingLockSummary = coursesUnlocked ? 'Training library unlocked' : nextMilestone ? `Complete Step ${nextMilestone.number} to keep unlocking access` : 'Finish guided onboarding to unlock training';
   const mobileStepHref = activeStep?.route || nextMilestone?.route || MILESTONES[MILESTONES.length - 1]?.route || '/step10';
   const mobileStepLabel = activeStep ? `Step ${activeStep.number}` : 'Steps';
-  const mobileTabs: MobileTabDef[] = [
-    { key: 'home', label: 'Home', href: '/', active: router.pathname === '/', meta: 'Workspace', icon: 'home' },
-    { key: 'steps', label: mobileStepLabel, href: mobileStepHref, active: Boolean(activeStep), meta: activeStep ? activeStep.shortLabel : nextMilestone ? 'Continue' : 'Complete', icon: 'steps' },
-    { key: 'journey', label: 'Journey', href: '/journey', active: inJourney, meta: coursesUnlocked ? 'Day path' : 'Locked', icon: 'journey' },
-    { key: 'courses', label: 'Courses', href: '/courses', active: inClassroom, meta: coursesUnlocked ? 'Library' : 'Locked', icon: 'courses' },
-    { key: 'profile', label: 'Profile', href: '/profile', active: inProfile, meta: 'Account', icon: 'profile' },
-  ];
+  const mobileTabs: MobileTabDef[] = loading
+    ? [
+        { key: 'home', label: 'Home', href: '/', active: router.pathname === '/', meta: 'Loading', icon: 'home' },
+        { key: 'steps', label: 'Steps', href: mobileStepHref, active: Boolean(activeStep), meta: 'Fetching', icon: 'steps' },
+        { key: 'journey', label: 'Journey', href: '/journey', active: inJourney, meta: 'Preparing', icon: 'journey' },
+        { key: 'courses', label: 'Courses', href: '/courses', active: inClassroom, meta: 'Checking', icon: 'courses' },
+        { key: 'profile', label: 'Profile', href: '/profile', active: inProfile, meta: 'Account', icon: 'profile' },
+      ]
+    : [
+        { key: 'home', label: 'Home', href: '/', active: router.pathname === '/', meta: 'Workspace', icon: 'home' },
+        { key: 'steps', label: mobileStepLabel, href: mobileStepHref, active: Boolean(activeStep), meta: activeStep ? activeStep.shortLabel : nextMilestone ? 'Continue' : 'Complete', icon: 'steps' },
+        { key: 'journey', label: 'Journey', href: '/journey', active: inJourney, meta: coursesUnlocked ? 'Day path' : 'Locked', icon: 'journey' },
+        { key: 'courses', label: 'Courses', href: '/courses', active: inClassroom, meta: coursesUnlocked ? 'Library' : 'Locked', icon: 'courses' },
+        { key: 'profile', label: 'Profile', href: '/profile', active: inProfile, meta: 'Account', icon: 'profile' },
+      ];
 
   useEffect(() => {
     try {
@@ -199,14 +207,14 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                 <span className={styles.navGroupTitle}>Workspace</span>
                 <div className={`${styles.navItem} ${styles.navLoadingItem}`}>
                   <span className={styles.navDot} aria-hidden="true" />
-                  <span className={styles.navTitle}>Loading workspace...</span>
+                  <span className={styles.navTitle}>Loading workspace</span>
                   <span className={styles.navStateRow}>
-                    <span className={styles.navState}>Checking progress</span>
+                    <span className={styles.navState}>Fetching progress</span>
                   </span>
                 </div>
                 <div className={`${styles.navItem} ${styles.navLoadingItem}`}>
                   <span className={styles.navDot} aria-hidden="true" />
-                  <span className={styles.navTitle}>Loading journey...</span>
+                  <span className={styles.navTitle}>Preparing journey</span>
                   <span className={styles.navStateRow}>
                     <span className={styles.navState}>Preparing daily path</span>
                   </span>
@@ -215,9 +223,9 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                 {Array.from({ length: 5 }, (_, index) => (
                   <div key={index} className={`${styles.navItem} ${styles.navLoadingItem}`}>
                     <span className={styles.navDot} aria-hidden="true" />
-                    <span className={styles.navTitle}>Loading step</span>
+                    <span className={styles.navTitle}>Fetching step</span>
                     <span className={styles.navStateRow}>
-                      <span className={styles.navState}>Please wait</span>
+                      <span className={styles.navState}>Loading data</span>
                     </span>
                   </div>
                 ))}
@@ -357,20 +365,20 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                 </div>
               </div>
             </header>
-            <div className={styles.content}>{children}</div>
+            <div className={`${styles.content} ${loading ? styles.contentLoading : styles.contentReady}`}>{children}</div>
             <section className={styles.supportingSection}>
               <div className={styles.supportingInner}>
                 {loading ? (
                   <>
                     <h2 className={styles.sideTitle}>Loading workspace</h2>
-                    <p className={styles.sideSubtitle}>Preparing your progress and journey details...</p>
+                    <p className={styles.sideSubtitle}>Fetching progress, steps, and journey details.</p>
                     <ul className={styles.sideList}>
                       {Array.from({ length: 3 }, (_, index) => (
                         <li key={index} className={`${styles.sideItem} ${styles.sideItemLoading}`}>
                           <span className={styles.sideItemHeader}>
-                            <span className={styles.sideItemTitle}>Loading item</span>
+                            <span className={styles.sideItemTitle}>{index === 0 ? 'Fetching steps' : index === 1 ? 'Checking courses' : 'Preparing sidebar'}</span>
                           </span>
-                          <span className={styles.sideItemStatus}>Please wait</span>
+                          <span className={styles.sideItemStatus}>Loading data</span>
                         </li>
                       ))}
                     </ul>

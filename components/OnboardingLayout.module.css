@@ -423,6 +423,14 @@
   gap: 0.9rem;
 }
 
+.contentReady {
+  animation: contentSettle 240ms ease-out both;
+}
+
+.contentLoading {
+  min-height: 34rem;
+}
+
 .supportingSection {
   margin-top: 0.95rem;
 }
@@ -470,6 +478,11 @@
 
 .sideItemLoading {
   background: color-mix(in srgb, var(--surface-strong) 72%, var(--surface));
+}
+
+.sideItemLoading .sideItemTitle,
+.sideItemLoading .sideItemStatus {
+  color: var(--ink-muted);
 }
 
 .sideItemHeader {
@@ -583,6 +596,34 @@
   50% {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes contentSettle {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layout,
+  .sidebarToggle,
+  .navItem,
+  .profileLink,
+  .logoutButton,
+  .mobileBottomNavItem {
+    transition: none;
+  }
+
+  .contentReady,
+  .navLoadingItem .navDot {
+    animation: none;
   }
 }
 

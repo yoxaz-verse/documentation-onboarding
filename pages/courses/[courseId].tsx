@@ -114,7 +114,11 @@ function ClassroomDetailContent() {
   }, [router.isReady, courseId]);
 
   if (!ready) {
-    return <OnboardingLayout title="Classroom" subtitle="Loading your course classroom...">Loading...</OnboardingLayout>;
+    return (
+      <OnboardingLayout title="Classroom" subtitle="Loading your course classroom..." loading>
+        <p className={styles.message}>Loading classroom...</p>
+      </OnboardingLayout>
+    );
   }
 
   if (!course) {
@@ -287,6 +291,7 @@ function ClassroomDetailContent() {
       subtitle={course.description}
       progress={progress}
       courseProgress={courseProgress}
+      loading={!ready}
     >
       {message ? <p className={`${styles.message} ${styles.messageError}`}>{message}</p> : null}
 

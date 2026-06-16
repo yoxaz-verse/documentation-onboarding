@@ -14,6 +14,7 @@ function ProfileContent() {
   const router = useRouter();
   const [progress, setProgress] = useState<ProgressRecord | null>(null);
   const [profile, setProfile] = useState<OperatorProfile | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -29,6 +30,8 @@ function ProfileContent() {
         }
 
         setMessage(error instanceof Error ? error.message : 'Failed to load profile.');
+      } finally {
+        setLoadingProfile(false);
       }
     };
     load();
@@ -39,6 +42,7 @@ function ProfileContent() {
       title="Operator Profile"
       subtitle="Review the details tied to your operator workspace and keep them accurate as you move through onboarding."
       progress={progress}
+      loading={loadingProfile}
     >
       <div className={styles.brandBanner}>
         <div className={styles.brandLogo}>OBAOL</div>

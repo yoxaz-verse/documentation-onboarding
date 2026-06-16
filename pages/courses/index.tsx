@@ -82,7 +82,11 @@ function ClassroomCatalogContent() {
   }, []);
 
   if (!ready) {
-    return <OnboardingLayout title="Classroom" subtitle="Loading your classroom catalog, progress, and leaderboard...">Loading...</OnboardingLayout>;
+    return (
+      <OnboardingLayout title="Classroom" subtitle="Loading your classroom catalog, progress, and leaderboard..." loading>
+        <p className={styles.message}>Loading classroom...</p>
+      </OnboardingLayout>
+    );
   }
 
   return (
@@ -91,6 +95,7 @@ function ClassroomCatalogContent() {
       subtitle="Access operator-specific training tracks, keep every lesson saved, and build readiness only after the guided onboarding path is complete."
       progress={progress}
       courseProgress={courseProgress}
+      loading={!ready}
       aside={
         <section className={styles.leaderboardPanel}>
           <div className={styles.sectionHeader}>

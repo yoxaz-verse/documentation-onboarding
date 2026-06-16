@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { buildCourseProgressSummary } from '../../../lib/courseProgress';
 import { ensureOperatorSeed } from '../../../lib/ensureOperatorSeed';
-import { buildJourneySummary, normalizeJourneyTemplates, type JourneyCheckRecord, type JourneyMilestoneRecord, type JourneyStateRecord, type JourneyTemplateRecord } from '../../../lib/operatorJourney';
+import { buildJourneySummary, normalizeJourneyDayTemplates, type JourneyCheckRecord, type JourneyMilestoneRecord, type JourneyStateRecord, type JourneySubmissionRecord, type JourneyTemplateRecord } from '../../../lib/operatorJourney';
 import { normalizeProgressRecord } from '../../../lib/onboarding';
 import { requireSession } from '../../../lib/serverAuth';
 import { isMissingSupabaseTableError } from '../../../lib/supabaseErrors';
@@ -57,6 +57,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     { data: checkRows, error: checkError },
     { data: milestoneRows, error: milestoneError },
     { data: templateRows, error: templateError },
+    { data: submissionRows, error: submissionError },
   ] = await Promise.all([
     supabaseAdmin.from('quiz_attempts').select('module_id').eq('email', session.email).eq('passed', true),
     supabaseAdmin
@@ -79,7 +80,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .eq('email', session.email),
     supabaseAdmin
       .from('operator_journey_day_templates')
-      .select('template_id, day_number, title, description, category, href, action_label, is_active')
+      .select('template_id, day_number, title, description, category, href, action_label, is_active, rich_template, review_required, button_text, completion_message')
+      .order('day_number', { ascending: true }),
+    supabaseAdmin
+      .from('operator_journey_day_submissions')
+      .select('id, email, template_id, day_number, status, answers, computed_metrics, submitted_at, reviewed_at, reviewed_by, review_note, created_at, updated_at')
+      .eq('email', session.email)
       .order('day_number', { ascending: true }),
   ]);
 
@@ -98,6 +104,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: milestoneError.message });
   }
   if (templateError && !isMissingSupabaseTableError(templateError)) return res.status(500).json({ error: templateError.message });
+  if (submissionError && !isMissingSupabaseTableError(submissionError)) return res.status(500).json({ error: submissionError.message });
 
   const rows = (submoduleRows || []) as SubmoduleStateRow[];
   const draftBySubModuleId = rows.reduce<Record<string, Record<string, string>>>((acc, row) => {
@@ -107,7 +114,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const activeCandidate = rows.find((row) => row.status !== 'passed')?.submodule_id || null;
   const passedSubModuleIds = new Set((passedRows || []).map((row) => row.module_id));
   const courseProgress = buildCourseProgressSummary(passedSubModuleIds, draftBySubModuleId, activeCandidate);
-  const templates = normalizeJourneyTemplates(templateError ? null : (templateRows || []) as JourneyTemplateRecord[]);
+  const templates = normalizeJourneyDayTemplates(templateError ? null : (templateRows || []) as JourneyTemplateRecord[]);
   const response: JourneyResponse = {
     progress: normalizeProgressRecord(progress)!,
     courseProgress,
@@ -115,7 +122,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       journeyState as JourneyStateRecord | null,
       (checkRows || []) as JourneyCheckRecord[],
       (milestoneRows || []) as JourneyMilestoneRecord[],
-      templates
+      templates,
+      (submissionError ? [] : submissionRows || []) as JourneySubmissionRecord[]
     ),
   };
 

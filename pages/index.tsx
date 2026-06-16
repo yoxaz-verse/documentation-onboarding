@@ -89,6 +89,7 @@ function HomeError({ message }: { message: string }) {
 function HomeContent({ user, onSessionExpired }: HomeContentProps) {
   const [progress, setProgress] = useState<ProgressRecord | null>(null);
   const [courseProgress, setCourseProgress] = useState<CourseProgressSummary | null>(null);
+  const [loadingProgress, setLoadingProgress] = useState(true);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -109,6 +110,8 @@ function HomeContent({ user, onSessionExpired }: HomeContentProps) {
         }
 
         setMessage(error instanceof Error ? error.message : 'Failed to load onboarding progress.');
+      } finally {
+        if (active) setLoadingProgress(false);
       }
     };
 
@@ -139,7 +142,12 @@ function HomeContent({ user, onSessionExpired }: HomeContentProps) {
       subtitle="Use this page to see the next required move and continue without extra distractions."
       progress={progress}
       courseProgress={courseProgress}
+      loading={loadingProgress}
     >
+      {loadingProgress ? (
+        <p className={styles.message}>Loading workspace progress...</p>
+      ) : (
+        <>
       {message ? <p className={`${styles.message} ${styles.messageError}`}>{message}</p> : null}
 
       <section className={`${styles.callout} ${styles.homeHeroCard}`}>
@@ -177,6 +185,8 @@ function HomeContent({ user, onSessionExpired }: HomeContentProps) {
           <span>Remaining: {remainingMilestones}</span>
         </div>
       </section>
+        </>
+      )}
     </OnboardingLayout>
   );
 }

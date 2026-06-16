@@ -645,6 +645,130 @@
   box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
+.loadingWorkspace {
+  display: grid;
+  gap: 0.9rem;
+  min-height: 48rem;
+}
+
+.loadingSpinner {
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, var(--surface-border-strong) 78%, transparent);
+  border-top-color: var(--accent);
+  animation: loadingSpin 850ms linear infinite;
+}
+
+.skeletonBlock {
+  display: block;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--ink-strong) 9%, transparent) 42%, transparent 78%),
+    color-mix(in srgb, var(--surface-border-strong) 44%, var(--surface-strong));
+  background-size: 220% 100%, 100% 100%;
+  animation: skeletonShimmer 1.25s ease-in-out infinite;
+}
+
+.skeletonLabel {
+  width: 58%;
+  height: 0.72rem;
+}
+
+.skeletonValue {
+  width: 38%;
+  height: 1.55rem;
+  margin-top: 0.62rem;
+}
+
+.skeletonMetricLabel {
+  width: 64%;
+  height: 0.68rem;
+}
+
+.skeletonMetricValue {
+  width: 28%;
+  height: 1.18rem;
+}
+
+.skeletonBadge {
+  width: 4.2rem;
+  height: 1.8rem;
+}
+
+.skeletonBadgeSmall {
+  width: 4.8rem;
+  height: 1.45rem;
+}
+
+.skeletonEyebrow {
+  width: 35%;
+  height: 0.72rem;
+}
+
+.skeletonTitle {
+  width: min(100%, 27rem);
+  height: 2rem;
+  border-radius: 0.62rem;
+}
+
+.skeletonTitleSmall {
+  width: min(100%, 14rem);
+  height: 1.15rem;
+  border-radius: 0.48rem;
+}
+
+.skeletonTextWide,
+.skeletonTextMedium {
+  height: 0.9rem;
+  border-radius: 0.42rem;
+}
+
+.skeletonTextWide {
+  width: 100%;
+}
+
+.skeletonTextMedium {
+  width: 72%;
+}
+
+.skeletonInput {
+  width: 100%;
+  height: 2.92rem;
+  border-radius: 0.78rem;
+}
+
+.skeletonTextarea {
+  width: 100%;
+  height: 7.5rem;
+  border-radius: 0.82rem;
+}
+
+.skeletonTimelineText {
+  width: 72%;
+  height: 0.64rem;
+}
+
+.skeletonTimelineStatus {
+  width: 54%;
+  height: 0.7rem;
+}
+
+.journeyLoadingHero {
+  min-height: 10.5rem;
+}
+
+.loadingProgressFill {
+  width: 38%;
+  animation: loadingProgress 1.25s ease-in-out infinite;
+}
+
+.journeyTimelineItemLoading {
+  cursor: wait;
+  pointer-events: none;
+}
+
 .cardActions {
   display: flex;
   align-items: center;
@@ -867,6 +991,36 @@
   background: color-mix(in srgb, var(--accent-soft) 34%, var(--surface-strong));
 }
 
+.journeyTimelineItemLocked {
+  border-color: color-mix(in srgb, var(--surface-border) 76%, transparent);
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  color: color-mix(in srgb, var(--ink-muted) 72%, transparent);
+  cursor: not-allowed;
+}
+
+.journeyTimelineItemLocked:hover,
+.journeyTimelineItemLocked:focus-visible {
+  transform: none;
+  border-color: color-mix(in srgb, var(--accent-secondary) 40%, var(--surface-border));
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+}
+
+.journeyTimelineItemLocked strong,
+.journeyTimelineItemLocked span {
+  color: color-mix(in srgb, var(--ink-muted) 78%, transparent);
+}
+
+.journeyCalendarNotice {
+  margin: 0;
+  border: 1px solid color-mix(in srgb, var(--accent-secondary) 42%, var(--surface-border));
+  border-radius: 0.82rem;
+  background: color-mix(in srgb, var(--accent-soft) 46%, var(--surface-strong));
+  color: var(--ink-strong);
+  padding: 0.72rem 0.82rem;
+  font-size: 0.86rem;
+  font-weight: 850;
+}
+
 .journeyAsideStack {
   margin-top: 0.85rem;
 }
@@ -893,6 +1047,212 @@
   font-size: 0.86rem;
   font-weight: 900;
   text-align: right;
+}
+
+.journeyMetricsGrid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.journeyMetricCard {
+  border: 1px solid var(--surface-border);
+  border-radius: 0.82rem;
+  background: var(--surface-strong);
+  box-shadow: var(--inset-highlight);
+  padding: 0.72rem;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.journeyMetricCard span {
+  color: var(--ink-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.journeyMetricCard strong {
+  color: var(--ink-strong);
+  font-size: 1.05rem;
+  font-weight: 950;
+}
+
+.journeyWorkspace {
+  display: grid;
+  grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
+  gap: 0.9rem;
+  align-items: start;
+}
+
+.journeyDayContent,
+.journeyFormPanel,
+.journeyRepeatEntry {
+  border: 1px solid var(--surface-border);
+  border-radius: 0.95rem;
+  background: var(--surface-strong);
+  box-shadow: var(--inset-highlight);
+}
+
+.journeyDayContent,
+.journeyFormPanel {
+  padding: 1rem;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.journeyInfoGrid,
+.journeyListGrid,
+.journeyFormGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.72rem;
+}
+
+.journeyInfoGrid article,
+.journeyListGrid article {
+  border: 1px solid color-mix(in srgb, var(--surface-border) 78%, transparent);
+  border-radius: 0.82rem;
+  padding: 0.82rem;
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+}
+
+.journeyInfoGrid h3,
+.journeyListGrid h3 {
+  margin: 0 0 0.45rem;
+  color: var(--ink-strong);
+  font-size: 0.86rem;
+}
+
+.journeyInfoGrid p,
+.journeyListGrid li {
+  color: var(--ink);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.journeyListGrid ul,
+.journeyListGrid ol {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.journeyField {
+  min-width: 0;
+  display: grid;
+  gap: 0.36rem;
+}
+
+.journeyFieldWide {
+  grid-column: 1 / -1;
+}
+
+.journeyField span {
+  color: var(--ink-muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.journeyField input,
+.journeyField select,
+.journeyField textarea {
+  width: 100%;
+  border: 1px solid var(--control-border);
+  border-radius: 0.72rem;
+  background: var(--control-surface-strong);
+  color: var(--control-text);
+  font: inherit;
+  font-size: 0.86rem;
+  padding: 0.62rem 0.72rem;
+}
+
+.journeyField textarea {
+  resize: vertical;
+  min-height: 5.3rem;
+  line-height: 1.45;
+}
+
+.journeyField input:focus-visible,
+.journeyField select:focus-visible,
+.journeyField textarea:focus-visible {
+  outline: none;
+  border-color: var(--control-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--control-focus) 22%, transparent);
+}
+
+.journeyFieldInvalid span {
+  color: color-mix(in srgb, var(--error) 72%, var(--ink-strong));
+}
+
+.journeyInputInvalid,
+.journeyFieldInvalid input,
+.journeyFieldInvalid select,
+.journeyFieldInvalid textarea {
+  border-color: color-mix(in srgb, var(--error) 72%, var(--control-border)) !important;
+  background: color-mix(in srgb, var(--error-bg) 32%, var(--control-surface-strong)) !important;
+}
+
+.journeyBoolean {
+  min-height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.journeyBoolean input {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--accent);
+}
+
+.journeyRepeatGroup {
+  display: grid;
+  gap: 0.72rem;
+  border-top: 1px solid var(--surface-border);
+  padding-top: 0.9rem;
+}
+
+.journeyRepeatEntry {
+  padding: 0.85rem;
+  display: grid;
+  gap: 0.64rem;
+}
+
+.journeyInlineWarning {
+  border: 1px solid color-mix(in srgb, var(--error) 42%, var(--surface-border));
+  border-radius: 0.88rem;
+  background: color-mix(in srgb, var(--error-bg) 58%, var(--surface-strong));
+  color: var(--ink-strong);
+  padding: 0.82rem 0.9rem;
+  display: grid;
+  gap: 0.42rem;
+}
+
+.journeyInlineWarning strong {
+  color: var(--ink-strong);
+  font-size: 0.9rem;
+}
+
+.journeyInlineWarning ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.journeyInlineWarning li,
+.journeyInlineWarning p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.journeySubmitHint {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
 }
 
 .leaderboardPanel,
@@ -1368,6 +1728,47 @@
   font-weight: 800;
 }
 
+@keyframes skeletonShimmer {
+  0% {
+    background-position: 180% 0, 0 0;
+  }
+
+  100% {
+    background-position: -80% 0, 0 0;
+  }
+}
+
+@keyframes loadingSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loadingProgress {
+  0%,
+  100% {
+    width: 28%;
+    opacity: 0.7;
+  }
+
+  50% {
+    width: 62%;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonBlock,
+  .loadingSpinner,
+  .loadingProgressFill {
+    animation: none;
+  }
+
+  .loadingProgressFill {
+    width: 44%;
+  }
+}
+
 .homePrimaryCallout,
 .homeKpiGrid,
 .homeSecondaryCallout,
@@ -1382,13 +1783,18 @@
   .kpiGrid,
   .journeyStartGrid,
   .journeyStatsGrid,
+  .journeyMetricsGrid,
+  .journeyWorkspace,
   .homeSummaryGrid,
   .formGrid,
   .profileGrid {
     grid-template-columns: 1fr;
   }
 
-  .journeyMilestoneGrid {
+  .journeyMilestoneGrid,
+  .journeyInfoGrid,
+  .journeyListGrid,
+  .journeyFormGrid {
     grid-template-columns: 1fr;
   }
 

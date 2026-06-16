@@ -662,6 +662,7 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
       subtitle={milestone.summary}
       progress={progress}
       courseProgress={courseProgress}
+      loading={loading}
     >
       <div className={styles.kpiGrid}>
         <section className={styles.kpiCard}>
