@@ -3,7 +3,8 @@ import { requireAdminSession } from '../../../../lib/adminAuth';
 import type { AdminOperatorRow } from '../../../../lib/adminTypes';
 import { getCompletedMilestoneCount, normalizeProgressRecord } from '../../../../lib/onboarding';
 import { JOURNEY_MILESTONES } from '../../../../config/operatorJourney';
-import { getJourneyCurrentDay } from '../../../../lib/operatorJourney';
+import { getJourneyCurrentDay, normalizeJourneyTemplates, type JourneyTemplateRecord } from '../../../../lib/operatorJourney';
+import { isMissingSupabaseTableError } from '../../../../lib/supabaseErrors';
 import { supabaseAdmin } from '../../../../lib/supabaseAdmin';
 
 function toSafePage(value: string | string[] | undefined, fallback: number) {
@@ -29,6 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     { data: submissions, error: submissionsError },
     { data: journeyRows, error: journeyError },
     { data: journeyMilestoneRows, error: journeyMilestoneError },
+    { data: templateRows, error: templateError },
   ] = await Promise.all([
     supabaseAdmin.from('operators').select('email, name'),
     supabaseAdmin.from('operator_profiles').select('email, full_name'),
@@ -38,6 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     supabaseAdmin.from('onboarding_submissions').select('email, status, completion_code, updated_at'),
     supabaseAdmin.from('operator_journey_state').select('email, started_at, updated_at'),
     supabaseAdmin.from('operator_journey_milestone_state').select('email, milestone_id, updated_at'),
+    supabaseAdmin.from('operator_journey_day_templates').select('template_id, day_number, title, description, category, href, action_label, is_active'),
   ]);
 
   if (operatorsError) return res.status(500).json({ error: operatorsError.message });
@@ -46,11 +49,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (submissionsError) return res.status(500).json({ error: submissionsError.message });
   if (journeyError) return res.status(500).json({ error: journeyError.message });
   if (journeyMilestoneError) return res.status(500).json({ error: journeyMilestoneError.message });
+  if (templateError && !isMissingSupabaseTableError(templateError)) return res.status(500).json({ error: templateError.message });
 
   const profileMap = new Map((profiles || []).map((profile) => [profile.email, profile]));
   const progressMap = new Map((progressRows || []).map((progress) => [progress.email, progress]));
   const submissionMap = new Map((submissions || []).map((submission) => [submission.email, submission]));
   const journeyMap = new Map((journeyRows || []).map((journey) => [journey.email, journey]));
+  const journeyTemplates = templateError ? JOURNEY_MILESTONES : normalizeJourneyTemplates((templateRows || []) as JourneyTemplateRecord[]);
+  const journeyTotalMilestones = journeyTemplates.filter((milestone) => milestone.isActive !== false).length;
   const journeyMilestoneCounts = (journeyMilestoneRows || []).reduce<Record<string, { count: number; latestActivityAt: string | null }>>((acc, row) => {
     const current = acc[row.email] || { count: 0, latestActivityAt: null };
     current.count += 1;
@@ -77,7 +83,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       journeyStartedAt: journey?.started_at || null,
       journeyCurrentDay: getJourneyCurrentDay(journey?.started_at || null),
       journeyCompletedMilestones: journeyMilestones.count,
-      journeyTotalMilestones: JOURNEY_MILESTONES.length,
+      journeyTotalMilestones,
       submissionStatus: submission?.status || 'pending',
       hasCompletionCode: Boolean(submission?.completion_code),
       latestActivityAt,

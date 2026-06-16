@@ -1,9 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { requireAdminSession } from '../../../../lib/adminAuth';
 import type { AdminOperatorDetail } from '../../../../lib/adminTypes';
-import { buildJourneySummary, type JourneyCheckRecord, type JourneyMilestoneRecord, type JourneyStateRecord } from '../../../../lib/operatorJourney';
+import { buildJourneySummary, normalizeJourneyTemplates, type JourneyCheckRecord, type JourneyMilestoneRecord, type JourneyStateRecord, type JourneyTemplateRecord } from '../../../../lib/operatorJourney';
 import { getCompletedMilestoneCount, getMilestone, MILESTONES, normalizeProgressRecord } from '../../../../lib/onboarding';
 import { supabaseAdmin } from '../../../../lib/supabaseAdmin';
+import { isMissingSupabaseTableError } from '../../../../lib/supabaseErrors';
 
 function formatFieldValue(value: string | null | undefined) {
   const normalized = String(value || '').trim();
@@ -30,6 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     { data: journeyState, error: journeyStateError },
     { data: journeyChecks, error: journeyChecksError },
     { data: journeyMilestones, error: journeyMilestonesError },
+    { data: templateRows, error: templateError },
   ] = await Promise.all([
     supabaseAdmin
       .from('operators')
@@ -68,6 +70,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .from('operator_journey_milestone_state')
       .select('milestone_id, completed_at, updated_at')
       .eq('email', email),
+    supabaseAdmin
+      .from('operator_journey_day_templates')
+      .select('template_id, day_number, title, description, category, href, action_label, is_active'),
   ]);
 
   if (operatorError) return res.status(500).json({ error: operatorError.message });
@@ -78,6 +83,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (journeyStateError) return res.status(500).json({ error: journeyStateError.message });
   if (journeyChecksError) return res.status(500).json({ error: journeyChecksError.message });
   if (journeyMilestonesError) return res.status(500).json({ error: journeyMilestonesError.message });
+  if (templateError && !isMissingSupabaseTableError(templateError)) return res.status(500).json({ error: templateError.message });
 
   if (!operator) return res.status(404).json({ error: 'Operator not found.' });
 
@@ -92,7 +98,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const journeySummary = buildJourneySummary(
     journeyState as JourneyStateRecord | null,
     (journeyChecks || []) as JourneyCheckRecord[],
-    (journeyMilestones || []) as JourneyMilestoneRecord[]
+    (journeyMilestones || []) as JourneyMilestoneRecord[],
+    normalizeJourneyTemplates(templateError ? null : (templateRows || []) as JourneyTemplateRecord[])
   );
   const journeyLatestActivityAt =
     [

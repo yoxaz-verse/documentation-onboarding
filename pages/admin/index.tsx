@@ -80,6 +80,7 @@ function DashboardContent() {
             <p className={styles.subtitle}>Monitor the guided operator onboarding funnel and course unlock readiness in real time.</p>
           </div>
           <div className={styles.actions}>
+            <Link className={styles.linkButton} href="/admin/journey">Edit Journey</Link>
             <Link className={styles.linkButton} href="/">Operator View</Link>
             <ThemeToggle size="sm" variant="surface" />
             <button className={styles.actionButton} onClick={handleLogout} type="button">Logout</button>

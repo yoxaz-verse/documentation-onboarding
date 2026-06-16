@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { buildCourseProgressSummary } from '../../../lib/courseProgress';
 import { ensureOperatorSeed } from '../../../lib/ensureOperatorSeed';
-import { buildJourneySummary, type JourneyCheckRecord, type JourneyMilestoneRecord, type JourneyStateRecord } from '../../../lib/operatorJourney';
+import { buildJourneySummary, normalizeJourneyTemplates, type JourneyCheckRecord, type JourneyMilestoneRecord, type JourneyStateRecord, type JourneyTemplateRecord } from '../../../lib/operatorJourney';
 import { normalizeProgressRecord } from '../../../lib/onboarding';
 import { requireSession } from '../../../lib/serverAuth';
 import { isMissingSupabaseTableError } from '../../../lib/supabaseErrors';
@@ -56,6 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     { data: journeyState, error: journeyStateError },
     { data: checkRows, error: checkError },
     { data: milestoneRows, error: milestoneError },
+    { data: templateRows, error: templateError },
   ] = await Promise.all([
     supabaseAdmin.from('quiz_attempts').select('module_id').eq('email', session.email).eq('passed', true),
     supabaseAdmin
@@ -76,6 +77,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .from('operator_journey_milestone_state')
       .select('milestone_id, completed_at')
       .eq('email', session.email),
+    supabaseAdmin
+      .from('operator_journey_day_templates')
+      .select('template_id, day_number, title, description, category, href, action_label, is_active')
+      .order('day_number', { ascending: true }),
   ]);
 
   if (passedError) return res.status(500).json({ error: passedError.message });
@@ -92,6 +97,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (isMissingSupabaseTableError(milestoneError)) return schemaError(res, 'operator_journey_milestone_state');
     return res.status(500).json({ error: milestoneError.message });
   }
+  if (templateError && !isMissingSupabaseTableError(templateError)) return res.status(500).json({ error: templateError.message });
 
   const rows = (submoduleRows || []) as SubmoduleStateRow[];
   const draftBySubModuleId = rows.reduce<Record<string, Record<string, string>>>((acc, row) => {
@@ -101,13 +107,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const activeCandidate = rows.find((row) => row.status !== 'passed')?.submodule_id || null;
   const passedSubModuleIds = new Set((passedRows || []).map((row) => row.module_id));
   const courseProgress = buildCourseProgressSummary(passedSubModuleIds, draftBySubModuleId, activeCandidate);
+  const templates = normalizeJourneyTemplates(templateError ? null : (templateRows || []) as JourneyTemplateRecord[]);
   const response: JourneyResponse = {
     progress: normalizeProgressRecord(progress)!,
     courseProgress,
     journey: buildJourneySummary(
       journeyState as JourneyStateRecord | null,
       (checkRows || []) as JourneyCheckRecord[],
-      (milestoneRows || []) as JourneyMilestoneRecord[]
+      (milestoneRows || []) as JourneyMilestoneRecord[],
+      templates
     ),
   };
 

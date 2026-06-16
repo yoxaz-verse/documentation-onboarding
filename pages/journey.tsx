@@ -30,6 +30,7 @@ function JourneyContent() {
   const [state, setState] = useState<JourneyPageState>({ status: 'loading' });
   const [savingId, setSavingId] = useState('');
   const [message, setMessage] = useState('');
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
   const load = async () => {
     try {
@@ -55,6 +56,7 @@ function JourneyContent() {
         courseProgress: payload.courseProgress,
         journey: payload.journey,
       });
+      setSelectedDay((current) => current || clampTimelineDay(payload.journey.currentDay));
       setMessage('');
     } catch (error) {
       if (isUnauthorizedError(error)) {
@@ -131,7 +133,7 @@ function JourneyContent() {
 
   if (state.status === 'loading') {
     return (
-      <OnboardingLayout title="Operator Journey" subtitle="Loading your Day 1 path and milestone progress...">
+      <OnboardingLayout title="Operator Journey" subtitle="Loading your Day 1 path and milestone progress..." loading>
         <p className={styles.message}>Loading journey...</p>
       </OnboardingLayout>
     );
@@ -151,8 +153,21 @@ function JourneyContent() {
   const checksComplete = journey.completedCheckCount === journey.totalCheckCount;
   const currentDay = journey.currentDay;
   const visibleDay = clampTimelineDay(currentDay);
-  const todaysMilestones = journey.milestones.filter((milestone) => milestone.day === visibleDay);
-  const upcomingMilestone = journey.milestones.find((milestone) => milestone.day >= visibleDay && !completedMilestoneSet.has(milestone.id));
+  const activeSelectedDay = selectedDay || visibleDay;
+  const selectedMilestone = journey.milestones.find((milestone) => milestone.day === activeSelectedDay) || journey.milestones.find((milestone) => milestone.day === visibleDay) || journey.milestones[0];
+  const selectedMilestoneCompleted = selectedMilestone ? completedMilestoneSet.has(selectedMilestone.id) : false;
+  const dueMilestones = journey.milestones.filter((milestone) => milestone.day <= visibleDay && !completedMilestoneSet.has(milestone.id));
+  const futureCompletedCount = journey.milestones.filter((milestone) => milestone.day > visibleDay && completedMilestoneSet.has(milestone.id)).length;
+  const trackState = futureCompletedCount > 0
+    ? 'Ahead'
+    : dueMilestones.length === 0
+      ? 'On track'
+      : `${dueMilestones.length} to catch up`;
+  const trackHint = futureCompletedCount > 0
+    ? `You have already completed ${futureCompletedCount} future ${futureCompletedCount === 1 ? 'day' : 'days'}.`
+    : dueMilestones.length === 0
+      ? 'All expected days through today are complete.'
+      : 'Finish the older open days when you can, then return to today.';
   const completionPercent = Math.round((journey.completedMilestoneCount / journey.totalMilestoneCount) * 100);
   const dayPercent = Math.round((Math.min(visibleDay, JOURNEY_TOTAL_DAYS) / JOURNEY_TOTAL_DAYS) * 100);
 
@@ -268,48 +283,45 @@ function JourneyContent() {
               <p className={styles.kpiValue}>{journey.completedMilestoneCount}/{journey.totalMilestoneCount}</p>
             </article>
             <article className={styles.kpiCard}>
-              <p className={styles.kpiLabel}>Course progress</p>
-              <p className={styles.kpiValue}>{courseProgress.overallPercent}%</p>
+              <p className={styles.kpiLabel}>Track status</p>
+              <p className={styles.kpiValue}>{trackState}</p>
             </article>
           </section>
 
           <section className={styles.journeyTodayPanel}>
             <div className={styles.sectionHeader}>
               <div>
-                <h2 className={styles.courseCardTitle}>Today's operator focus</h2>
-                <p className={styles.sectionHint}>{upcomingMilestone ? upcomingMilestone.title : 'All journey milestones are complete.'}</p>
+                <h2 className={styles.courseCardTitle}>{activeSelectedDay === visibleDay ? "Today's operator focus" : `Day ${activeSelectedDay} focus`}</h2>
+                <p className={styles.sectionHint}>{trackHint}</p>
               </div>
-              <span className={styles.pointsBadge}>Day {visibleDay}</span>
+              <span className={styles.pointsBadge}>Day {activeSelectedDay}</span>
             </div>
             <div className={styles.journeyMilestoneGrid}>
-              {(todaysMilestones.length ? todaysMilestones : journey.milestones.slice(Math.max(0, visibleDay - 1), visibleDay + 2)).map((milestone) => {
-                const completed = completedMilestoneSet.has(milestone.id);
-                return (
-                  <article key={milestone.id} className={`${styles.journeyMilestoneCard} ${completed ? styles.journeyMilestoneCardDone : ''}`}>
-                    <div className={styles.journeyMilestoneHeader}>
-                      <span className={styles.journeyDayBadge}>Day {milestone.day}</span>
-                      <span className={styles.courseBadge}>{categoryLabel(milestone.category)}</span>
-                    </div>
-                    <h3 className={styles.journeyMilestoneTitle}>{milestone.title}</h3>
-                    <p className={styles.sectionHint}>{milestone.description}</p>
-                    <div className={styles.cardActions}>
-                      <button
-                        type="button"
-                        className={completed ? styles.secondaryButton : styles.primaryButton}
-                        disabled={savingId === milestone.id}
-                        onClick={() => toggleMilestone(milestone.id, !completed)}
-                      >
-                        {savingId === milestone.id ? 'Saving...' : completed ? 'Mark open' : 'Mark complete'}
-                      </button>
-                      {milestone.href ? (
-                        <Link href={milestone.href} className={styles.inlineLink}>
-                          {milestone.actionLabel || 'Open'}
-                        </Link>
-                      ) : null}
-                    </div>
-                  </article>
-                );
-              })}
+              {selectedMilestone ? (
+                <article className={`${styles.journeyMilestoneCard} ${selectedMilestoneCompleted ? styles.journeyMilestoneCardDone : ''}`}>
+                  <div className={styles.journeyMilestoneHeader}>
+                    <span className={styles.journeyDayBadge}>Day {selectedMilestone.day}</span>
+                    <span className={styles.courseBadge}>{categoryLabel(selectedMilestone.category)}</span>
+                  </div>
+                  <h3 className={styles.journeyMilestoneTitle}>{selectedMilestone.title}</h3>
+                  <p className={styles.sectionHint}>{selectedMilestone.description}</p>
+                  <div className={styles.cardActions}>
+                    <button
+                      type="button"
+                      className={selectedMilestoneCompleted ? styles.secondaryButton : styles.primaryButton}
+                      disabled={savingId === selectedMilestone.id}
+                      onClick={() => toggleMilestone(selectedMilestone.id, !selectedMilestoneCompleted)}
+                    >
+                      {savingId === selectedMilestone.id ? 'Saving...' : selectedMilestoneCompleted ? 'Reopen' : 'Mark complete'}
+                    </button>
+                    {selectedMilestone.href ? (
+                      <Link href={selectedMilestone.href} className={styles.inlineLink}>
+                        {selectedMilestone.actionLabel || 'Open'}
+                      </Link>
+                    ) : null}
+                  </div>
+                </article>
+              ) : null}
             </div>
           </section>
 
@@ -325,21 +337,23 @@ function JourneyContent() {
                 const completed = completedMilestoneSet.has(milestone.id);
                 const isToday = milestone.day === visibleDay;
                 const isPast = milestone.day < visibleDay;
+                const isSelected = milestone.day === activeSelectedDay;
+                const stateLabel = completed ? (milestone.day > visibleDay ? 'Ahead' : 'Complete') : isToday ? 'Today' : isPast ? 'Catch up' : 'Upcoming';
                 const className = `${styles.journeyTimelineItem} ${completed ? styles.journeyTimelineItemDone : ''} ${
                   isToday ? styles.journeyTimelineItemToday : ''
-                } ${isPast && !completed ? styles.journeyTimelineItemDue : ''}`;
+                } ${isPast && !completed ? styles.journeyTimelineItemDue : ''} ${isSelected ? styles.journeyTimelineItemSelected : ''}`;
 
                 return (
                   <button
                     key={milestone.id}
                     type="button"
                     className={className}
-                    disabled={savingId === milestone.id}
-                    onClick={() => toggleMilestone(milestone.id, !completed)}
+                    onClick={() => setSelectedDay(milestone.day)}
                     title={milestone.title}
+                    aria-pressed={isSelected}
                   >
                     <span>Day {milestone.day}</span>
-                    <strong>{completed ? 'Done' : isToday ? 'Today' : isPast ? 'Due' : 'Next'}</strong>
+                    <strong>{stateLabel}</strong>
                   </button>
                 );
               })}

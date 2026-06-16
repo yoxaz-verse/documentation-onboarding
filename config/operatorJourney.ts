@@ -14,6 +14,7 @@ export type JourneyMilestone = {
   category: JourneyMilestoneCategory;
   href?: string;
   actionLabel?: string;
+  isActive?: boolean;
 };
 
 export const JOURNEY_TOTAL_DAYS = 30;

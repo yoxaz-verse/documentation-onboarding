@@ -17,6 +17,17 @@ export type JourneyMilestoneRecord = {
   completed_at: string;
 };
 
+export type JourneyTemplateRecord = {
+  template_id: string;
+  day_number: number;
+  title: string;
+  description: string;
+  category: string;
+  href: string | null;
+  action_label: string | null;
+  is_active: boolean | null;
+};
+
 export type JourneySummary = {
   startedAt: string | null;
   currentDay: number | null;
@@ -51,12 +62,50 @@ export function isValidJourneyMilestoneId(milestoneId: string) {
   return JOURNEY_MILESTONES.some((milestone) => milestone.id === milestoneId);
 }
 
+export function normalizeJourneyTemplates(rows: Array<Partial<JourneyTemplateRecord>> | null | undefined): JourneyMilestone[] {
+  if (!rows?.length) return JOURNEY_MILESTONES;
+
+  const categories = new Set(['setup', 'learning', 'outreach', 'platform', 'deal']);
+  const normalized = rows
+    .map((row): JourneyMilestone | null => {
+      const fallback = JOURNEY_MILESTONES.find((milestone) => milestone.id === row.template_id || milestone.day === row.day_number);
+      const day = Number(row.day_number || fallback?.day || 0);
+      const category = categories.has(String(row.category)) ? (String(row.category) as JourneyMilestone['category']) : fallback?.category || 'learning';
+      const id = String(row.template_id || fallback?.id || '').trim();
+      const title = String(row.title || fallback?.title || '').trim();
+      const description = String(row.description || fallback?.description || '').trim();
+
+      if (!id || !day || !title || !description) return null;
+
+      return {
+        id,
+        day,
+        title,
+        description,
+        category,
+        href: String(row.href || fallback?.href || '').trim() || undefined,
+        actionLabel: String(row.action_label || fallback?.actionLabel || '').trim() || undefined,
+        isActive: row.is_active !== false,
+      };
+    })
+    .filter((milestone): milestone is JourneyMilestone => Boolean(milestone))
+    .sort((a, b) => a.day - b.day);
+
+  return normalized.length ? normalized : JOURNEY_MILESTONES;
+}
+
+export function isValidJourneyMilestoneIdForTemplate(milestoneId: string, milestones: JourneyMilestone[]) {
+  return milestones.some((milestone) => milestone.id === milestoneId);
+}
+
 export function buildJourneySummary(
   state: Partial<JourneyStateRecord> | null | undefined,
   checks: Array<Partial<JourneyCheckRecord>> = [],
   milestones: Array<Partial<JourneyMilestoneRecord>> = [],
+  templates: JourneyMilestone[] = JOURNEY_MILESTONES,
   now = new Date()
 ): JourneySummary {
+  const activeTemplates = templates.filter((milestone) => milestone.isActive !== false);
   const completedChecks = new Set(
     checks
       .map((check) => String(check.check_id || ''))
@@ -65,7 +114,7 @@ export function buildJourneySummary(
   const completedMilestones = new Set(
     milestones
       .map((milestone) => String(milestone.milestone_id || ''))
-      .filter((milestoneId) => isValidJourneyMilestoneId(milestoneId))
+      .filter((milestoneId) => isValidJourneyMilestoneIdForTemplate(milestoneId, activeTemplates))
   );
   const startedAt = state?.started_at || null;
 
@@ -78,9 +127,9 @@ export function buildJourneySummary(
     completedCheckCount: completedChecks.size,
     completedMilestoneCount: completedMilestones.size,
     totalCheckCount: JOURNEY_CHECKS.length,
-    totalMilestoneCount: JOURNEY_MILESTONES.length,
+    totalMilestoneCount: activeTemplates.length,
     checks: JOURNEY_CHECKS,
-    milestones: JOURNEY_MILESTONES,
+    milestones: activeTemplates,
   };
 }
 

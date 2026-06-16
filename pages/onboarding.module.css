@@ -858,6 +858,10 @@
   background: color-mix(in srgb, var(--accent-soft) 78%, var(--surface));
 }
 
+.journeyTimelineItemSelected {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--control-focus) 24%, transparent);
+}
+
 .journeyTimelineItemDue {
   border-color: color-mix(in srgb, var(--accent-secondary) 42%, var(--surface-border));
   background: color-mix(in srgb, var(--accent-soft) 34%, var(--surface-strong));
