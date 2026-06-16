@@ -859,8 +859,8 @@
 }
 
 .journeyTimelineItemDue {
-  border-color: color-mix(in srgb, var(--warning-border) 76%, var(--surface-border));
-  background: color-mix(in srgb, var(--warning-bg) 40%, var(--surface-strong));
+  border-color: color-mix(in srgb, var(--accent-secondary) 42%, var(--surface-border));
+  background: color-mix(in srgb, var(--accent-soft) 34%, var(--surface-strong));
 }
 
 .journeyAsideStack {
@@ -1376,10 +1376,24 @@
   .classroomSummaryStrip,
   .classroomLayout,
   .kpiGrid,
+  .journeyStartGrid,
+  .journeyStatsGrid,
   .homeSummaryGrid,
   .formGrid,
   .profileGrid {
     grid-template-columns: 1fr;
+  }
+
+  .journeyMilestoneGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .journeyTimelineGrid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .journeyStartPanel {
+    position: static;
   }
 
   .classroomHeroInner,
@@ -1462,6 +1476,14 @@
 
   .classroomSummaryStrip {
     gap: 0.68rem;
+  }
+
+  .journeyTimelineGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .journeyTimelineItem {
+    min-height: 3.8rem;
   }
 
   .summaryStatCard {

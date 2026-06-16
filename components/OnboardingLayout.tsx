@@ -22,10 +22,10 @@ type StepDef = {
   state: string;
 };
 
-type MobileTabIcon = 'home' | 'steps' | 'courses' | 'profile';
+type MobileTabIcon = 'home' | 'steps' | 'journey' | 'courses' | 'profile';
 
 type MobileTabDef = {
-  key: 'home' | 'steps' | 'courses' | 'profile';
+  key: 'home' | 'steps' | 'journey' | 'courses' | 'profile';
   label: string;
   href: string;
   active: boolean;
@@ -79,6 +79,17 @@ function MobileTabIconGlyph({ icon }: { icon: MobileTabIcon }) {
     );
   }
 
+  if (icon === 'journey') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M4 19V5" />
+        <path d="M4 7h11l-1.5 3L15 13H4" />
+        <path d="M7 19h13" />
+        <path d="M16 16l2 3 2-3" />
+      </svg>
+    );
+  }
+
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M19 21a7 7 0 0 0-14 0" />
@@ -92,6 +103,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
   const [loggingOut, setLoggingOut] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const inClassroom = router.pathname === '/courses' || router.pathname.startsWith('/courses/');
+  const inJourney = router.pathname === '/journey';
   const inProfile = router.pathname === '/profile';
   const activeStep = MILESTONES.find((milestone) => router.pathname === milestone.route) || null;
   const coursesUnlocked = areCoursesUnlocked(progress ?? null);
@@ -130,6 +142,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
   const mobileTabs: MobileTabDef[] = [
     { key: 'home', label: 'Home', href: '/', active: router.pathname === '/', meta: 'Workspace', icon: 'home' },
     { key: 'steps', label: mobileStepLabel, href: mobileStepHref, active: Boolean(activeStep), meta: activeStep ? activeStep.shortLabel : nextMilestone ? 'Continue' : 'Complete', icon: 'steps' },
+    { key: 'journey', label: 'Journey', href: '/journey', active: inJourney, meta: coursesUnlocked ? 'Day path' : 'Locked', icon: 'journey' },
     { key: 'courses', label: 'Courses', href: '/courses', active: inClassroom, meta: coursesUnlocked ? 'Library' : 'Locked', icon: 'courses' },
     { key: 'profile', label: 'Profile', href: '/profile', active: inProfile, meta: 'Account', icon: 'profile' },
   ];
@@ -237,6 +250,14 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
             <p className={styles.navGroupTitle}>Classroom</p>
             {coursesUnlocked ? (
               <>
+                <Link href="/journey" className={`${styles.navItem} ${inJourney ? styles.navActive : ''}`}>
+                  <span className={styles.navDot} aria-hidden="true" />
+                  <span className={styles.navTitle}>Operator Journey</span>
+                  <span className={styles.navStateRow}>
+                    <span className={styles.navState}>30-day milestone path</span>
+                    {inJourney ? <span className={styles.navChip}>Now</span> : null}
+                  </span>
+                </Link>
                 <Link href="/courses" className={`${styles.navItem} ${inClassroom ? styles.navActive : ''}`}>
                   <span className={styles.navDot} aria-hidden="true" />
                   <span className={styles.navTitle}>Operator Training Library</span>
@@ -265,13 +286,22 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                 ))}
               </>
             ) : (
-              <span className={`${styles.navItem} ${styles.navDisabled}`} aria-disabled="true">
-                <span className={styles.navDot} aria-hidden="true" />
-                <span className={styles.navTitle}>Operator Training Library</span>
-                <span className={styles.navStateRow}>
-                  <span className={styles.navState}>Locked until Step 10</span>
+              <>
+                <span className={`${styles.navItem} ${styles.navDisabled}`} aria-disabled="true">
+                  <span className={styles.navDot} aria-hidden="true" />
+                  <span className={styles.navTitle}>Operator Journey</span>
+                  <span className={styles.navStateRow}>
+                    <span className={styles.navState}>Locked until onboarding is done</span>
+                  </span>
                 </span>
-              </span>
+                <span className={`${styles.navItem} ${styles.navDisabled}`} aria-disabled="true">
+                  <span className={styles.navDot} aria-hidden="true" />
+                  <span className={styles.navTitle}>Operator Training Library</span>
+                  <span className={styles.navStateRow}>
+                    <span className={styles.navState}>Locked until Step 10</span>
+                  </span>
+                </span>
+              </>
             )}
           </nav>
 
