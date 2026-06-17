@@ -779,7 +779,8 @@
 
 .journeyHero {
   display: grid;
-  gap: 0.9rem;
+  gap: 0.62rem;
+  padding: 0.9rem 1rem;
 }
 
 .journeyStartGrid,
@@ -796,6 +797,28 @@
 
 .journeyStatsGrid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.journeyStatusStrip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.journeyStatusStrip .kpiCard {
+  min-height: 5rem;
+  padding: 0.78rem 0.86rem;
+  border-radius: 0.78rem;
+  box-shadow: var(--inset-highlight);
+}
+
+.journeyStatusStrip .kpiLabel {
+  font-size: 0.68rem;
+}
+
+.journeyStatusStrip .kpiValue {
+  margin-top: 0.32rem;
+  font-size: clamp(1.06rem, 1.45vw, 1.36rem);
 }
 
 .journeyChecklist,
@@ -920,26 +943,26 @@
 
 .journeyTimelinePanel {
   display: grid;
-  gap: 0.85rem;
+  gap: 0.68rem;
 }
 
 .journeyTimelineGrid {
   display: grid;
   grid-template-columns: repeat(10, minmax(0, 1fr));
-  gap: 0.48rem;
+  gap: 0.38rem;
 }
 
 .journeyTimelineItem {
   min-width: 0;
-  min-height: 4.2rem;
+  min-height: 3.25rem;
   border: 1px solid color-mix(in srgb, var(--surface-border-strong) 72%, transparent);
-  border-radius: 0.78rem;
-  background: color-mix(in srgb, var(--surface-strong) 88%, transparent);
+  border-radius: 0.64rem;
+  background: color-mix(in srgb, var(--surface-strong) 72%, transparent);
   color: var(--ink-muted);
   display: grid;
   place-items: center;
-  gap: 0.16rem;
-  padding: 0.45rem 0.3rem;
+  gap: 0.08rem;
+  padding: 0.36rem 0.28rem;
   cursor: pointer;
   transition: transform 170ms ease, border-color 170ms ease, background-color 170ms ease;
 }
@@ -961,13 +984,13 @@
 }
 
 .journeyTimelineItem span {
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   font-weight: 800;
 }
 
 .journeyTimelineItem strong {
   color: var(--ink-strong);
-  font-size: 0.74rem;
+  font-size: 0.68rem;
   font-weight: 900;
 }
 
@@ -995,19 +1018,24 @@
   border-color: color-mix(in srgb, var(--surface-border) 76%, transparent);
   background: color-mix(in srgb, var(--surface) 72%, transparent);
   color: color-mix(in srgb, var(--ink-muted) 72%, transparent);
-  cursor: not-allowed;
+  cursor: pointer;
 }
 
 .journeyTimelineItemLocked:hover,
 .journeyTimelineItemLocked:focus-visible {
-  transform: none;
+  transform: translateY(-1px);
   border-color: color-mix(in srgb, var(--accent-secondary) 40%, var(--surface-border));
-  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  background: color-mix(in srgb, var(--accent-soft) 26%, var(--surface));
 }
 
 .journeyTimelineItemLocked strong,
 .journeyTimelineItemLocked span {
   color: color-mix(in srgb, var(--ink-muted) 78%, transparent);
+}
+
+.journeyTimelineItemLocked.journeyTimelineItemSelected {
+  border-color: color-mix(in srgb, var(--accent-secondary) 58%, var(--surface-border));
+  background: color-mix(in srgb, var(--accent-soft) 38%, var(--surface));
 }
 
 .journeyCalendarNotice {
@@ -1052,35 +1080,37 @@
 .journeyMetricsGrid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 0.7rem;
+  gap: 0.52rem;
 }
 
 .journeyMetricCard {
   border: 1px solid var(--surface-border);
-  border-radius: 0.82rem;
-  background: var(--surface-strong);
+  border-radius: 0.68rem;
+  background: color-mix(in srgb, var(--surface-strong) 76%, transparent);
   box-shadow: var(--inset-highlight);
-  padding: 0.72rem;
-  display: grid;
-  gap: 0.28rem;
+  padding: 0.52rem 0.62rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
 }
 
 .journeyMetricCard span {
   color: var(--ink-muted);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 800;
 }
 
 .journeyMetricCard strong {
   color: var(--ink-strong);
-  font-size: 1.05rem;
+  font-size: 0.96rem;
   font-weight: 950;
 }
 
 .journeyWorkspace {
   display: grid;
-  grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
-  gap: 0.9rem;
+  grid-template-columns: minmax(20rem, 0.88fr) minmax(26rem, 1.12fr);
+  gap: 0.8rem;
   align-items: start;
 }
 
@@ -1097,7 +1127,39 @@
 .journeyFormPanel {
   padding: 1rem;
   display: grid;
-  gap: 0.9rem;
+  gap: 0.72rem;
+}
+
+.journeyFormPanel {
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--surface-border));
+  box-shadow: 0 18px 42px color-mix(in srgb, var(--bg-a) 10%, transparent), var(--inset-highlight);
+}
+
+.journeyFormPanelPreview {
+  border-color: color-mix(in srgb, var(--surface-border-strong) 72%, var(--accent-soft));
+  background: color-mix(in srgb, var(--surface-strong) 88%, var(--surface));
+}
+
+.journeyOverviewHeader,
+.journeyFormHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.72rem;
+}
+
+.journeyOverviewHeader .homeHeroEyebrow {
+  margin-top: 0.56rem;
+}
+
+.journeyDayContent .homeHeroTitle {
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+  line-height: 1.14;
+}
+
+.journeyDayContent .calloutText {
+  font-size: 0.94rem;
+  line-height: 1.5;
 }
 
 .journeyInfoGrid,
@@ -1105,29 +1167,30 @@
 .journeyFormGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.72rem;
+  gap: 0.58rem;
 }
 
 .journeyInfoGrid article,
-.journeyListGrid article {
+.journeyListGrid article,
+.journeyInfoBlock {
   border: 1px solid color-mix(in srgb, var(--surface-border) 78%, transparent);
-  border-radius: 0.82rem;
-  padding: 0.82rem;
+  border-radius: 0.7rem;
+  padding: 0.72rem;
   background: color-mix(in srgb, var(--surface) 72%, transparent);
 }
 
 .journeyInfoGrid h3,
 .journeyListGrid h3 {
-  margin: 0 0 0.45rem;
+  margin: 0 0 0.36rem;
   color: var(--ink-strong);
-  font-size: 0.86rem;
+  font-size: 0.82rem;
 }
 
 .journeyInfoGrid p,
 .journeyListGrid li {
   color: var(--ink);
-  font-size: 0.86rem;
-  line-height: 1.5;
+  font-size: 0.82rem;
+  line-height: 1.45;
 }
 
 .journeyListGrid ul,
@@ -1136,10 +1199,32 @@
   padding-left: 1.1rem;
 }
 
+.journeySecondaryLink {
+  width: max-content;
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.journeySecondaryLink:hover {
+  text-decoration: underline;
+}
+
+.journeySecondaryLinkDisabled {
+  color: var(--ink-muted);
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.journeySecondaryLinkDisabled:hover {
+  text-decoration: none;
+}
+
 .journeyField {
   min-width: 0;
   display: grid;
-  gap: 0.36rem;
+  gap: 0.3rem;
 }
 
 .journeyFieldWide {
@@ -1148,8 +1233,8 @@
 
 .journeyField span {
   color: var(--ink-muted);
-  font-size: 0.72rem;
-  font-weight: 850;
+  font-size: 0.7rem;
+  font-weight: 800;
 }
 
 .journeyField input,
@@ -1162,12 +1247,28 @@
   color: var(--control-text);
   font: inherit;
   font-size: 0.86rem;
-  padding: 0.62rem 0.72rem;
+  padding: 0.56rem 0.68rem;
+  min-height: 2.55rem;
+}
+
+.journeyField input:disabled,
+.journeyField select:disabled,
+.journeyField textarea:disabled,
+.journeyBoolean input:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.journeyField input:disabled,
+.journeyField select:disabled,
+.journeyField textarea:disabled {
+  background: color-mix(in srgb, var(--surface) 72%, var(--control-surface-strong));
+  color: var(--ink-muted);
 }
 
 .journeyField textarea {
   resize: vertical;
-  min-height: 5.3rem;
+  min-height: 4.9rem;
   line-height: 1.45;
 }
 
@@ -1207,27 +1308,32 @@
   accent-color: var(--accent);
 }
 
+.journeyBoolean[aria-disabled='true'] {
+  color: var(--ink-muted);
+  cursor: not-allowed;
+}
+
 .journeyRepeatGroup {
   display: grid;
-  gap: 0.72rem;
+  gap: 0.62rem;
   border-top: 1px solid var(--surface-border);
-  padding-top: 0.9rem;
+  padding-top: 0.72rem;
 }
 
 .journeyRepeatEntry {
-  padding: 0.85rem;
+  padding: 0.72rem;
   display: grid;
   gap: 0.64rem;
 }
 
 .journeyInlineWarning {
   border: 1px solid color-mix(in srgb, var(--error) 42%, var(--surface-border));
-  border-radius: 0.88rem;
+  border-radius: 0.74rem;
   background: color-mix(in srgb, var(--error-bg) 58%, var(--surface-strong));
   color: var(--ink-strong);
-  padding: 0.82rem 0.9rem;
+  padding: 0.72rem 0.82rem;
   display: grid;
-  gap: 0.42rem;
+  gap: 0.36rem;
 }
 
 .journeyInlineWarning strong {
@@ -1248,11 +1354,59 @@
   line-height: 1.45;
 }
 
+.journeyPreviewNotice {
+  border: 1px solid color-mix(in srgb, var(--accent-secondary) 38%, var(--surface-border));
+  border-radius: 0.74rem;
+  background: color-mix(in srgb, var(--accent-soft) 42%, var(--surface-strong));
+  color: var(--ink);
+  padding: 0.72rem 0.82rem;
+  display: grid;
+  gap: 0.24rem;
+}
+
+.journeyPreviewNotice strong,
+.journeyPreviewNotice p {
+  margin: 0;
+}
+
+.journeyPreviewNotice strong {
+  color: var(--ink-strong);
+  font-size: 0.88rem;
+}
+
+.journeyPreviewNotice p {
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
 .journeySubmitHint {
   margin: 0;
   color: var(--ink-muted);
   font-size: 0.82rem;
   font-weight: 800;
+}
+
+.journeySubmitFooter {
+  border-top: 1px solid var(--surface-border);
+  padding-top: 0.78rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.journeySubmitActions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.journeySubmitActions .primaryButton {
+  min-height: 2.8rem;
 }
 
 .leaderboardPanel,
@@ -1783,12 +1937,16 @@
   .kpiGrid,
   .journeyStartGrid,
   .journeyStatsGrid,
-  .journeyMetricsGrid,
   .journeyWorkspace,
   .homeSummaryGrid,
   .formGrid,
   .profileGrid {
     grid-template-columns: 1fr;
+  }
+
+  .journeyStatusStrip,
+  .journeyMetricsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .journeyMilestoneGrid,
@@ -1894,6 +2052,39 @@
 
   .journeyTimelineItem {
     min-height: 3.8rem;
+  }
+
+  .journeyStatusStrip,
+  .journeyMetricsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .journeyHero,
+  .journeyDayContent,
+  .journeyFormPanel,
+  .journeyTimelinePanel {
+    padding: 0.86rem;
+  }
+
+  .journeyOverviewHeader,
+  .journeyFormHeader,
+  .journeySubmitFooter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .journeySubmitActions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .journeySubmitActions .primaryButton,
+  .journeySubmitActions .secondaryButton {
+    width: 100%;
+  }
+
+  .journeyMetricCard {
+    min-height: 2.9rem;
   }
 
   .summaryStatCard {

@@ -338,18 +338,21 @@
 }
 
 .controls {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.92rem;
+  display: grid;
+  grid-template-columns: minmax(16rem, 24rem) minmax(0, 1fr);
+  grid-template-areas:
+    "search pager"
+    "filters filters";
+  align-items: end;
+  gap: 0.8rem 0.92rem;
   margin-bottom: 0.85rem;
 }
 
 .filterGrid {
-  flex: 1;
-  min-width: min(38rem, 100%);
+  grid-area: filters;
+  min-width: 0;
   display: grid;
-  grid-template-columns: repeat(6, minmax(8.2rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
   gap: 0.58rem;
   align-items: end;
 }
@@ -387,8 +390,9 @@
 }
 
 .searchWrap {
+  grid-area: search;
   position: relative;
-  width: min(26rem, 100%);
+  width: 100%;
   display: block;
 }
 
@@ -428,9 +432,12 @@
 }
 
 .pager {
+  grid-area: pager;
+  justify-self: end;
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
+  white-space: nowrap;
 }
 
 .pageMeta {
@@ -852,7 +859,11 @@
   }
 
   .controls {
-    flex-direction: column;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "search"
+      "filters"
+      "pager";
     align-items: stretch;
   }
 
@@ -860,8 +871,8 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .search {
-    width: 100%;
+  .pager {
+    justify-self: start;
   }
 }
 
@@ -954,6 +965,7 @@
   .pager {
     width: 100%;
     justify-content: space-between;
+    justify-self: stretch;
   }
 
   .pageMeta {

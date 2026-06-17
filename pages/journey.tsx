@@ -134,20 +134,22 @@ function FieldInput({
   onChange,
   invalid,
   inputKey,
+  disabled = false,
 }: {
   field: JourneyFormField;
   value: unknown;
   onChange: (value: unknown) => void;
   invalid?: boolean;
   inputKey: string;
+  disabled?: boolean;
 }) {
   if (field.type === 'textarea') {
-    return <textarea data-field-key={inputKey} className={invalid ? styles.journeyInputInvalid : ''} value={String(value || '')} onChange={(event) => onChange(event.target.value)} placeholder={field.placeholder} rows={4} />;
+    return <textarea data-field-key={inputKey} className={invalid ? styles.journeyInputInvalid : ''} value={String(value || '')} onChange={(event) => onChange(event.target.value)} placeholder={field.placeholder} rows={4} disabled={disabled} />;
   }
 
   if (field.type === 'select') {
     return (
-      <select data-field-key={inputKey} className={invalid ? styles.journeyInputInvalid : ''} value={String(value || '')} onChange={(event) => onChange(event.target.value)}>
+      <select data-field-key={inputKey} className={invalid ? styles.journeyInputInvalid : ''} value={String(value || '')} onChange={(event) => onChange(event.target.value)} disabled={disabled}>
         <option value="">Select</option>
         {(field.options || []).map((option) => (
           <option key={option} value={option}>{option}</option>
@@ -158,8 +160,8 @@ function FieldInput({
 
   if (field.type === 'checkbox') {
     return (
-      <label className={`${styles.journeyBoolean} ${invalid ? styles.journeyInputInvalid : ''}`}>
-        <input data-field-key={inputKey} type="checkbox" checked={value === true} onChange={(event) => onChange(event.target.checked)} />
+      <label className={`${styles.journeyBoolean} ${invalid ? styles.journeyInputInvalid : ''}`} aria-disabled={disabled}>
+        <input data-field-key={inputKey} type="checkbox" checked={value === true} onChange={(event) => onChange(event.target.checked)} disabled={disabled} />
         <span>Confirmed</span>
       </label>
     );
@@ -175,6 +177,7 @@ function FieldInput({
       value={String(value || '')}
       onChange={(event) => onChange(field.type === 'number' ? event.target.value : event.target.value)}
       placeholder={field.placeholder}
+      disabled={disabled}
     />
   );
 }
@@ -302,7 +305,7 @@ function JourneyContent() {
       }
 
       setState({ status: 'ready', progress: payload.progress, courseProgress: payload.courseProgress, journey: payload.journey });
-      setSelectedDay((current) => (current && isDayAccessible(payload.journey!, current) ? current : getNextActionableDay(payload.journey!)));
+      setSelectedDay((current) => (current && payload.journey!.dayTemplates.some((template) => template.day === current) ? current : getNextActionableDay(payload.journey!)));
       setMessage('');
     } catch (error) {
       if (isUnauthorizedError(error)) {
@@ -354,7 +357,7 @@ function JourneyContent() {
 
   const selectedTemplate = useMemo(() => {
     if (state.status !== 'ready') return null;
-    const activeSelectedDay = selectedDay && isDayAccessible(state.journey, selectedDay) ? selectedDay : getNextActionableDay(state.journey);
+    const activeSelectedDay = selectedDay || getNextActionableDay(state.journey);
     return state.journey.dayTemplates.find((template) => template.day === activeSelectedDay) || state.journey.dayTemplates[0] || null;
   }, [state, selectedDay]);
 
@@ -395,6 +398,12 @@ function JourneyContent() {
 
   const submitDay = async () => {
     if (!selectedTemplate) return;
+    if (state.status !== 'ready') return;
+    if (!isDayAccessible(state.journey, selectedTemplate.day)) {
+      setFormErrors([]);
+      setLocalNotice(lockedReason(state.journey, selectedTemplate.day));
+      return;
+    }
     const localErrors = validateAnswers(selectedTemplate, answers);
     if (localErrors.length) {
       setFormErrors(localErrors);
@@ -434,6 +443,12 @@ function JourneyContent() {
 
   const reopenDay = async () => {
     if (!selectedTemplate) return;
+    if (state.status !== 'ready') return;
+    if (!isDayAccessible(state.journey, selectedTemplate.day)) {
+      setFormErrors([]);
+      setLocalNotice(lockedReason(state.journey, selectedTemplate.day));
+      return;
+    }
     setSavingId(`reopen-${selectedTemplate.day}`);
     setMessage('');
     setFormErrors([]);
@@ -476,14 +491,13 @@ function JourneyContent() {
   const dayPercent = Math.round((Math.min(visibleDay, JOURNEY_TOTAL_DAYS) / JOURNEY_TOTAL_DAYS) * 100);
   const dueCount = journey.dayStatuses.filter((item) => ['catch_up', 'needs_correction', 'pending'].includes(item.status) && item.day <= visibleDay).length;
   const formErrorKeys = new Set(formErrors.map((error) => error.key));
+  const selectedIsLockedPreview = Boolean(selectedTemplate && !isDayAccessible(journey, selectedTemplate.day));
+  const lockedPreviewNotice = selectedIsLockedPreview && selectedTemplate ? `Preview only. ${lockedReason(journey, selectedTemplate.day).replace('opening', 'working on')}` : '';
 
   const selectTimelineDay = (day: number) => {
-    if (!isDayAccessible(journey, day)) {
-      setLocalNotice(lockedReason(journey, day));
-      return;
-    }
     setSelectedDay(day);
-    setLocalNotice('');
+    setFormErrors([]);
+    setLocalNotice(isDayAccessible(journey, day) ? '' : lockedReason(journey, day));
   };
 
   const aside = (
@@ -553,7 +567,7 @@ function JourneyContent() {
         </section>
       ) : (
         <>
-          <section className={styles.journeyStatsGrid}>
+          <section className={styles.journeyStatusStrip}>
             <article className={styles.kpiCard}><p className={styles.kpiLabel}>Current operator day</p><p className={styles.kpiValue}>Day {currentDay}</p></article>
             <article className={styles.kpiCard}><p className={styles.kpiLabel}>30-day path</p><p className={styles.kpiValue}>{dayPercent}% elapsed</p></article>
             <article className={styles.kpiCard}><p className={styles.kpiLabel}>Milestones done</p><p className={styles.kpiValue}>{journey.completedMilestoneCount}/{journey.totalMilestoneCount}</p></article>
@@ -582,55 +596,77 @@ function JourneyContent() {
           {selectedTemplate && selectedStatus ? (
             <section className={styles.journeyWorkspace}>
               <div className={styles.journeyDayContent}>
-                <div className={styles.journeyMilestoneHeader}>
-                  <span className={styles.journeyDayBadge}>Day {selectedTemplate.day}</span>
-                  <span className={styles.courseBadge}>{selectedStatus.label}</span>
+                <div className={styles.journeyOverviewHeader}>
+                  <div>
+                    <span className={styles.journeyDayBadge}>Day {selectedTemplate.day}</span>
+                    <p className={styles.homeHeroEyebrow}>{selectedTemplate.phase} · {selectedTemplate.dayType}</p>
+                  </div>
+                  <span className={styles.courseBadge}>{selectedIsLockedPreview ? 'Locked preview' : selectedStatus.label}</span>
                 </div>
-                <p className={styles.homeHeroEyebrow}>{selectedTemplate.phase} · {selectedTemplate.dayType}</p>
                 <h2 className={styles.homeHeroTitle}>{selectedTemplate.title}</h2>
                 <p className={styles.calloutText}>{selectedTemplate.description}</p>
                 <div className={styles.journeyInfoGrid}>
-                  <article>
+                  <article className={styles.journeyInfoBlock}>
                     <h3>Purpose</h3>
                     <p>{selectedTemplate.purpose}</p>
                   </article>
-                  <article>
+                  <article className={styles.journeyInfoBlock}>
                     <h3>Required output</h3>
                     <p>{selectedTemplate.requiredOutput}</p>
                   </article>
                 </div>
                 <div className={styles.journeyListGrid}>
-                  <article>
+                  <article className={styles.journeyInfoBlock}>
                     <h3>What to learn</h3>
                     <ul>{selectedTemplate.learn.map((item) => <li key={item}>{item}</li>)}</ul>
                   </article>
-                  <article>
+                  <article className={styles.journeyInfoBlock}>
                     <h3>Tasks</h3>
                     <ol>{selectedTemplate.tasks.map((item) => <li key={item}>{item}</li>)}</ol>
                   </article>
                 </div>
-                {selectedTemplate.href ? <Link href={selectedTemplate.href} className={styles.inlineLink}>{selectedTemplate.actionLabel || 'Open related page'}</Link> : null}
+                {selectedTemplate.href ? (
+                  selectedIsLockedPreview ? (
+                    <span className={`${styles.journeySecondaryLink} ${styles.journeySecondaryLinkDisabled}`}>{selectedTemplate.actionLabel || 'Open related page'}</span>
+                  ) : (
+                    <Link href={selectedTemplate.href} className={styles.journeySecondaryLink}>{selectedTemplate.actionLabel || 'Open related page'}</Link>
+                  )
+                ) : null}
               </div>
 
-              <div className={styles.journeyFormPanel}>
-                <div className={styles.sectionHeader}>
+              <div className={`${styles.journeyFormPanel} ${selectedIsLockedPreview ? styles.journeyFormPanelPreview : ''}`}>
+                <div className={styles.journeyFormHeader}>
                   <div>
-                    <h2 className={styles.courseCardTitle}>Day submission</h2>
-                    <p className={styles.sectionHint}>{selectedTemplate.reviewRequired ? 'This day requires admin review after submission.' : 'This day completes automatically when validation passes.'}</p>
+                    <h2 className={styles.courseCardTitle}>{selectedIsLockedPreview ? 'Day submission preview' : 'Day submission'}</h2>
+                    <p className={styles.sectionHint}>
+                      {selectedIsLockedPreview
+                        ? 'You can review the form requirements now. Editing unlocks after earlier days are completed.'
+                        : selectedTemplate.reviewRequired
+                          ? 'This day requires admin review after submission.'
+                          : 'This day completes automatically when validation passes.'}
+                    </p>
                   </div>
                   <span className={styles.pointsBadge}>{categoryLabel(selectedTemplate.category)}</span>
                 </div>
 
+                {selectedIsLockedPreview ? (
+                  <div className={styles.journeyPreviewNotice} role="note">
+                    <strong>{lockedPreviewNotice}</strong>
+                    <p>This form unlocks after earlier required days are completed.</p>
+                  </div>
+                ) : null}
+
                 <div className={styles.journeyFormGrid}>
                   {selectedTemplate.formFields.map((field) => (
-                    <label key={field.id} className={`${styles.journeyField} ${field.type === 'textarea' ? styles.journeyFieldWide : ''} ${formErrorKeys.has(fieldKey(field.id)) ? styles.journeyFieldInvalid : ''}`}>
+                    <label key={field.id} className={`${styles.journeyField} ${field.type === 'textarea' ? styles.journeyFieldWide : ''} ${!selectedIsLockedPreview && formErrorKeys.has(fieldKey(field.id)) ? styles.journeyFieldInvalid : ''}`}>
                       <span>{field.label}{field.required ? ' *' : ''}</span>
                       <FieldInput
                         field={field}
                         value={answers[field.id]}
                         onChange={(value) => setField(field.id, value)}
-                        invalid={formErrorKeys.has(fieldKey(field.id))}
+                        invalid={!selectedIsLockedPreview && formErrorKeys.has(fieldKey(field.id))}
                         inputKey={fieldKey(field.id)}
+                        disabled={selectedIsLockedPreview}
                       />
                     </label>
                   ))}
@@ -639,27 +675,28 @@ function JourneyContent() {
                 {selectedTemplate.repeatGroups.map((group) => {
                   const entries = Array.isArray(answers[group.id]) ? answers[group.id] as Record<string, unknown>[] : [];
                   return (
-                    <section key={group.id} className={`${styles.journeyRepeatGroup} ${formErrorKeys.has(`group:${group.id}`) ? styles.journeyFieldInvalid : ''}`}>
+                    <section key={group.id} className={`${styles.journeyRepeatGroup} ${!selectedIsLockedPreview && formErrorKeys.has(`group:${group.id}`) ? styles.journeyFieldInvalid : ''}`}>
                       <div className={styles.sectionHeader}>
                         <div>
                           <h3 className={styles.journeyMilestoneTitle}>{group.label}</h3>
                           <p className={styles.sectionHint}>Minimum {group.minEntries} entries required.</p>
                         </div>
-                        <button type="button" className={styles.secondaryButton} onClick={() => addGroupEntry(group)}>Add entry</button>
+                        <button type="button" className={styles.secondaryButton} disabled={selectedIsLockedPreview} onClick={() => addGroupEntry(group)}>Add entry</button>
                       </div>
                       {entries.map((entry, index) => (
                         <article key={`${group.id}-${index}`} className={styles.journeyRepeatEntry}>
                           <p className={styles.kpiLabel}>Entry {index + 1}</p>
                           <div className={styles.journeyFormGrid}>
                             {group.fields.map((field) => (
-                              <label key={field.id} className={`${styles.journeyField} ${field.type === 'textarea' ? styles.journeyFieldWide : ''} ${formErrorKeys.has(groupFieldKey(group.id, index, field.id)) ? styles.journeyFieldInvalid : ''}`}>
+                              <label key={field.id} className={`${styles.journeyField} ${field.type === 'textarea' ? styles.journeyFieldWide : ''} ${!selectedIsLockedPreview && formErrorKeys.has(groupFieldKey(group.id, index, field.id)) ? styles.journeyFieldInvalid : ''}`}>
                                 <span>{field.label}{field.required ? ' *' : ''}</span>
                                 <FieldInput
                                   field={field}
                                   value={entry[field.id]}
                                   onChange={(value) => setGroupField(group, index, field.id, value)}
-                                  invalid={formErrorKeys.has(groupFieldKey(group.id, index, field.id))}
+                                  invalid={!selectedIsLockedPreview && formErrorKeys.has(groupFieldKey(group.id, index, field.id))}
                                   inputKey={groupFieldKey(group.id, index, field.id)}
+                                  disabled={selectedIsLockedPreview}
                                 />
                               </label>
                             ))}
@@ -672,7 +709,7 @@ function JourneyContent() {
 
                 {selectedStatus.submission?.review_note ? <p className={`${styles.message} ${styles.messageError}`}>{selectedStatus.submission.review_note}</p> : null}
 
-                {formErrors.length ? (
+                {!selectedIsLockedPreview && formErrors.length ? (
                   <div className={styles.journeyInlineWarning} role="alert">
                     <strong>{localNotice || `Complete ${formErrors.length} required ${formErrors.length === 1 ? 'field' : 'fields'} before submitting.`}</strong>
                     <ul>
@@ -682,24 +719,32 @@ function JourneyContent() {
                   </div>
                 ) : null}
 
-                <p className={styles.journeySubmitHint}>
-                  {selectedStatus.status === 'under_review'
-                    ? 'This day is submitted and waiting for admin review.'
-                    : selectedStatus.status === 'completed'
-                      ? 'This day is completed. Reopen only if you need to correct it.'
-                      : 'Fill all required fields to confirm this day.'}
-                </p>
+                {selectedIsLockedPreview ? (
+                  <div className={styles.journeySubmitFooter}>
+                    <p className={styles.journeySubmitHint}>This form unlocks after earlier required days are completed.</p>
+                  </div>
+                ) : (
+                  <div className={styles.journeySubmitFooter}>
+                    <p className={styles.journeySubmitHint}>
+                      {selectedStatus.status === 'under_review'
+                        ? 'This day is submitted and waiting for admin review.'
+                        : selectedStatus.status === 'completed'
+                          ? 'This day is completed. Reopen only if you need to correct it.'
+                          : 'Fill all required fields to confirm this day.'}
+                    </p>
 
-                <div className={styles.cardActions}>
-                  <button type="button" className={styles.primaryButton} disabled={savingId === `submit-${selectedTemplate.day}`} onClick={submitDay}>
-                    {savingId === `submit-${selectedTemplate.day}` ? 'Submitting...' : selectedTemplate.buttonText}
-                  </button>
-                  {selectedStatus.submission ? (
-                    <button type="button" className={styles.secondaryButton} disabled={savingId === `reopen-${selectedTemplate.day}`} onClick={reopenDay}>
-                      {savingId === `reopen-${selectedTemplate.day}` ? 'Reopening...' : 'Reopen'}
-                    </button>
-                  ) : null}
-                </div>
+                    <div className={styles.journeySubmitActions}>
+                      <button type="button" className={styles.primaryButton} disabled={savingId === `submit-${selectedTemplate.day}`} onClick={submitDay}>
+                        {savingId === `submit-${selectedTemplate.day}` ? 'Submitting...' : selectedTemplate.buttonText}
+                      </button>
+                      {selectedStatus.submission ? (
+                        <button type="button" className={styles.secondaryButton} disabled={savingId === `reopen-${selectedTemplate.day}`} onClick={reopenDay}>
+                          {savingId === `reopen-${selectedTemplate.day}` ? 'Reopening...' : 'Reopen'}
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                )}
               </div>
             </section>
           ) : null}
@@ -725,8 +770,8 @@ function JourneyContent() {
                     key={item.templateId}
                     type="button"
                     className={className}
-                    aria-disabled={locked}
-                    title={locked ? lockedReason(journey, item.day) : item.label}
+                    aria-disabled={false}
+                    title={locked ? `${lockedReason(journey, item.day)} You can preview this day now.` : item.label}
                     onClick={() => selectTimelineDay(item.day)}
                   >
                     <span>Day {item.day}</span>
