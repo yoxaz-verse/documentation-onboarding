@@ -246,6 +246,88 @@
   box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
+.analyticsGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.72rem;
+  margin-top: 0.25rem;
+}
+
+.analyticsCard {
+  min-width: 0;
+  border: 1px solid color-mix(in srgb, var(--surface-border) 78%, transparent);
+  border-radius: 0.86rem;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  color: var(--ink);
+  padding: 0.78rem 0.82rem;
+  display: grid;
+  gap: 0.26rem;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 170ms ease, background-color 170ms ease, transform 170ms ease;
+}
+
+.analyticsCard:hover,
+.analyticsCard:focus-visible,
+.analyticsCardActive {
+  outline: none;
+  transform: translateY(-1px);
+  border-color: var(--control-border-hover);
+  background: color-mix(in srgb, var(--accent-soft) 42%, var(--surface));
+}
+
+.analyticsCard span {
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.analyticsCard strong {
+  color: var(--ink-strong);
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.dayDistribution {
+  display: grid;
+  grid-template-columns: repeat(15, minmax(0, 1fr));
+  gap: 0.42rem;
+  margin-top: 0.9rem;
+}
+
+.dayPill {
+  min-width: 0;
+  min-height: 3rem;
+  border: 1px solid color-mix(in srgb, var(--surface-border) 78%, transparent);
+  border-radius: 0.68rem;
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  gap: 0.1rem;
+  cursor: pointer;
+}
+
+.dayPill:hover,
+.dayPill:focus-visible,
+.dayPillActive {
+  outline: none;
+  border-color: var(--control-border-hover);
+  background: color-mix(in srgb, var(--accent-soft) 42%, var(--surface));
+}
+
+.dayPill span {
+  color: var(--ink-muted);
+  font-size: 0.66rem;
+  font-weight: 850;
+}
+
+.dayPill strong {
+  color: var(--ink-strong);
+  font-size: 0.84rem;
+}
+
 .tableSection {
   border: 1px solid var(--surface-border);
   border-radius: 1rem;
@@ -261,6 +343,47 @@
   justify-content: space-between;
   gap: 0.92rem;
   margin-bottom: 0.85rem;
+}
+
+.filterGrid {
+  flex: 1;
+  min-width: min(38rem, 100%);
+  display: grid;
+  grid-template-columns: repeat(6, minmax(8.2rem, 1fr));
+  gap: 0.58rem;
+  align-items: end;
+}
+
+.filterControl {
+  min-width: 0;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.filterControl span {
+  color: var(--ink-muted);
+  font-size: 0.66rem;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.filterControl select {
+  width: 100%;
+  border: 1px solid var(--control-border);
+  border-radius: 0.72rem;
+  min-height: 2.45rem;
+  padding: 0.5rem 0.62rem;
+  background: var(--control-surface-strong);
+  color: var(--control-text);
+  font: inherit;
+  font-size: 0.82rem;
+}
+
+.filterControl select:focus-visible {
+  outline: none;
+  border-color: var(--control-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--control-focus) 22%, transparent);
 }
 
 .searchWrap {
@@ -696,6 +819,14 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .analyticsGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .dayDistribution {
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+  }
+
   .detailHero {
     grid-template-columns: 1fr;
   }
@@ -725,6 +856,10 @@
     align-items: stretch;
   }
 
+  .filterGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .search {
     width: 100%;
   }
@@ -741,6 +876,15 @@
   }
 
   .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .analyticsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dayDistribution,
+  .filterGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -787,6 +931,15 @@
 @media (max-width: 520px) {
   .grid {
     grid-template-columns: 1fr;
+  }
+
+  .analyticsGrid,
+  .filterGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .dayDistribution {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .actions {

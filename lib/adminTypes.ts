@@ -4,12 +4,45 @@ export type AdminMilestoneStat = {
   count: number;
 };
 
+export type AdminJourneyTrackStatus =
+  | 'not_started'
+  | 'ahead'
+  | 'on_track'
+  | 'behind'
+  | 'short_inactive'
+  | 'serious_inactive'
+  | 'under_review'
+  | 'needs_correction'
+  | 'completed';
+
+export type AdminOnboardingStepStatus = 'completed' | 'current' | 'not_completed';
+
+export type AdminJourneyDayStat = {
+  day: number;
+  count: number;
+};
+
+export type AdminJourneyAnalytics = {
+  totalStarted: number;
+  notStarted: number;
+  ahead: number;
+  onTrack: number;
+  behind: number;
+  shortInactive: number;
+  seriousInactive: number;
+  underReview: number;
+  needsCorrection: number;
+  completed: number;
+  perDay: AdminJourneyDayStat[];
+};
+
 export type AdminOverview = {
   totalOperators: number;
   completedOperators: number;
   inProgressOperators: number;
   completionRate: number;
   stepCompletion: AdminMilestoneStat[];
+  journey: AdminJourneyAnalytics;
 };
 
 export type AdminOperatorRow = {
@@ -20,8 +53,15 @@ export type AdminOperatorRow = {
   completedMilestones: number;
   journeyStartedAt: string | null;
   journeyCurrentDay: number | null;
+  journeyTrackStatus: AdminJourneyTrackStatus;
+  journeyActionDay: number | null;
+  journeyExpectedDay: number | null;
+  journeyLastSubmissionAt: string | null;
+  journeyPendingReviewCount: number;
+  journeyNeedsCorrectionCount: number;
   journeyCompletedMilestones: number;
   journeyTotalMilestones: number;
+  onboardingStepStatus: AdminOnboardingStepStatus;
   submissionStatus: string;
   hasCompletionCode: boolean;
   latestActivityAt: string | null;
