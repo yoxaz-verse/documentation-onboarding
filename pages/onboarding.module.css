@@ -779,8 +779,8 @@
 
 .journeyHero {
   display: grid;
-  gap: 0.62rem;
-  padding: 0.9rem 1rem;
+  gap: 0.7rem;
+  padding: 0.95rem 1rem;
 }
 
 .journeyStartGrid,
@@ -806,9 +806,10 @@
 }
 
 .journeyStatusStrip .kpiCard {
-  min-height: 5rem;
-  padding: 0.78rem 0.86rem;
-  border-radius: 0.78rem;
+  min-height: 4.75rem;
+  padding: 0.74rem 0.82rem;
+  border-radius: 0.68rem;
+  background: color-mix(in srgb, var(--surface-strong) 76%, transparent);
   box-shadow: var(--inset-highlight);
 }
 
@@ -827,7 +828,7 @@
 .journeyTimelinePanel,
 .journeyMilestoneCard {
   border: 1px solid var(--surface-border);
-  border-radius: 0.95rem;
+  border-radius: 0.78rem;
   background: var(--surface-strong);
   box-shadow: var(--inset-highlight);
 }
@@ -1077,17 +1078,75 @@
   text-align: right;
 }
 
+.journeyProgressDetails {
+  border: 1px solid var(--surface-border);
+  border-radius: 0.72rem;
+  background: color-mix(in srgb, var(--surface-strong) 82%, transparent);
+  box-shadow: var(--inset-highlight);
+  overflow: hidden;
+}
+
+.journeyProgressDetails summary {
+  min-height: 3.1rem;
+  padding: 0.72rem 0.86rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  cursor: pointer;
+  color: var(--ink-strong);
+  font-weight: 850;
+}
+
+.journeyProgressDetails summary::-webkit-details-marker {
+  display: none;
+}
+
+.journeyProgressDetails summary::after {
+  content: '+';
+  flex: 0 0 auto;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--surface-border);
+  color: var(--ink-muted);
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.journeyProgressDetails[open] summary::after {
+  content: '-';
+}
+
+.journeyProgressDetails summary span,
+.journeyProgressDetails summary strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.journeyProgressDetails summary strong {
+  margin-left: auto;
+  color: var(--ink-muted);
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
 .journeyMetricsGrid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0.52rem;
+  padding: 0 0.82rem 0.82rem;
 }
 
 .journeyMetricCard {
   border: 1px solid var(--surface-border);
-  border-radius: 0.68rem;
-  background: color-mix(in srgb, var(--surface-strong) 76%, transparent);
-  box-shadow: var(--inset-highlight);
+  border-radius: 0.58rem;
+  background: color-mix(in srgb, var(--surface) 68%, transparent);
+  box-shadow: none;
   padding: 0.52rem 0.62rem;
   display: flex;
   align-items: center;
@@ -1109,7 +1168,7 @@
 
 .journeyWorkspace {
   display: grid;
-  grid-template-columns: minmax(20rem, 0.88fr) minmax(26rem, 1.12fr);
+  grid-template-columns: minmax(20rem, 0.92fr) minmax(26rem, 1.08fr);
   gap: 0.8rem;
   align-items: start;
 }
@@ -1118,7 +1177,7 @@
 .journeyFormPanel,
 .journeyRepeatEntry {
   border: 1px solid var(--surface-border);
-  border-radius: 0.95rem;
+  border-radius: 0.78rem;
   background: var(--surface-strong);
   box-shadow: var(--inset-highlight);
 }
@@ -1127,12 +1186,12 @@
 .journeyFormPanel {
   padding: 1rem;
   display: grid;
-  gap: 0.72rem;
+  gap: 0.82rem;
 }
 
 .journeyFormPanel {
   border-color: color-mix(in srgb, var(--accent) 28%, var(--surface-border));
-  box-shadow: 0 18px 42px color-mix(in srgb, var(--bg-a) 10%, transparent), var(--inset-highlight);
+  box-shadow: var(--inset-highlight);
 }
 
 .journeyFormPanelPreview {
@@ -1158,8 +1217,17 @@
 }
 
 .journeyDayContent .calloutText {
-  font-size: 0.94rem;
-  line-height: 1.5;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.journeySectionLabel {
+  margin: 0.12rem 0 -0.22rem;
+  color: var(--ink-soft);
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .journeyInfoGrid,
@@ -1174,9 +1242,9 @@
 .journeyListGrid article,
 .journeyInfoBlock {
   border: 1px solid color-mix(in srgb, var(--surface-border) 78%, transparent);
-  border-radius: 0.7rem;
-  padding: 0.72rem;
-  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  border-radius: 0.62rem;
+  padding: 0.78rem;
+  background: color-mix(in srgb, var(--surface) 58%, transparent);
 }
 
 .journeyInfoGrid h3,
@@ -1189,8 +1257,8 @@
 .journeyInfoGrid p,
 .journeyListGrid li {
   color: var(--ink);
-  font-size: 0.82rem;
-  line-height: 1.45;
+  font-size: 0.84rem;
+  line-height: 1.55;
 }
 
 .journeyListGrid ul,
@@ -1224,7 +1292,7 @@
 .journeyField {
   min-width: 0;
   display: grid;
-  gap: 0.3rem;
+  gap: 0.36rem;
 }
 
 .journeyFieldWide {
@@ -1233,7 +1301,7 @@
 
 .journeyField span {
   color: var(--ink-muted);
-  font-size: 0.7rem;
+  font-size: 0.74rem;
   font-weight: 800;
 }
 
@@ -1242,13 +1310,13 @@
 .journeyField textarea {
   width: 100%;
   border: 1px solid var(--control-border);
-  border-radius: 0.72rem;
+  border-radius: 0.62rem;
   background: var(--control-surface-strong);
   color: var(--control-text);
   font: inherit;
-  font-size: 0.86rem;
-  padding: 0.56rem 0.68rem;
-  min-height: 2.55rem;
+  font-size: 0.9rem;
+  padding: 0.62rem 0.72rem;
+  min-height: 2.75rem;
 }
 
 .journeyField input:disabled,
@@ -1268,8 +1336,8 @@
 
 .journeyField textarea {
   resize: vertical;
-  min-height: 4.9rem;
-  line-height: 1.45;
+  min-height: 6.6rem;
+  line-height: 1.5;
 }
 
 .journeyField input:focus-visible,
@@ -1315,15 +1383,15 @@
 
 .journeyRepeatGroup {
   display: grid;
-  gap: 0.62rem;
+  gap: 0.72rem;
   border-top: 1px solid var(--surface-border);
-  padding-top: 0.72rem;
+  padding-top: 0.82rem;
 }
 
 .journeyRepeatEntry {
-  padding: 0.72rem;
+  padding: 0.82rem;
   display: grid;
-  gap: 0.64rem;
+  gap: 0.72rem;
 }
 
 .journeyInlineWarning {
@@ -1389,7 +1457,13 @@
 
 .journeySubmitFooter {
   border-top: 1px solid var(--surface-border);
-  padding-top: 0.78rem;
+  margin: 0 -1rem -1rem;
+  padding: 0.82rem 1rem 1rem;
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background: color-mix(in srgb, var(--surface-strong) 96%, transparent);
+  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1949,6 +2023,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .journeyProgressDetails summary {
+    min-height: 3rem;
+  }
+
   .journeyMilestoneGrid,
   .journeyInfoGrid,
   .journeyListGrid,
@@ -2059,6 +2137,27 @@
     grid-template-columns: 1fr;
   }
 
+  .journeyProgressDetails,
+  .journeyChecklist,
+  .journeyStartPanel,
+  .journeyTimelinePanel,
+  .journeyDayContent,
+  .journeyFormPanel {
+    border-radius: 0.78rem;
+  }
+
+  .journeyProgressDetails summary {
+    align-items: flex-start;
+  }
+
+  .journeyProgressDetails summary strong {
+    display: none;
+  }
+
+  .journeyMetricsGrid {
+    padding: 0 0.7rem 0.7rem;
+  }
+
   .journeyHero,
   .journeyDayContent,
   .journeyFormPanel,
@@ -2071,6 +2170,11 @@
   .journeySubmitFooter {
     flex-direction: column;
     align-items: stretch;
+    position: static;
+    margin: 0;
+    padding: 0.8rem 0 0;
+    background: transparent;
+    backdrop-filter: none;
   }
 
   .journeySubmitActions {

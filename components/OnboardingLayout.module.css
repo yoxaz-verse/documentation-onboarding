@@ -18,7 +18,7 @@
 
 .layout {
   display: grid;
-  grid-template-columns: 18rem minmax(0, 1fr);
+  grid-template-columns: 17rem minmax(0, 1fr);
   gap: 0.95rem;
   align-items: start;
   transition: grid-template-columns 180ms ease;
@@ -42,10 +42,10 @@
   top: 0.8rem;
   max-height: calc(100dvh - 1.6rem);
   overflow: auto;
-  border-radius: 1rem;
-  padding: 0.75rem;
+  border-radius: 0.8rem;
+  padding: 0.68rem;
   display: grid;
-  gap: 0.42rem;
+  gap: 0.34rem;
 }
 
 .sidebarHeader {
@@ -72,7 +72,7 @@
   flex: 0 0 auto;
   width: 2.35rem;
   height: 2.35rem;
-  border-radius: 0.72rem;
+  border-radius: 0.55rem;
   display: inline-grid;
   place-items: center;
   background: color-mix(in srgb, var(--accent) 86%, var(--accent-secondary));
@@ -81,7 +81,7 @@
   font-size: 0.74rem;
   font-weight: 900;
   letter-spacing: 0.03em;
-  box-shadow: 0 10px 18px color-mix(in srgb, var(--accent) 18%, transparent);
+  box-shadow: none;
 }
 
 .brandText {
@@ -110,7 +110,7 @@
   width: 2.25rem;
   height: 2.25rem;
   border: 1px solid var(--control-border);
-  border-radius: 0.68rem;
+  border-radius: 0.55rem;
   background: var(--control-surface);
   color: var(--ink-strong);
   display: inline-grid;
@@ -144,11 +144,11 @@
 .navGroupTitle,
 .navSubgroupTitle,
 .mobileSubsectionTitle {
-  margin: 0.58rem 0.35rem 0.1rem;
+  margin: 0.62rem 0.34rem 0.08rem;
   color: var(--ink-soft);
   font-size: 0.66rem;
   text-transform: uppercase;
-  letter-spacing: 0.13em;
+  letter-spacing: 0.1em;
   font-weight: 800;
 }
 
@@ -160,11 +160,11 @@
 .navItem {
   min-width: 0;
   border: 1px solid transparent;
-  border-radius: 0.75rem;
+  border-radius: 0.6rem;
   color: var(--ink-strong);
-  padding: 0.62rem 0.68rem;
+  padding: 0.54rem 0.62rem;
   text-decoration: none;
-  min-height: 3rem;
+  min-height: 2.72rem;
   display: grid;
   grid-template-columns: 0.55rem minmax(0, 1fr);
   align-items: center;
@@ -177,7 +177,7 @@
 .navItem:hover {
   border-color: color-mix(in srgb, var(--control-border-hover) 58%, transparent);
   background: color-mix(in srgb, var(--accent-softer) 52%, var(--surface));
-  transform: translateY(-1px);
+  transform: none;
 }
 
 .navItem:focus-visible {
@@ -188,8 +188,8 @@
 
 .navDot {
   grid-row: 1 / span 2;
-  width: 0.5rem;
-  height: 0.5rem;
+  width: 0.46rem;
+  height: 0.46rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--ink-soft) 58%, transparent);
 }
@@ -197,7 +197,7 @@
 .navTitle {
   min-width: 0;
   font-weight: 800;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   line-height: 1.2;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -207,7 +207,7 @@
 .navState {
   min-width: 0;
   color: var(--ink-muted);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 650;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -233,6 +233,45 @@
   font-weight: 900;
   letter-spacing: 0.03em;
   padding: 0.12rem 0.42rem;
+}
+
+.navPriorityItem {
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--surface-border));
+  background: color-mix(in srgb, var(--accent-softer) 66%, var(--surface));
+}
+
+.navSummaryLine {
+  border: 1px solid color-mix(in srgb, var(--surface-border) 80%, transparent);
+  border-radius: 0.58rem;
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  padding: 0.52rem 0.62rem;
+  display: grid;
+  gap: 0.18rem;
+}
+
+.navSummaryLine span,
+.navSummaryLine strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navSummaryLine span {
+  color: var(--ink-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.navSummaryLine strong {
+  color: var(--ink-strong);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.navCourseItem {
+  min-height: 2.55rem;
+  padding-block: 0.48rem;
 }
 
 .navChip {
@@ -321,7 +360,7 @@
 
 .mainCard {
   min-width: 0;
-  border-radius: 1rem;
+  border-radius: 0.8rem;
   padding: clamp(1rem, 1.6vw, 1.35rem);
 }
 
@@ -421,6 +460,50 @@
   margin-top: 1rem;
   display: grid;
   gap: 0.9rem;
+}
+
+.compactNav {
+  display: none;
+  margin-top: 0.8rem;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.48rem;
+}
+
+.compactNavItem {
+  min-width: 0;
+  border: 1px solid var(--surface-border);
+  border-radius: 0.62rem;
+  background: color-mix(in srgb, var(--surface-strong) 84%, transparent);
+  color: var(--ink-muted);
+  text-decoration: none;
+  padding: 0.62rem 0.7rem;
+  display: grid;
+  gap: 0.16rem;
+}
+
+.compactNavItem span,
+.compactNavItem small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compactNavItem span {
+  color: var(--ink-strong);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.compactNavItem small {
+  color: var(--ink-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.compactNavItemActive {
+  border-color: color-mix(in srgb, var(--accent) 44%, var(--surface-border));
+  background: color-mix(in srgb, var(--accent-soft) 56%, var(--surface));
 }
 
 .contentReady {
@@ -629,7 +712,7 @@
 
 @media (max-width: 1180px) {
   .layout {
-    grid-template-columns: 16rem minmax(0, 1fr);
+    grid-template-columns: 14.5rem minmax(0, 1fr);
   }
 
   .layoutCollapsed {
@@ -652,6 +735,10 @@
     gap: 0.85rem;
   }
 
+  .compactNav {
+    display: grid;
+  }
+
   .desktopAction {
     display: none;
   }
@@ -662,7 +749,7 @@
   }
 
   .mobileBottomNav {
-    display: grid;
+    display: none;
   }
 
   .shell {
@@ -683,6 +770,14 @@
 
   .mainCard {
     padding: 0.88rem;
+  }
+
+  .compactNav {
+    display: none;
+  }
+
+  .mobileBottomNav {
+    display: grid;
   }
 
   .heading {

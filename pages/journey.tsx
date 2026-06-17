@@ -493,6 +493,20 @@ function JourneyContent() {
   const formErrorKeys = new Set(formErrors.map((error) => error.key));
   const selectedIsLockedPreview = Boolean(selectedTemplate && !isDayAccessible(journey, selectedTemplate.day));
   const lockedPreviewNotice = selectedIsLockedPreview && selectedTemplate ? `Preview only. ${lockedReason(journey, selectedTemplate.day).replace('opening', 'working on')}` : '';
+  const journeyMetricItems = [
+    ['Suppliers', journey.metrics.suppliersAdded],
+    ['Buyers', journey.metrics.buyersAdded],
+    ['Products', journey.metrics.productsMapped],
+    ['Availability', journey.metrics.availabilitiesLogged],
+    ['Requirements', journey.metrics.buyerRequirementsLogged],
+    ['Outreach', journey.metrics.outreachDone],
+    ['Responses', journey.metrics.responsesReceived],
+    ['Follow-ups', journey.metrics.followUpsPending],
+    ['Matches', journey.metrics.matchesAttempted],
+    ['Quote-ready', journey.metrics.quotationReadyInquiries],
+    ['Avg score', journey.metrics.opportunityScoreAverage],
+    ['Readiness', journey.metrics.executionReadinessScore],
+  ];
 
   const selectTimelineDay = (day: number) => {
     setSelectedDay(day);
@@ -574,24 +588,17 @@ function JourneyContent() {
             <article className={styles.kpiCard}><p className={styles.kpiLabel}>Track status</p><p className={styles.kpiValue}>{dueCount ? `${dueCount} to handle` : 'On track'}</p></article>
           </section>
 
-          <section className={styles.journeyMetricsGrid}>
-            {[
-              ['Suppliers', journey.metrics.suppliersAdded],
-              ['Buyers', journey.metrics.buyersAdded],
-              ['Products', journey.metrics.productsMapped],
-              ['Availability', journey.metrics.availabilitiesLogged],
-              ['Requirements', journey.metrics.buyerRequirementsLogged],
-              ['Outreach', journey.metrics.outreachDone],
-              ['Responses', journey.metrics.responsesReceived],
-              ['Follow-ups', journey.metrics.followUpsPending],
-              ['Matches', journey.metrics.matchesAttempted],
-              ['Quote-ready', journey.metrics.quotationReadyInquiries],
-              ['Avg score', journey.metrics.opportunityScoreAverage],
-              ['Readiness', journey.metrics.executionReadinessScore],
-            ].map(([label, value]) => (
-              <article key={label} className={styles.journeyMetricCard}><span>{label}</span><strong>{value}</strong></article>
-            ))}
-          </section>
+          <details className={styles.journeyProgressDetails}>
+            <summary>
+              <span>Progress details</span>
+              <strong>{journeyMetricItems.filter(([, value]) => Number(value) > 0).length} active metrics</strong>
+            </summary>
+            <div className={styles.journeyMetricsGrid}>
+              {journeyMetricItems.map(([label, value]) => (
+                <article key={label} className={styles.journeyMetricCard}><span>{label}</span><strong>{value}</strong></article>
+              ))}
+            </div>
+          </details>
 
           {selectedTemplate && selectedStatus ? (
             <section className={styles.journeyWorkspace}>
@@ -605,6 +612,7 @@ function JourneyContent() {
                 </div>
                 <h2 className={styles.homeHeroTitle}>{selectedTemplate.title}</h2>
                 <p className={styles.calloutText}>{selectedTemplate.description}</p>
+                <p className={styles.journeySectionLabel}>What to understand</p>
                 <div className={styles.journeyInfoGrid}>
                   <article className={styles.journeyInfoBlock}>
                     <h3>Purpose</h3>
@@ -615,6 +623,7 @@ function JourneyContent() {
                     <p>{selectedTemplate.requiredOutput}</p>
                   </article>
                 </div>
+                <p className={styles.journeySectionLabel}>What to do</p>
                 <div className={styles.journeyListGrid}>
                   <article className={styles.journeyInfoBlock}>
                     <h3>What to learn</h3>
@@ -643,7 +652,7 @@ function JourneyContent() {
                         ? 'You can review the form requirements now. Editing unlocks after earlier days are completed.'
                         : selectedTemplate.reviewRequired
                           ? 'This day requires admin review after submission.'
-                          : 'This day completes automatically when validation passes.'}
+                          : 'Complete the required fields below. This day completes automatically when validation passes.'}
                     </p>
                   </div>
                   <span className={styles.pointsBadge}>{categoryLabel(selectedTemplate.category)}</span>

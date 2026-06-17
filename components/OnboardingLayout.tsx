@@ -17,7 +17,7 @@ type Props = {
 };
 
 type StepDef = {
-  key: 'home' | MilestoneNumber;
+  key: MilestoneNumber;
   label: string;
   href: string;
   state: string;
@@ -126,10 +126,9 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
   };
 
   const stepDefs: StepDef[] = [
-    { key: 'home', label: 'Home', href: '/', state: 'Overview' },
     ...MILESTONES.map((milestone) => ({
       key: milestone.number,
-      label: `Step ${milestone.number}`,
+      label: `${milestone.number}. ${milestone.shortLabel}`,
       href: milestone.route,
       state: isMilestoneCompleted(progress, milestone.number) ? 'Done' : milestone.shortLabel,
     })),
@@ -138,8 +137,18 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
   const onboardingSummary = `${completedSteps}/${MILESTONES.length} milestones completed`;
   const classroomSummary = coursesUnlocked ? `${passedCourses}/${totalCourses} training tracks completed` : 'Locked until onboarding is done';
   const trainingLockSummary = coursesUnlocked ? 'Training library unlocked' : nextMilestone ? `Complete Step ${nextMilestone.number} to keep unlocking access` : 'Finish guided onboarding to unlock training';
+  const nextActionHref = nextMilestone?.route || (coursesUnlocked ? '/journey' : '/');
+  const nextActionTitle = nextMilestone ? `Step ${nextMilestone.number}: ${nextMilestone.shortLabel}` : coursesUnlocked ? 'Open operator journey' : 'Review workspace';
+  const nextActionMeta = nextMilestone ? nextMilestone.summary : coursesUnlocked ? 'Continue the 30-day path' : onboardingSummary;
   const mobileStepHref = activeStep?.route || nextMilestone?.route || MILESTONES[MILESTONES.length - 1]?.route || '/step10';
   const mobileStepLabel = activeStep ? `Step ${activeStep.number}` : 'Steps';
+  const compactNavItems = [
+    { key: 'home', label: 'Home', href: '/', active: router.pathname === '/', meta: 'Overview' },
+    { key: 'next', label: nextMilestone ? `Step ${nextMilestone.number}` : 'Journey', href: nextActionHref, active: Boolean(activeStep), meta: nextMilestone ? nextMilestone.shortLabel : coursesUnlocked ? 'Daily path' : 'Workspace' },
+    { key: 'journey', label: 'Journey', href: '/journey', active: inJourney, meta: coursesUnlocked ? '30 days' : 'Locked' },
+    { key: 'courses', label: 'Courses', href: '/courses', active: inClassroom, meta: coursesUnlocked ? 'Library' : 'Locked' },
+    { key: 'profile', label: 'Profile', href: '/profile', active: inProfile, meta: 'Account' },
+  ];
   const mobileTabs: MobileTabDef[] = loading
     ? [
         { key: 'home', label: 'Home', href: '/', active: router.pathname === '/', meta: 'Loading', icon: 'home' },
@@ -232,85 +241,90 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
               </>
             ) : (
               <>
-                <span className={styles.navGroupTitle}>Momentum</span>
-                <div className={styles.navItem}>
+                <span className={styles.navGroupTitle}>Today / next action</span>
+                <Link href={nextActionHref} className={`${styles.navItem} ${styles.navPriorityItem} ${activeStep || inJourney ? styles.navActive : ''}`}>
                   <span className={styles.navDot} aria-hidden="true" />
-                  <span className={styles.navTitle}>Onboarding status</span>
+                  <span className={styles.navTitle}>{nextActionTitle}</span>
                   <span className={styles.navStateRow}>
-                    <span className={styles.navState}>{onboardingSummary}</span>
-                    {completedSteps === MILESTONES.length ? <CompletionChip label="Ready" /> : null}
-                  </span>
-                </div>
-                <div className={styles.navItem}>
-                  <span className={styles.navDot} aria-hidden="true" />
-                  <span className={styles.navTitle}>Course progress</span>
-                  <span className={styles.navStateRow}>
-                    <span className={styles.navState}>{coursesUnlocked ? classroomSummary : trainingLockSummary}</span>
-                  </span>
-                </div>
-                <p className={styles.navGroupTitle}>Onboarding</p>
-                {stepDefs.map((step) => {
-              const isActive = router.pathname === step.href;
-              const isDone = typeof step.key === 'number' && isMilestoneCompleted(progress, step.key);
-              const isEnabled = step.key === 'home' || (typeof step.key === 'number' && canAccessStep(progress ?? null, step.key));
-              const stateLabel = isActive ? 'Current' : isEnabled ? step.state : 'Locked';
-              const className = `${styles.navItem} ${isActive ? styles.navActive : ''} ${isDone ? styles.navDone : ''} ${
-                !isEnabled ? styles.navDisabled : ''
-              }`;
-
-              if (!isEnabled) {
-                return (
-                  <span key={step.href} className={className} aria-disabled="true" title={step.label}>
-                    <span className={styles.navDot} aria-hidden="true" />
-                    <span className={styles.navTitle}>{step.label}</span>
-                    <span className={styles.navStateRow}>
-                      <span className={styles.navState}>{stateLabel}</span>
-                    </span>
-                  </span>
-                );
-              }
-
-              return (
-                <Link key={step.href} href={step.href} className={className} title={step.label} aria-current={isActive ? 'page' : undefined}>
-                  <span className={styles.navDot} aria-hidden="true" />
-                  <span className={styles.navTitle}>
-                    {step.label}
-                    {typeof step.key === 'number' ? ` · ${MILESTONES[step.key - 1]?.shortLabel || ''}` : ''}
-                  </span>
-                  <span className={styles.navStateRow}>
-                    <span className={styles.navState}>{stateLabel}</span>
-                    {isDone ? <CompletionChip /> : null}
-                    {isActive ? <span className={styles.navChip}>Now</span> : null}
+                    <span className={styles.navState}>{nextActionMeta}</span>
                   </span>
                 </Link>
-              );
-                })}
+                <div className={styles.navSummaryLine}>
+                  <span>{onboardingSummary}</span>
+                  <strong>{coursesUnlocked ? 'Training open' : 'Training locked'}</strong>
+                </div>
 
-                <p className={styles.navGroupTitle}>Classroom</p>
-                {coursesUnlocked ? (
-                  <>
-                    <Link href="/journey" className={`${styles.navItem} ${inJourney ? styles.navActive : ''}`}>
+                <p className={styles.navGroupTitle}>Onboarding steps</p>
+                {stepDefs.map((step) => {
+                  const isActive = router.pathname === step.href;
+                  const isDone = isMilestoneCompleted(progress, step.key);
+                  const isEnabled = canAccessStep(progress ?? null, step.key);
+                  const stateLabel = isActive ? 'Current' : isDone ? 'Done' : isEnabled ? 'Open' : 'Locked';
+                  const className = `${styles.navItem} ${isActive ? styles.navActive : ''} ${isDone ? styles.navDone : ''} ${
+                    !isEnabled ? styles.navDisabled : ''
+                  }`;
+
+                  if (!isEnabled) {
+                    return (
+                      <span key={step.href} className={className} aria-disabled="true" title={step.label}>
+                        <span className={styles.navDot} aria-hidden="true" />
+                        <span className={styles.navTitle}>{step.label}</span>
+                        <span className={styles.navStateRow}>
+                          <span className={styles.navState}>{stateLabel}</span>
+                        </span>
+                      </span>
+                    );
+                  }
+
+                  return (
+                    <Link key={step.href} href={step.href} className={className} title={step.label} aria-current={isActive ? 'page' : undefined}>
                       <span className={styles.navDot} aria-hidden="true" />
-                      <span className={styles.navTitle}>Operator Journey</span>
+                      <span className={styles.navTitle}>{step.label}</span>
                       <span className={styles.navStateRow}>
-                        <span className={styles.navState}>30-day milestone path</span>
-                        {inJourney ? <span className={styles.navChip}>Now</span> : null}
+                        <span className={styles.navState}>{stateLabel}</span>
+                        {isActive ? <span className={styles.navChip}>Now</span> : null}
                       </span>
                     </Link>
+                  );
+                })}
+
+                <p className={styles.navGroupTitle}>Operator journey</p>
+                {coursesUnlocked ? (
+                  <Link href="/journey" className={`${styles.navItem} ${inJourney ? styles.navActive : ''}`}>
+                    <span className={styles.navDot} aria-hidden="true" />
+                    <span className={styles.navTitle}>30-day journey</span>
+                    <span className={styles.navStateRow}>
+                      <span className={styles.navState}>Daily learning and submission</span>
+                      {inJourney ? <span className={styles.navChip}>Now</span> : null}
+                    </span>
+                  </Link>
+                ) : (
+                  <span className={`${styles.navItem} ${styles.navDisabled}`} aria-disabled="true">
+                    <span className={styles.navDot} aria-hidden="true" />
+                    <span className={styles.navTitle}>30-day journey</span>
+                    <span className={styles.navStateRow}>
+                      <span className={styles.navState}>Unlock after onboarding</span>
+                    </span>
+                  </span>
+                )}
+
+                <p className={styles.navGroupTitle}>Training library</p>
+                {coursesUnlocked ? (
+                  <>
                     <Link href="/courses" className={`${styles.navItem} ${inClassroom ? styles.navActive : ''}`}>
                       <span className={styles.navDot} aria-hidden="true" />
-                      <span className={styles.navTitle}>Operator Training Library</span>
+                      <span className={styles.navTitle}>Courses</span>
                       <span className={styles.navStateRow}>
-                        <span className={styles.navState}>Unlocked</span>
+                        <span className={styles.navState}>{classroomSummary}</span>
                         {inClassroom ? <span className={styles.navChip}>Now</span> : null}
                       </span>
                     </Link>
-                    <p className={styles.navSubgroupTitle}>Classrooms</p>
+                    {(courseProgress?.courses || []).length ? <p className={styles.navSubgroupTitle}>Course queue</p> : null}
                     {(courseProgress?.courses || []).map((course) => (
                       <Link
                         key={course.id}
                         href={`/courses/${course.id}`}
-                        className={`${styles.navItem} ${course.status === 'passed' ? styles.navDone : ''} ${router.asPath === `/courses/${course.id}` ? styles.navActive : ''}`}
+                        className={`${styles.navItem} ${styles.navCourseItem} ${course.status === 'passed' ? styles.navDone : ''} ${router.asPath === `/courses/${course.id}` ? styles.navActive : ''}`}
                         title={course.title}
                       >
                         <span className={styles.navDot} aria-hidden="true" />
@@ -319,29 +333,29 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                           <span className={styles.navState}>
                             {course.completedSubModules}/{course.totalSubModules} lessons · {getCourseStatusLabel(course.status)}
                           </span>
-                          {course.status === 'passed' ? <CompletionChip /> : null}
                         </span>
                       </Link>
                     ))}
                   </>
                 ) : (
-                  <>
-                    <span className={`${styles.navItem} ${styles.navDisabled}`} aria-disabled="true">
-                      <span className={styles.navDot} aria-hidden="true" />
-                      <span className={styles.navTitle}>Operator Journey</span>
-                      <span className={styles.navStateRow}>
-                        <span className={styles.navState}>Locked until onboarding is done</span>
-                      </span>
+                  <span className={`${styles.navItem} ${styles.navDisabled}`} aria-disabled="true">
+                    <span className={styles.navDot} aria-hidden="true" />
+                    <span className={styles.navTitle}>Courses</span>
+                    <span className={styles.navStateRow}>
+                      <span className={styles.navState}>{trainingLockSummary}</span>
                     </span>
-                    <span className={`${styles.navItem} ${styles.navDisabled}`} aria-disabled="true">
-                      <span className={styles.navDot} aria-hidden="true" />
-                      <span className={styles.navTitle}>Operator Training Library</span>
-                      <span className={styles.navStateRow}>
-                        <span className={styles.navState}>Locked until Step 10</span>
-                      </span>
-                    </span>
-                  </>
+                  </span>
                 )}
+
+                <p className={styles.navGroupTitle}>Profile</p>
+                <Link href="/profile" className={`${styles.navItem} ${inProfile ? styles.navActive : ''}`}>
+                  <span className={styles.navDot} aria-hidden="true" />
+                  <span className={styles.navTitle}>Operator profile</span>
+                  <span className={styles.navStateRow}>
+                    <span className={styles.navState}>Account and setup details</span>
+                    {inProfile ? <span className={styles.navChip}>Now</span> : null}
+                  </span>
+                </Link>
               </>
             )}
           </nav>
@@ -365,6 +379,14 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                 </div>
               </div>
             </header>
+            <nav className={styles.compactNav} aria-label="Compact workspace navigation">
+              {compactNavItems.map((item) => (
+                <Link key={item.key} href={item.href} className={`${styles.compactNavItem} ${item.active ? styles.compactNavItemActive : ''}`} aria-current={item.active ? 'page' : undefined}>
+                  <span>{item.label}</span>
+                  <small>{item.meta}</small>
+                </Link>
+              ))}
+            </nav>
             <div className={`${styles.content} ${loading ? styles.contentLoading : styles.contentReady}`}>{children}</div>
             <section className={styles.supportingSection}>
               <div className={styles.supportingInner}>

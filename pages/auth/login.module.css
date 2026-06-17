@@ -149,6 +149,7 @@
 .statusIcon {
   width: 1rem;
   height: 1rem;
+  flex-shrink: 0;
 }
 
 .inputIcon {
@@ -343,6 +344,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
   transition: transform 170ms ease, box-shadow 170ms ease;
   box-shadow: 0 16px 30px color-mix(in srgb, var(--accent) 28%, transparent);
 }
@@ -396,7 +398,19 @@
   font-weight: 800;
 }
 
-.editButton,
+.editButton {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  justify-content: center;
+}
+
 .resendButton {
   border: 0;
   background: transparent;
@@ -434,7 +448,10 @@
   padding: 0.82rem 0.95rem;
   font-size: 0.86rem;
   line-height: 1.45;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .statusInfo {
