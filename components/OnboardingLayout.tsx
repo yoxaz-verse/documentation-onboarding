@@ -42,10 +42,6 @@ function getCourseStatusLabel(status: 'locked' | 'in_progress' | 'passed') {
   return 'Ready';
 }
 
-function CompletionChip({ label = 'Completed' }: { label?: string }) {
-  return <span className={styles.completionChip}>{label}</span>;
-}
-
 function MobileTabIconGlyph({ icon }: { icon: MobileTabIcon }) {
   if (icon === 'home') {
     return (
@@ -388,58 +384,30 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
               ))}
             </nav>
             <div className={`${styles.content} ${loading ? styles.contentLoading : styles.contentReady}`}>{children}</div>
-            <section className={styles.supportingSection}>
-              <div className={styles.supportingInner}>
-                {loading ? (
-                  <>
-                    <h2 className={styles.sideTitle}>Loading workspace</h2>
-                    <p className={styles.sideSubtitle}>Fetching progress, steps, and journey details.</p>
-                    <ul className={styles.sideList}>
-                      {Array.from({ length: 3 }, (_, index) => (
-                        <li key={index} className={`${styles.sideItem} ${styles.sideItemLoading}`}>
-                          <span className={styles.sideItemHeader}>
-                            <span className={styles.sideItemTitle}>{index === 0 ? 'Fetching steps' : index === 1 ? 'Checking courses' : 'Preparing sidebar'}</span>
-                          </span>
-                          <span className={styles.sideItemStatus}>Loading data</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                ) : aside ?? (
-                  <>
-                    <h2 className={styles.sideTitle}>{coursesUnlocked ? 'Training Library' : 'Guided Onboarding'}</h2>
-                    <p className={styles.sideSubtitle}>
-                      {coursesUnlocked
-                        ? 'Access operator-specific courses inside your workspace and return to saved lessons anytime.'
-                        : 'Courses stay locked until the full pre-course onboarding sequence is completed.'}
-                    </p>
-                    <ul className={styles.sideList}>
-                      {coursesUnlocked
-                        ? (courseProgress?.courses || []).map((course) => (
-                            <li key={course.id} className={`${styles.sideItem} ${course.status === 'passed' ? styles.sideItemDone : ''}`}>
-                              <span className={styles.sideItemHeader}>
-                                <span className={styles.sideItemTitle}>{course.title}</span>
-                                {course.status === 'passed' ? <CompletionChip /> : null}
-                              </span>
-                              <span className={styles.sideItemStatus}>
-                                {course.completedSubModules}/{course.totalSubModules} lessons · {getCourseStatusLabel(course.status)}
-                              </span>
-                            </li>
-                          ))
-                        : MILESTONES.map((milestone) => (
-                            <li key={milestone.number} className={`${styles.sideItem} ${isMilestoneCompleted(progress, milestone.number) ? styles.sideItemDone : ''}`}>
-                              <span className={styles.sideItemHeader}>
-                                <span className={styles.sideItemTitle}>Step {milestone.number}: {milestone.shortLabel}</span>
-                                {isMilestoneCompleted(progress, milestone.number) ? <CompletionChip /> : null}
-                              </span>
-                              <span className={styles.sideItemStatus}>{milestone.summary}</span>
-                            </li>
-                          ))}
-                    </ul>
-                  </>
-                )}
-              </div>
-            </section>
+            {loading || aside ? (
+              <section className={styles.supportingSection}>
+                <div className={styles.supportingInner}>
+                  {loading ? (
+                    <>
+                      <h2 className={styles.sideTitle}>Loading workspace</h2>
+                      <p className={styles.sideSubtitle}>Fetching progress, steps, and journey details.</p>
+                      <ul className={styles.sideList}>
+                        {Array.from({ length: 3 }, (_, index) => (
+                          <li key={index} className={`${styles.sideItem} ${styles.sideItemLoading}`}>
+                            <span className={styles.sideItemHeader}>
+                              <span className={styles.sideItemTitle}>{index === 0 ? 'Fetching steps' : index === 1 ? 'Checking courses' : 'Preparing sidebar'}</span>
+                            </span>
+                            <span className={styles.sideItemStatus}>Loading data</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  ) : (
+                    aside
+                  )}
+                </div>
+              </section>
+            ) : null}
           </article>
         </section>
       </div>
