@@ -23,10 +23,10 @@ type StepDef = {
   state: string;
 };
 
-type MobileTabIcon = 'home' | 'steps' | 'journey' | 'courses' | 'profile';
+type MobileTabIcon = 'home' | 'steps' | 'journey' | 'inquiries' | 'courses' | 'profile';
 
 type MobileTabDef = {
-  key: 'home' | 'steps' | 'journey' | 'courses' | 'profile';
+  key: 'home' | 'steps' | 'journey' | 'inquiries' | 'courses' | 'profile';
   label: string;
   href: string;
   active: boolean;
@@ -76,6 +76,17 @@ function MobileTabIconGlyph({ icon }: { icon: MobileTabIcon }) {
     );
   }
 
+  if (icon === 'inquiries') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M6 3h12l2 4v14H4V7l2-4Z" />
+        <path d="M4 7h16" />
+        <path d="M9 11h6" />
+        <path d="M9 15h6" />
+      </svg>
+    );
+  }
+
   if (icon === 'journey') {
     return (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -101,6 +112,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const inClassroom = router.pathname === '/courses' || router.pathname.startsWith('/courses/');
   const inJourney = router.pathname === '/journey';
+  const inInquiries = router.pathname === '/inquiries';
   const inProfile = router.pathname === '/profile';
   const activeStep = MILESTONES.find((milestone) => router.pathname === milestone.route) || null;
   const coursesUnlocked = loading ? false : areCoursesUnlocked(progress ?? null);
@@ -142,6 +154,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
     { key: 'home', label: 'Home', href: '/', active: router.pathname === '/', meta: 'Overview' },
     { key: 'next', label: nextMilestone ? `Step ${nextMilestone.number}` : 'Journey', href: nextActionHref, active: Boolean(activeStep), meta: nextMilestone ? nextMilestone.shortLabel : coursesUnlocked ? 'Daily path' : 'Workspace' },
     { key: 'journey', label: 'Journey', href: '/journey', active: inJourney, meta: coursesUnlocked ? '30 days' : 'Locked' },
+    { key: 'inquiries', label: 'Inquiries', href: '/inquiries', active: inInquiries, meta: 'Live orders' },
     { key: 'courses', label: 'Courses', href: '/courses', active: inClassroom, meta: coursesUnlocked ? 'Library' : 'Locked' },
     { key: 'profile', label: 'Profile', href: '/profile', active: inProfile, meta: 'Account' },
   ];
@@ -150,6 +163,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
         { key: 'home', label: 'Home', href: '/', active: router.pathname === '/', meta: 'Loading', icon: 'home' },
         { key: 'steps', label: 'Steps', href: mobileStepHref, active: Boolean(activeStep), meta: 'Fetching', icon: 'steps' },
         { key: 'journey', label: 'Journey', href: '/journey', active: inJourney, meta: 'Preparing', icon: 'journey' },
+        { key: 'inquiries', label: 'Inquiries', href: '/inquiries', active: inInquiries, meta: 'Live', icon: 'inquiries' },
         { key: 'courses', label: 'Courses', href: '/courses', active: inClassroom, meta: 'Checking', icon: 'courses' },
         { key: 'profile', label: 'Profile', href: '/profile', active: inProfile, meta: 'Account', icon: 'profile' },
       ]
@@ -157,6 +171,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
         { key: 'home', label: 'Home', href: '/', active: router.pathname === '/', meta: 'Workspace', icon: 'home' },
         { key: 'steps', label: mobileStepLabel, href: mobileStepHref, active: Boolean(activeStep), meta: activeStep ? activeStep.shortLabel : nextMilestone ? 'Continue' : 'Complete', icon: 'steps' },
         { key: 'journey', label: 'Journey', href: '/journey', active: inJourney, meta: coursesUnlocked ? 'Day path' : 'Locked', icon: 'journey' },
+        { key: 'inquiries', label: 'Inquiries', href: '/inquiries', active: inInquiries, meta: 'Live', icon: 'inquiries' },
         { key: 'courses', label: 'Courses', href: '/courses', active: inClassroom, meta: coursesUnlocked ? 'Library' : 'Locked', icon: 'courses' },
         { key: 'profile', label: 'Profile', href: '/profile', active: inProfile, meta: 'Account', icon: 'profile' },
       ];
@@ -285,6 +300,14 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                 })}
 
                 <p className={styles.navGroupTitle}>Operator journey</p>
+                <Link href="/inquiries" className={`${styles.navItem} ${inInquiries ? styles.navActive : ''}`}>
+                  <span className={styles.navDot} aria-hidden="true" />
+                  <span className={styles.navTitle}>Live inquiries</span>
+                  <span className={styles.navStateRow}>
+                    <span className={styles.navState}>Current order requests</span>
+                    {inInquiries ? <span className={styles.navChip}>Now</span> : null}
+                  </span>
+                </Link>
                 {coursesUnlocked ? (
                   <Link href="/journey" className={`${styles.navItem} ${inJourney ? styles.navActive : ''}`}>
                     <span className={styles.navDot} aria-hidden="true" />

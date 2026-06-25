@@ -1699,6 +1699,105 @@
   gap: 0.62rem;
 }
 
+.inquiriesHero {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.inquiryGrid {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.inquiryCard {
+  border: 1px solid var(--surface-border);
+  border-radius: 0.95rem;
+  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
+  box-shadow: var(--elev-shadow), var(--inset-highlight);
+  padding: 1rem;
+  display: grid;
+  gap: 0.82rem;
+}
+
+.inquiryCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.inquiryTitle {
+  margin: 0.24rem 0 0;
+  color: var(--ink-strong);
+  font-size: clamp(1.05rem, 1.8vw, 1.35rem);
+  line-height: 1.18;
+}
+
+.inquirySummary {
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+.inquiryTableWrap {
+  border: 1px solid var(--surface-border);
+  border-radius: 0.78rem;
+  overflow: auto;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+}
+
+.inquiryTable {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+}
+
+.inquiryTable th,
+.inquiryTable td {
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid color-mix(in srgb, var(--surface-border) 68%, transparent);
+  padding: 0.72rem;
+  color: var(--ink);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.inquiryTable th {
+  color: var(--ink-muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: color-mix(in srgb, var(--surface-solid) 80%, transparent);
+}
+
+.inquiryTable tr:last-child td {
+  border-bottom: 0;
+}
+
+.emptyInquiryState {
+  border: 1px solid var(--surface-border);
+  border-radius: 0.95rem;
+  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
+  box-shadow: var(--elev-shadow), var(--inset-highlight);
+  padding: 1.1rem;
+  text-align: center;
+}
+
+.emptyInquiryState h2 {
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: 1.1rem;
+}
+
+.emptyInquiryState p {
+  margin: 0.45rem auto 0;
+  max-width: 42rem;
+  color: var(--ink-muted);
+  line-height: 1.55;
+}
+
 .summaryStatCardFeature {
   gap: 0.75rem;
 }

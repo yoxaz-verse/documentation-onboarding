@@ -1,6 +1,7 @@
 import type { CourseProgressSummary } from './courseProgress';
 import type { JourneySummary } from './operatorJourney';
 export type { CourseProgressSummary } from './courseProgress';
+export type { InquiryProductLineItem, LiveInquiry, PublicLiveInquiry } from './inquiries';
 export type { JourneySummary } from './operatorJourney';
 
 export type SessionUser = {
