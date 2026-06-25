@@ -5,11 +5,13 @@ import OnboardingLayout from '../components/OnboardingLayout';
 import { JOURNEY_PAGE_COPY, JOURNEY_TOTAL_DAYS, type JourneyDayTemplate, type JourneyFormField, type JourneyRepeatGroup } from '../config/operatorJourney';
 import { isUnauthorizedError } from '../lib/http';
 import { areCoursesUnlocked } from '../lib/onboarding';
+import { getProgressBundle } from '../lib/progress';
 import type { CourseProgressSummary, JourneyResponse, JourneySummary, ProgressRecord } from '../lib/types';
 import styles from './onboarding.module.css';
 
 type JourneyPageState =
   | { status: 'loading' }
+  | { status: 'locked'; progress: ProgressRecord; courseProgress: CourseProgressSummary }
   | { status: 'ready'; progress: ProgressRecord; courseProgress: CourseProgressSummary; journey: JourneySummary }
   | { status: 'error'; message: string };
 
@@ -288,6 +290,13 @@ function JourneyContent() {
 
   const load = async () => {
     try {
+      const bundle = await getProgressBundle();
+      if (!areCoursesUnlocked(bundle.progress)) {
+        setState({ status: 'locked', progress: bundle.progress, courseProgress: bundle.courseProgress });
+        setMessage('');
+        return;
+      }
+
       const response = await fetch('/api/journey', { credentials: 'include', cache: 'no-store' });
       const payload = (await response.json().catch(() => ({}))) as Partial<JourneyResponse> & { error?: string };
 
@@ -297,11 +306,6 @@ function JourneyContent() {
           return;
         }
         throw new Error(payload.error || 'Failed to load operator journey.');
-      }
-
-      if (!areCoursesUnlocked(payload.progress)) {
-        window.location.assign('/step10');
-        return;
       }
 
       setState({ status: 'ready', progress: payload.progress, courseProgress: payload.courseProgress, journey: payload.journey });
@@ -478,6 +482,23 @@ function JourneyContent() {
     return (
       <OnboardingLayout title="Operator Journey" subtitle="Your journey is temporarily unavailable.">
         <p className={`${styles.message} ${styles.messageError}`}>{state.message}</p>
+      </OnboardingLayout>
+    );
+  }
+
+  if (state.status === 'locked') {
+    return (
+      <OnboardingLayout
+        title="Operator Journey"
+        subtitle="The 30-day journey unlocks after the guided onboarding path reaches Step 10 completion."
+        progress={state.progress}
+        courseProgress={state.courseProgress}
+      >
+        <section className={styles.emptyInquiryState}>
+          <span className={styles.homeStatusPill}>Locked</span>
+          <h2>30-day journey unlocks after Step 10.</h2>
+          <p>Complete the Zoho completion check first. Once Step 10 is done, live inquiries, courses, and the 30-day journey will open in this workspace.</p>
+        </section>
       </OnboardingLayout>
     );
   }

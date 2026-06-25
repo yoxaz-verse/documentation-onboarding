@@ -154,7 +154,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
     { key: 'home', label: 'Home', href: '/', active: router.pathname === '/', meta: 'Overview' },
     { key: 'next', label: nextMilestone ? `Step ${nextMilestone.number}` : 'Journey', href: nextActionHref, active: Boolean(activeStep), meta: nextMilestone ? nextMilestone.shortLabel : coursesUnlocked ? 'Daily path' : 'Workspace' },
     { key: 'journey', label: 'Journey', href: '/journey', active: inJourney, meta: coursesUnlocked ? '30 days' : 'Locked' },
-    { key: 'inquiries', label: 'Inquiries', href: '/inquiries', active: inInquiries, meta: 'Live orders' },
+    { key: 'inquiries', label: 'Inquiries', href: coursesUnlocked ? '/inquiries' : '/step10', active: inInquiries, meta: coursesUnlocked ? 'Live orders' : 'Locked' },
     { key: 'courses', label: 'Courses', href: '/courses', active: inClassroom, meta: coursesUnlocked ? 'Library' : 'Locked' },
     { key: 'profile', label: 'Profile', href: '/profile', active: inProfile, meta: 'Account' },
   ];
@@ -163,7 +163,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
         { key: 'home', label: 'Home', href: '/', active: router.pathname === '/', meta: 'Loading', icon: 'home' },
         { key: 'steps', label: 'Steps', href: mobileStepHref, active: Boolean(activeStep), meta: 'Fetching', icon: 'steps' },
         { key: 'journey', label: 'Journey', href: '/journey', active: inJourney, meta: 'Preparing', icon: 'journey' },
-        { key: 'inquiries', label: 'Inquiries', href: '/inquiries', active: inInquiries, meta: 'Live', icon: 'inquiries' },
+        { key: 'inquiries', label: 'Inquiries', href: '/step10', active: inInquiries, meta: 'Locked', icon: 'inquiries' },
         { key: 'courses', label: 'Courses', href: '/courses', active: inClassroom, meta: 'Checking', icon: 'courses' },
         { key: 'profile', label: 'Profile', href: '/profile', active: inProfile, meta: 'Account', icon: 'profile' },
       ]
@@ -171,7 +171,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
         { key: 'home', label: 'Home', href: '/', active: router.pathname === '/', meta: 'Workspace', icon: 'home' },
         { key: 'steps', label: mobileStepLabel, href: mobileStepHref, active: Boolean(activeStep), meta: activeStep ? activeStep.shortLabel : nextMilestone ? 'Continue' : 'Complete', icon: 'steps' },
         { key: 'journey', label: 'Journey', href: '/journey', active: inJourney, meta: coursesUnlocked ? 'Day path' : 'Locked', icon: 'journey' },
-        { key: 'inquiries', label: 'Inquiries', href: '/inquiries', active: inInquiries, meta: 'Live', icon: 'inquiries' },
+        { key: 'inquiries', label: 'Inquiries', href: coursesUnlocked ? '/inquiries' : '/step10', active: inInquiries, meta: coursesUnlocked ? 'Live' : 'Locked', icon: 'inquiries' },
         { key: 'courses', label: 'Courses', href: '/courses', active: inClassroom, meta: coursesUnlocked ? 'Library' : 'Locked', icon: 'courses' },
         { key: 'profile', label: 'Profile', href: '/profile', active: inProfile, meta: 'Account', icon: 'profile' },
       ];
@@ -300,14 +300,24 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                 })}
 
                 <p className={styles.navGroupTitle}>Operator journey</p>
-                <Link href="/inquiries" className={`${styles.navItem} ${inInquiries ? styles.navActive : ''}`}>
-                  <span className={styles.navDot} aria-hidden="true" />
-                  <span className={styles.navTitle}>Live inquiries</span>
-                  <span className={styles.navStateRow}>
-                    <span className={styles.navState}>Current order requests</span>
-                    {inInquiries ? <span className={styles.navChip}>Now</span> : null}
+                {coursesUnlocked ? (
+                  <Link href="/inquiries" className={`${styles.navItem} ${inInquiries ? styles.navActive : ''}`}>
+                    <span className={styles.navDot} aria-hidden="true" />
+                    <span className={styles.navTitle}>Live inquiries</span>
+                    <span className={styles.navStateRow}>
+                      <span className={styles.navState}>Current order requests</span>
+                      {inInquiries ? <span className={styles.navChip}>Now</span> : null}
+                    </span>
+                  </Link>
+                ) : (
+                  <span className={`${styles.navItem} ${styles.navDisabled}`} aria-disabled="true">
+                    <span className={styles.navDot} aria-hidden="true" />
+                    <span className={styles.navTitle}>Live inquiries</span>
+                    <span className={styles.navStateRow}>
+                      <span className={styles.navState}>Unlock after Step 10</span>
+                    </span>
                   </span>
-                </Link>
+                )}
                 {coursesUnlocked ? (
                   <Link href="/journey" className={`${styles.navItem} ${inJourney ? styles.navActive : ''}`}>
                     <span className={styles.navDot} aria-hidden="true" />

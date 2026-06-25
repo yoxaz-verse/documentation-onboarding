@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { buildCourseProgressSummary } from '../../../lib/courseProgress';
 import { ensureOperatorSeed } from '../../../lib/ensureOperatorSeed';
 import { buildJourneySummary, normalizeJourneyDayTemplates, type JourneyCheckRecord, type JourneyMilestoneRecord, type JourneyStateRecord, type JourneySubmissionRecord, type JourneyTemplateRecord } from '../../../lib/operatorJourney';
-import { normalizeProgressRecord } from '../../../lib/onboarding';
+import { areCoursesUnlocked, normalizeProgressRecord } from '../../../lib/onboarding';
 import { requireSession } from '../../../lib/serverAuth';
 import { isMissingSupabaseTableError } from '../../../lib/supabaseErrors';
 import { supabaseAdmin } from '../../../lib/supabaseAdmin';
@@ -48,6 +48,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (insertError) return res.status(500).json({ error: insertError.message });
     progress = inserted;
+  }
+
+  const normalizedProgress = normalizeProgressRecord(progress)!;
+  if (!areCoursesUnlocked(normalizedProgress)) {
+    return res.status(403).json({ error: 'Complete Step 10 before opening the operator journey.' });
   }
 
   const [
@@ -116,7 +121,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const courseProgress = buildCourseProgressSummary(passedSubModuleIds, draftBySubModuleId, activeCandidate);
   const templates = normalizeJourneyDayTemplates(templateError ? null : (templateRows || []) as JourneyTemplateRecord[]);
   const response: JourneyResponse = {
-    progress: normalizeProgressRecord(progress)!,
+    progress: normalizedProgress,
     courseProgress,
     journey: buildJourneySummary(
       journeyState as JourneyStateRecord | null,

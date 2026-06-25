@@ -29,6 +29,7 @@ function ClassroomCatalogContent() {
   const [progress, setProgress] = useState<ProgressRecord | null>(null);
   const [courseProgress, setCourseProgress] = useState<CourseProgressSummary | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [locked, setLocked] = useState(false);
   const [message, setMessage] = useState('');
 
   const courses = useMemo(() => getAllCourses(), []);
@@ -53,12 +54,16 @@ function ClassroomCatalogContent() {
         }
 
         if (!areCoursesUnlocked(bundle.progress)) {
-          window.location.assign('/step10');
+          setProgress(bundle.progress);
+          setCourseProgress(bundle.courseProgress);
+          setLocked(true);
+          setMessage('');
           return;
         }
 
         setProgress(bundle.progress);
         setCourseProgress(bundle.courseProgress);
+        setLocked(false);
         setLeaderboard(leaderboardPayload.leaderboard || []);
         setMessage('');
       } catch (error) {
@@ -122,6 +127,16 @@ function ClassroomCatalogContent() {
         </section>
       }
     >
+      {locked ? (
+        <section className={styles.emptyInquiryState}>
+          <span className={styles.homeStatusPill}>Locked</span>
+          <h2>Courses unlock after Step 10.</h2>
+          <p>Complete the Zoho completion check first. Once Step 10 is done, courses, live inquiries, and the 30-day journey will open in this workspace.</p>
+        </section>
+      ) : null}
+
+      {!locked ? (
+        <>
       <div className={styles.kpiGrid}>
         <section className={styles.kpiCard}>
           <p className={styles.kpiLabel}>Classrooms completed</p>
@@ -188,6 +203,8 @@ function ClassroomCatalogContent() {
           );
         })}
       </section>
+        </>
+      ) : null}
     </OnboardingLayout>
   );
 }

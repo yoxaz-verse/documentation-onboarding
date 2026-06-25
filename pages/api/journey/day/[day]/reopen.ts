@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { areCoursesUnlocked, normalizeProgressRecord } from '../../../../../lib/onboarding';
 import { requireSession } from '../../../../../lib/serverAuth';
 import { isMissingSupabaseTableError } from '../../../../../lib/supabaseErrors';
 import { supabaseAdmin } from '../../../../../lib/supabaseAdmin';
@@ -11,6 +12,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const day = Number(req.query.day);
   if (!Number.isInteger(day) || day < 1 || day > 30) return res.status(400).json({ error: 'Invalid journey day.' });
+
+  const { data: progress, error: progressError } = await supabaseAdmin
+    .from('operator_progress')
+    .select('email, current_step')
+    .eq('email', session.email)
+    .maybeSingle();
+
+  if (progressError) return res.status(500).json({ error: progressError.message });
+  if (!areCoursesUnlocked(normalizeProgressRecord(progress))) {
+    return res.status(403).json({ error: 'Complete Step 10 before reopening journey days.' });
+  }
 
   const { data: existing, error: findError } = await supabaseAdmin
     .from('operator_journey_day_submissions')

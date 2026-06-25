@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { normalizePublicLiveInquiry, type LiveInquiryRecord } from '../../lib/inquiries';
+import { areCoursesUnlocked, normalizeProgressRecord } from '../../lib/onboarding';
 import { requireSession } from '../../lib/serverAuth';
 import { isMissingSupabaseTableError } from '../../lib/supabaseErrors';
 import { supabaseAdmin } from '../../lib/supabaseAdmin';
@@ -13,6 +14,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!session) return;
 
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+
+  const { data: progressData, error: progressError } = await supabaseAdmin
+    .from('operator_progress')
+    .select('email, current_step')
+    .eq('email', session.email)
+    .maybeSingle();
+
+  if (progressError) return res.status(500).json({ error: progressError.message });
+  if (!areCoursesUnlocked(normalizeProgressRecord(progressData))) {
+    return res.status(403).json({ error: 'Live inquiries unlock after Step 10 is complete.' });
+  }
 
   const { data, error } = await supabaseAdmin
     .from('live_inquiries')

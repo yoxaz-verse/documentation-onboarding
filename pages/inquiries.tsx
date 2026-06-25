@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import AuthGate from '../components/AuthGate';
 import OnboardingLayout from '../components/OnboardingLayout';
 import { isUnauthorizedError } from '../lib/http';
+import { areCoursesUnlocked } from '../lib/onboarding';
 import { getProgressBundle } from '../lib/progress';
 import type { CourseProgressSummary, ProgressRecord, PublicLiveInquiry, SessionUser } from '../lib/types';
 import styles from './onboarding.module.css';
 
 type PageState =
   | { status: 'loading' }
-  | { status: 'ready'; progress: ProgressRecord; courseProgress: CourseProgressSummary; inquiries: PublicLiveInquiry[] }
+  | { status: 'ready'; progress: ProgressRecord; courseProgress: CourseProgressSummary; inquiries: PublicLiveInquiry[]; locked: boolean }
   | { status: 'error'; message: string };
 
 function formatDate(value: string | null) {
@@ -26,10 +27,21 @@ function InquiriesContent({ user }: { user: SessionUser }) {
 
     const load = async () => {
       try {
-        const [progressBundle, inquiriesResponse] = await Promise.all([
-          getProgressBundle(),
-          fetch('/api/inquiries', { credentials: 'include', cache: 'no-store' }),
-        ]);
+        const progressBundle = await getProgressBundle();
+        if (!active) return;
+
+        if (!areCoursesUnlocked(progressBundle.progress)) {
+          setState({
+            status: 'ready',
+            progress: progressBundle.progress,
+            courseProgress: progressBundle.courseProgress,
+            inquiries: [],
+            locked: true,
+          });
+          return;
+        }
+
+        const inquiriesResponse = await fetch('/api/inquiries', { credentials: 'include', cache: 'no-store' });
         const inquiriesPayload = await inquiriesResponse.json().catch(() => ({}));
         if (!active) return;
 
@@ -46,6 +58,7 @@ function InquiriesContent({ user }: { user: SessionUser }) {
           progress: progressBundle.progress,
           courseProgress: progressBundle.courseProgress,
           inquiries: (inquiriesPayload.inquiries || []) as PublicLiveInquiry[],
+          locked: false,
         });
       } catch (error) {
         if (!active) return;
@@ -67,6 +80,7 @@ function InquiriesContent({ user }: { user: SessionUser }) {
   const progress = state.status === 'ready' ? state.progress : null;
   const courseProgress = state.status === 'ready' ? state.courseProgress : null;
   const inquiries = state.status === 'ready' ? state.inquiries : [];
+  const locked = state.status === 'ready' ? state.locked : false;
   const loading = state.status === 'loading';
 
   return (
@@ -80,7 +94,15 @@ function InquiriesContent({ user }: { user: SessionUser }) {
       {state.status === 'loading' ? <p className={styles.message}>Loading live inquiries...</p> : null}
       {state.status === 'error' ? <p className={`${styles.message} ${styles.messageError}`}>{state.message}</p> : null}
 
-      {state.status === 'ready' ? (
+      {state.status === 'ready' && locked ? (
+        <section className={styles.emptyInquiryState}>
+          <span className={styles.homeStatusPill}>Locked</span>
+          <h2>Live inquiries unlock after Step 10.</h2>
+          <p>Complete the Zoho completion check first. Once Step 10 is done, live inquiries and courses will open in this workspace.</p>
+        </section>
+      ) : null}
+
+      {state.status === 'ready' && !locked ? (
         <>
           <section className={`${styles.callout} ${styles.inquiriesHero}`}>
             <div className={styles.homeHeroHeader}>
