@@ -2,7 +2,7 @@
 
 .page {
   --control-height: 3.2rem;
-  --control-radius: 1rem;
+  --control-radius: 0.62rem;
   --card-border: var(--surface-border);
 
   position: relative;
@@ -15,9 +15,9 @@
   overflow-y: auto;
   font-family: 'Inter', system-ui, sans-serif;
   background:
-    radial-gradient(42rem 42rem at 10% 14%, color-mix(in srgb, var(--accent-soft) 100%, transparent), transparent 72%),
-    radial-gradient(34rem 34rem at 90% 82%, color-mix(in srgb, var(--accent-secondary) 12%, transparent), transparent 72%),
-    linear-gradient(135deg, var(--bg-a) 0%, var(--bg-b) 42%, var(--bg-c) 74%, var(--bg-d) 100%);
+    radial-gradient(48rem 42rem at 4% 10%, color-mix(in srgb, var(--info-bg) 92%, transparent), transparent 74%),
+    radial-gradient(34rem 34rem at 92% 82%, color-mix(in srgb, var(--accent-soft) 86%, transparent), transparent 72%),
+    linear-gradient(135deg, var(--bg-a) 0%, var(--bg-b) 44%, var(--bg-c) 78%, var(--bg-d) 100%);
 }
 
 .glowA,
@@ -33,7 +33,7 @@
   height: 32rem;
   top: -11rem;
   right: -6rem;
-  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  background: color-mix(in srgb, var(--info) 14%, transparent);
 }
 
 .glowB {
@@ -41,7 +41,7 @@
   height: 28rem;
   bottom: -10rem;
   left: -7rem;
-  background: color-mix(in srgb, var(--accent-secondary) 14%, transparent);
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
 }
 
 .topControls {
@@ -54,30 +54,33 @@
 .heroLayout {
   position: relative;
   z-index: 1;
-  width: min(100%, 80rem);
+  width: min(100%, 82rem);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(21.5rem, 28rem);
+  grid-template-columns: minmax(0, 1.08fr) minmax(22rem, 28.5rem);
   align-items: center;
   gap: clamp(1.35rem, 2.8vw, 2.6rem);
 }
 
 .heroPanel {
-  max-width: 33rem;
+  position: relative;
+  max-width: 38rem;
+  padding: clamp(1.2rem, 2.4vw, 2rem);
+  border-left: 3px solid color-mix(in srgb, var(--accent) 84%, var(--accent-secondary));
 }
 
 .brand {
   margin: 0;
   font-family: 'Sora', sans-serif;
-  color: var(--accent);
-  font-size: 1.7rem;
+  color: var(--ink-strong);
+  font-size: 1.58rem;
   font-weight: 800;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
 }
 
 .heroKicker {
   margin: 0.4rem 0 0;
-  color: var(--ink-muted);
+  color: var(--accent-strong);
   font-size: 0.82rem;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -88,16 +91,16 @@
   margin: 0.82rem 0 0;
   font-family: 'Sora', sans-serif;
   color: var(--ink-strong);
-  font-size: clamp(2rem, 4vw, 3.5rem);
-  line-height: 1;
-  letter-spacing: -0.05em;
+  font-size: clamp(2.2rem, 4.2vw, 3.8rem);
+  line-height: 0.98;
+  letter-spacing: 0;
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
 }
 
 .heroTitle span:first-child {
-  background: linear-gradient(130deg, var(--ink-strong) 24%, var(--accent) 88%);
+  background: linear-gradient(130deg, var(--ink-strong) 24%, var(--info) 92%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -107,7 +110,7 @@
   color: var(--ink);
   font-size: 0.98rem;
   line-height: 1.54;
-  max-width: 35ch;
+  max-width: 43ch;
 }
 
 .timeline {
@@ -120,18 +123,18 @@
   display: flex;
   align-items: flex-start;
   gap: 0.78rem;
-  padding: 0.76rem 0.88rem;
-  border-radius: 1rem;
+  padding: 0.78rem 0.9rem;
+  border-radius: 0.68rem;
   border: 1px solid var(--surface-border);
-  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
-  box-shadow: var(--elev-shadow), var(--inset-highlight);
+  background: color-mix(in srgb, var(--surface-strong) 84%, transparent);
+  box-shadow: var(--inset-highlight);
 }
 
 .timelineBadge {
   width: 2.15rem;
   height: 2.15rem;
   flex-shrink: 0;
-  border-radius: 999px;
+  border-radius: 0.58rem;
   display: grid;
   place-items: center;
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
@@ -139,7 +142,7 @@
   font-family: 'Sora', sans-serif;
   font-size: 0.8rem;
   font-weight: 800;
-  box-shadow: 0 14px 30px color-mix(in srgb, var(--accent) 28%, transparent);
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
 .timelineBadgeIcon,
@@ -181,12 +184,14 @@
   width: min(100%, 31rem);
   justify-self: end;
   border: 1px solid var(--card-border);
-  border-radius: 1.3rem;
-  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
+  border-radius: 0.9rem;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-solid) 96%, transparent), color-mix(in srgb, var(--surface-alt) 88%, transparent)),
+    var(--surface-solid);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   box-shadow: var(--elev-shadow-strong), var(--inset-highlight);
-  padding: clamp(1.1rem, 2vw, 1.55rem);
+  padding: clamp(1.1rem, 2vw, 1.6rem);
 }
 
 .cardHeader {
@@ -197,7 +202,7 @@
 }
 
 .cardHeaderIcon {
-  color: var(--accent);
+  color: var(--accent-strong);
 }
 
 .kicker {
@@ -215,7 +220,7 @@
   font-family: 'Sora', sans-serif;
   font-size: 1.62rem;
   line-height: 1.1;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   color: var(--ink-strong);
   font-weight: 800;
   text-align: center;
@@ -232,7 +237,7 @@
 
 .stepperContainer {
   width: 100%;
-  height: 0.42rem;
+  height: 0.34rem;
   background: var(--line);
   border-radius: 999px;
   overflow: hidden;
@@ -335,7 +340,7 @@
   border: 0;
   min-height: var(--control-height);
   border-radius: var(--control-radius);
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent-secondary) 76%, var(--accent)) 100%);
   color: var(--accent-ink);
   font-size: 0.96rem;
   font-weight: 800;
@@ -346,7 +351,7 @@
   justify-content: center;
   gap: 0.5rem;
   transition: transform 170ms ease, box-shadow 170ms ease;
-  box-shadow: 0 16px 30px color-mix(in srgb, var(--accent) 28%, transparent);
+  box-shadow: 0 16px 30px color-mix(in srgb, var(--accent) 22%, transparent);
 }
 
 .button:hover:enabled {
@@ -362,7 +367,7 @@
 .identityBlock {
   margin: 0;
   padding: 1rem;
-  border-radius: 1.15rem;
+  border-radius: 0.72rem;
   border: 1px solid var(--card-border);
   background: color-mix(in srgb, var(--control-surface) 92%, transparent);
   display: flex;
@@ -374,7 +379,7 @@
 .avatar {
   width: 2.9rem;
   height: 2.9rem;
-  border-radius: 50%;
+  border-radius: 0.64rem;
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
   color: var(--accent-ink);
   display: flex;
@@ -401,7 +406,7 @@
 .editButton {
   border: 0;
   background: transparent;
-  color: var(--accent);
+  color: var(--accent-strong);
   font-size: 0.8rem;
   font-weight: 800;
   cursor: pointer;
@@ -414,7 +419,7 @@
 .resendButton {
   border: 0;
   background: transparent;
-  color: var(--accent);
+  color: var(--accent-strong);
   font-size: 0.8rem;
   font-weight: 800;
   cursor: pointer;
@@ -427,7 +432,7 @@
 }
 
 .otpInput {
-  height: 3.2rem;
+  height: 3.15rem;
   text-align: center;
   font-size: 1.2rem;
   font-weight: 800;
@@ -443,7 +448,7 @@
 
 .status {
   margin-top: 0.2rem;
-  border-radius: 0.95rem;
+  border-radius: 0.62rem;
   border: 1px solid transparent;
   padding: 0.82rem 0.95rem;
   font-size: 0.86rem;

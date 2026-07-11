@@ -159,6 +159,20 @@ function HomeContent({ user, onSessionExpired }: HomeContentProps) {
           <span className={styles.homeStatusPill}>{coursesUnlocked ? 'Training unlocked' : `${remainingMilestones} remaining`}</span>
         </div>
         <p className={styles.calloutText}>{nextActionText}</p>
+        <div className={styles.homeCommandStats} aria-label="Workspace status">
+          <span>
+            <strong>{completedMilestones}</strong>
+            <small>Completed</small>
+          </span>
+          <span>
+            <strong>{remainingMilestones}</strong>
+            <small>Remaining</small>
+          </span>
+          <span>
+            <strong>{coursesUnlocked ? 'Open' : `Step ${nextMilestone?.number || 1}`}</strong>
+            <small>{coursesUnlocked ? 'Training' : 'Next unlock'}</small>
+          </span>
+        </div>
         <div className={styles.homeActionRow}>
           <Link href={nextActionHref} className={styles.cta}>
             {nextActionLabel}

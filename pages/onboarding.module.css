@@ -7,10 +7,10 @@
 .kpiCard {
   position: relative;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--surface-border-strong) 70%, transparent);
-  border-radius: 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--surface-border-strong) 62%, transparent);
+  border-radius: 0.68rem;
   background: var(--surface-strong);
-  padding: 0.9rem;
+  padding: 0.86rem;
   min-width: 0;
   box-shadow: var(--inset-highlight);
 }
@@ -22,7 +22,7 @@
 .kpiLabel {
   position: relative;
   margin: 0;
-  color: var(--ink-muted);
+  color: var(--ink-soft);
   font-size: 0.74rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -41,9 +41,9 @@
 
 .callout {
   margin-top: 0.2rem;
-  border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--surface-border));
-  border-radius: 0.9rem;
-  background: color-mix(in srgb, var(--accent-softer) 62%, var(--surface-solid));
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--surface-border));
+  border-radius: 0.72rem;
+  background: color-mix(in srgb, var(--surface-strong) 88%, var(--accent-softer));
   padding: 1rem;
   box-shadow: var(--inset-highlight);
 }
@@ -71,15 +71,15 @@
   gap: 0.45rem;
   margin-top: 0.9rem;
   border: 1px solid color-mix(in srgb, var(--accent-strong) 68%, black 8%);
-  border-radius: 0.78rem;
+  border-radius: 0.58rem;
   min-height: 2.95rem;
   padding: 0.78rem 1.08rem;
   color: var(--accent-ink);
   text-decoration: none;
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent-secondary) 76%, var(--accent)) 100%);
   font-weight: 800;
   letter-spacing: 0.01em;
-  box-shadow: 0 14px 30px color-mix(in srgb, var(--accent) 28%, transparent);
+  box-shadow: 0 14px 28px color-mix(in srgb, var(--accent) 22%, transparent);
   transition: background-color 170ms ease, border-color 170ms ease, transform 170ms ease, box-shadow 170ms ease;
   white-space: normal;
   cursor: pointer;
@@ -140,9 +140,22 @@
 }
 
 .homeHeroCard {
-  padding: clamp(1.1rem, 2vw, 1.45rem);
-  border-color: color-mix(in srgb, var(--accent) 32%, var(--surface-border));
-  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-softer) 70%, var(--surface-solid)), var(--surface-strong));
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.15rem, 2vw, 1.65rem);
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--surface-border));
+  background:
+    radial-gradient(30rem 16rem at 100% 0%, color-mix(in srgb, var(--info-bg) 72%, transparent), transparent 72%),
+    linear-gradient(135deg, color-mix(in srgb, var(--surface-solid) 96%, var(--accent-softer)), var(--surface-strong));
+}
+
+.homeHeroCard::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 0.22rem;
+  background: linear-gradient(90deg, var(--accent), var(--info), var(--success));
+  opacity: 0.82;
 }
 
 .homeHeroHeader {
@@ -165,9 +178,9 @@
   margin: 0.45rem 0 0;
   color: var(--ink-strong);
   font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
-  font-size: clamp(1.25rem, 2vw, 1.65rem);
-  line-height: 1.12;
-  letter-spacing: -0.03em;
+  font-size: clamp(1.42rem, 2.5vw, 2.05rem);
+  line-height: 1.05;
+  letter-spacing: 0;
 }
 
 .homeHeroProgress {
@@ -180,13 +193,53 @@
 
 .homeStatusPill {
   flex: 0 0 auto;
-  border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--surface-border));
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--surface-border));
   border-radius: 999px;
-  background: color-mix(in srgb, var(--surface-strong) 80%, var(--accent-soft));
+  background: color-mix(in srgb, var(--surface-strong) 84%, var(--accent-soft));
   color: var(--accent-strong);
   padding: 0.3rem 0.62rem;
   font-size: 0.72rem;
   font-weight: 850;
+  white-space: nowrap;
+}
+
+.homeCommandStats {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.homeCommandStats span {
+  min-width: 0;
+  border: 1px solid color-mix(in srgb, var(--surface-border) 80%, transparent);
+  border-radius: 0.58rem;
+  background: color-mix(in srgb, var(--surface-solid) 68%, transparent);
+  padding: 0.68rem 0.74rem;
+  display: grid;
+  gap: 0.12rem;
+}
+
+.homeCommandStats strong {
+  min-width: 0;
+  color: var(--ink-strong);
+  font-size: clamp(1.02rem, 1.8vw, 1.26rem);
+  font-weight: 900;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.homeCommandStats small {
+  min-width: 0;
+  color: var(--ink-muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -208,9 +261,9 @@
 
 .homeProgressPanel {
   border: 1px solid var(--surface-border);
-  border-radius: 0.9rem;
+  border-radius: 0.72rem;
   background: var(--surface-strong);
-  padding: 0.95rem;
+  padding: 1rem;
   display: grid;
   gap: 0.72rem;
   box-shadow: var(--inset-highlight);
@@ -238,7 +291,7 @@
   margin: 0;
   padding: 1rem 1rem 1rem 2rem;
   border: 1px solid color-mix(in srgb, var(--surface-border) 76%, transparent);
-  border-radius: 0.9rem;
+  border-radius: 0.72rem;
   background: var(--surface-strong);
   color: color-mix(in srgb, var(--ink) 82%, var(--ink-muted));
   display: grid;
@@ -250,7 +303,7 @@
 .infoStrip {
   margin: 0;
   border: 1px solid color-mix(in srgb, var(--info-border) 76%, var(--surface-border));
-  border-radius: 0.82rem;
+  border-radius: 0.64rem;
   background: color-mix(in srgb, var(--info-bg) 64%, var(--surface-strong));
   padding: 0.85rem 0.95rem;
   color: var(--ink);
@@ -270,7 +323,7 @@
 .trainingIntro,
 .codePanel {
   border: 1px solid var(--surface-border);
-  border-radius: 0.95rem;
+  border-radius: 0.72rem;
   background: var(--surface-strong);
   box-shadow: var(--inset-highlight);
 }
@@ -304,7 +357,7 @@
 .message {
   margin: 0;
   border: 1px solid var(--surface-border);
-  border-radius: 0.82rem;
+  border-radius: 0.64rem;
   background: var(--surface);
   padding: 0.78rem 0.9rem;
   color: var(--ink);
@@ -2172,6 +2225,20 @@
 }
 
 @media (max-width: 640px) {
+  .homeCommandStats {
+    grid-template-columns: 1fr;
+  }
+
+  .homeHeroHeader,
+  .homeProgressMeta {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .homeStatusPill {
+    width: fit-content;
+  }
+
   .desktopOnly {
     display: none;
   }
