@@ -277,7 +277,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
 
                   if (!isEnabled) {
                     return (
-                      <span key={step.href} className={className} aria-disabled="true" title={step.label}>
+                      <span key={step.href} className={className} aria-disabled="true">
                         <span className={styles.navDot} aria-hidden="true" />
                         <span className={styles.navTitle}>{step.label}</span>
                         <span className={styles.navStateRow}>
@@ -288,7 +288,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                   }
 
                   return (
-                    <Link key={step.href} href={step.href} className={className} title={step.label} aria-current={isActive ? 'page' : undefined}>
+                    <Link key={step.href} href={step.href} className={className} aria-current={isActive ? 'page' : undefined}>
                       <span className={styles.navDot} aria-hidden="true" />
                       <span className={styles.navTitle}>{step.label}</span>
                       <span className={styles.navStateRow}>
@@ -354,7 +354,6 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                         key={course.id}
                         href={`/courses/${course.id}`}
                         className={`${styles.navItem} ${styles.navCourseItem} ${course.status === 'passed' ? styles.navDone : ''} ${router.asPath === `/courses/${course.id}` ? styles.navActive : ''}`}
-                        title={course.title}
                       >
                         <span className={styles.navDot} aria-hidden="true" />
                         <span className={styles.navTitle}>{course.title}</span>
