@@ -16,6 +16,20 @@ function ProfileContent() {
   const [profile, setProfile] = useState<OperatorProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [message, setMessage] = useState('');
+  const profileFields = profile
+    ? [
+        ['Full name', profile.full_name || 'Not set'],
+        ['Phone', profile.phone || 'Not set'],
+        ['Role', profile.role_title || 'Not set'],
+        ['City', profile.city || 'Not set'],
+        ['State', profile.state || 'Not set'],
+        ['Experience', profile.total_work_experience_years || 'Not set'],
+        ['Agro trade', profile.group_trading_experience_years || 'Not set'],
+        ['Language', profile.preferred_language || 'Not set'],
+        ['Official email', profile.official_company_email || 'Not set'],
+        ['Email', profile.email],
+      ]
+    : [];
 
   useEffect(() => {
     const load = async () => {
@@ -44,27 +58,23 @@ function ProfileContent() {
       progress={progress}
       loading={loadingProfile}
     >
-      <div className={styles.brandBanner}>
-        <div className={styles.brandLogo}>OBAOL</div>
-        <p className={styles.brandCaption}>Operator Profile Overview</p>
-      </div>
-
       {message ? <p className={`${styles.message} ${styles.messageError}`}>{message}</p> : null}
 
       {profile ? (
         <section className={styles.profileCard}>
-          <div className={styles.profileGrid}>
-            <div><strong>Full Name:</strong> {profile.full_name || 'Not set'}</div>
-            <div><strong>Phone:</strong> {profile.phone || 'Not set'}</div>
-            <div><strong>Role:</strong> {profile.role_title || 'Not set'}</div>
-            <div><strong>City:</strong> {profile.city || 'Not set'}</div>
-            <div><strong>State:</strong> {profile.state || 'Not set'}</div>
-            <div><strong>Experience:</strong> {profile.total_work_experience_years || 'Not set'}</div>
-            <div><strong>Agro Trade:</strong> {profile.group_trading_experience_years || 'Not set'}</div>
-            <div><strong>Language:</strong> {profile.preferred_language || 'Not set'}</div>
-            <div><strong>Official Email:</strong> {profile.official_company_email || 'Not set'}</div>
-            <div><strong>Email:</strong> {profile.email}</div>
-          </div>
+          <header className={styles.profileHeader}>
+            <h2>Profile overview</h2>
+            <p>Account and operator details currently saved for this workspace.</p>
+          </header>
+
+          <dl className={styles.profileGrid}>
+            {profileFields.map(([label, value]) => (
+              <div key={label} className={styles.profileField}>
+                <dt>{label}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
 
           <div className={styles.actionRow}>
             <Link href="/step6" className={styles.cta}>Update Profile Details</Link>

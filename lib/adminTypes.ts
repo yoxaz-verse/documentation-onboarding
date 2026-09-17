@@ -78,6 +78,14 @@ export type AdminOperatorDetail = {
     createdAt: string | null;
     updatedAt: string | null;
   };
+  record: {
+    name: string | null;
+    phone: string | null;
+    role: string | null;
+    location: string | null;
+    preferredLanguage: string | null;
+    updatedAt: string | null;
+  };
   summary: {
     displayName: string;
     latestActivityAt: string | null;

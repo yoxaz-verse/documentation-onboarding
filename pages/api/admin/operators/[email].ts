@@ -11,6 +11,18 @@ function formatFieldValue(value: string | null | undefined) {
   return normalized || 'Not provided';
 }
 
+function normalizeOptionalValue(value: string | null | undefined) {
+  const normalized = String(value || '').trim();
+  return normalized || null;
+}
+
+function latestTimestamp(...values: Array<string | null | undefined>) {
+  return values
+    .filter((value): value is string => Boolean(value))
+    .sort()
+    .reverse()[0] || null;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = requireAdminSession(req, res);
   if (!session) return;
@@ -90,11 +102,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const normalizedProgress = normalizeProgressRecord(progress);
   const completedMilestones = getCompletedMilestoneCount(progress);
   const currentStep = normalizedProgress?.current_step || 1;
-  const latestActivityAt =
-    [normalizedProgress?.updated_at, profile?.updated_at, submission?.updated_at, journeyState?.updated_at]
-      .filter(Boolean)
-      .sort()
-      .reverse()[0] || null;
+  const latestActivityAt = latestTimestamp(
+    normalizedProgress?.updated_at,
+    profile?.updated_at,
+    operator.updated_at,
+    submission?.updated_at,
+    journeyState?.updated_at
+  );
+  const profileName = normalizeOptionalValue(profile?.full_name);
+  const profilePhone = normalizeOptionalValue(profile?.phone);
+  const profileRole = normalizeOptionalValue(profile?.role_title);
+  const city = normalizeOptionalValue(profile?.city);
+  const state = normalizeOptionalValue(profile?.state);
+  const location = [city, state].filter(Boolean).join(', ') || null;
   const journeySummary = buildJourneySummary(
     journeyState as JourneyStateRecord | null,
     (journeyChecks || []) as JourneyCheckRecord[],
@@ -187,8 +207,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       createdAt: operator.created_at || null,
       updatedAt: operator.updated_at || null,
     },
+    record: {
+      name: profileName || normalizeOptionalValue(operator.name),
+      phone: profilePhone || normalizeOptionalValue(operator.phone),
+      role: profileRole || normalizeOptionalValue(operator.role),
+      location,
+      preferredLanguage: normalizeOptionalValue(profile?.preferred_language),
+      updatedAt: latestTimestamp(profile?.updated_at, operator.updated_at),
+    },
     summary: {
-      displayName: operator.name || profile?.full_name || operator.email,
+      displayName: profileName || normalizeOptionalValue(operator.name) || operator.email,
       latestActivityAt,
       currentStepLabel: getMilestone(Math.min(currentStep, MILESTONES.length))?.label || 'Step 1',
       progressState: completedMilestones >= MILESTONES.length ? 'completed' : completedMilestones > 0 ? 'in_progress' : 'not_started',

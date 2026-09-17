@@ -123,27 +123,27 @@ function DetailContent() {
                 <div className={styles.fieldGrid}>
                   <div className={styles.fieldPair}>
                     <span className={styles.fieldLabel}>Name</span>
-                    <span className={styles.fieldValue}>{detail.operator.name || 'N/A'}</span>
+                    <span className={styles.fieldValue}>{detail.record.name || 'N/A'}</span>
                   </div>
                   <div className={styles.fieldPair}>
                     <span className={styles.fieldLabel}>Phone</span>
-                    <span className={styles.fieldValue}>{detail.operator.phone || 'N/A'}</span>
+                    <span className={styles.fieldValue}>{detail.record.phone || 'N/A'}</span>
                   </div>
                   <div className={styles.fieldPair}>
                     <span className={styles.fieldLabel}>Role</span>
-                    <span className={styles.fieldValue}>{detail.operator.role || 'N/A'}</span>
+                    <span className={styles.fieldValue}>{detail.record.role || 'N/A'}</span>
                   </div>
                   <div className={styles.fieldPair}>
-                    <span className={styles.fieldLabel}>Company</span>
-                    <span className={styles.fieldValue}>{detail.operator.company || 'N/A'}</span>
+                    <span className={styles.fieldLabel}>Location</span>
+                    <span className={styles.fieldValue}>{detail.record.location || 'N/A'}</span>
                   </div>
                   <div className={styles.fieldPair}>
-                    <span className={styles.fieldLabel}>Timezone</span>
-                    <span className={styles.fieldValue}>{detail.operator.timezone || 'N/A'}</span>
+                    <span className={styles.fieldLabel}>Preferred language</span>
+                    <span className={styles.fieldValue}>{detail.record.preferredLanguage || 'N/A'}</span>
                   </div>
                   <div className={styles.fieldPair}>
                     <span className={styles.fieldLabel}>Last updated</span>
-                    <span className={styles.fieldValue}>{formatDate(detail.operator.updatedAt)}</span>
+                    <span className={styles.fieldValue}>{formatDate(detail.record.updatedAt)}</span>
                   </div>
                 </div>
               </article>

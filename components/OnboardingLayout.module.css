@@ -1,14 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap');
-
 .shell {
   height: 100dvh;
   overflow: hidden;
-  padding: clamp(0.8rem, 1.7vw, 1.25rem);
-  font-family: 'Inter', 'Avenir Next', 'Segoe UI', sans-serif;
-  background:
-    radial-gradient(42rem 42rem at 8% -16%, color-mix(in srgb, var(--info-bg) 88%, transparent), transparent 72%),
-    radial-gradient(34rem 34rem at 90% -8%, color-mix(in srgb, var(--accent-soft) 72%, transparent), transparent 76%),
-    linear-gradient(180deg, var(--bg-a) 0%, var(--bg-b) 45%, var(--bg-c) 100%);
+  padding: 1rem;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg-b);
   color: var(--ink);
 }
 
@@ -23,7 +18,7 @@
   min-height: 0;
   display: grid;
   grid-template-columns: clamp(16.25rem, 22vw, 20rem) minmax(0, 1fr);
-  gap: 0.85rem;
+  gap: 1rem;
   align-items: stretch;
   transition: grid-template-columns 180ms ease;
 }
@@ -47,14 +42,12 @@
   overflow: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
-  border-radius: 0.72rem;
-  padding: 0.62rem;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
   display: grid;
   align-content: start;
   gap: 0.28rem;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--surface-solid) 96%, transparent), color-mix(in srgb, var(--surface-alt) 88%, transparent)),
-    var(--surface-solid);
+  background: var(--surface-solid);
 }
 
 .sidebarHeader {
@@ -81,17 +74,16 @@
   flex: 0 0 auto;
   width: 2.25rem;
   height: 2.25rem;
-  border-radius: 0.5rem;
+  border-radius: 0.38rem;
   display: inline-grid;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--surface-border));
-  background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 88%, var(--accent-secondary)), var(--accent));
+  border: 1px solid var(--surface-border-strong);
+  background: var(--surface-alt);
   color: var(--accent-ink);
-  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
   font-size: 0.74rem;
-  font-weight: 900;
-  letter-spacing: 0.03em;
-  box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 18%, transparent);
+  font-weight: 800;
+  letter-spacing: 0;
+  box-shadow: none;
 }
 
 .brandText {
@@ -102,16 +94,15 @@
 
 .brandName {
   color: var(--ink-strong);
-  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
-  font-size: 0.98rem;
-  font-weight: 800;
+  font-size: 0.95rem;
+  font-weight: 700;
   line-height: 1;
 }
 
 .brandSubline {
   color: var(--ink-muted);
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.2;
 }
 
@@ -120,7 +111,7 @@
   width: 2.25rem;
   height: 2.25rem;
   border: 1px solid var(--control-border);
-  border-radius: 0.5rem;
+  border-radius: 0.38rem;
   background: var(--control-surface);
   color: var(--ink-strong);
   display: inline-grid;
@@ -131,8 +122,8 @@
 
 .sidebarToggle:hover {
   border-color: var(--control-border-hover);
-  background: color-mix(in srgb, var(--control-surface-strong) 80%, var(--accent-soft));
-  transform: translateY(-1px);
+  background: var(--surface-alt);
+  transform: none;
 }
 
 .sidebarToggle:focus-visible {
@@ -156,10 +147,10 @@
 .mobileSubsectionTitle {
   margin: 0.72rem 0.36rem 0.06rem;
   color: var(--ink-soft);
-  font-size: 0.66rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 800;
+  letter-spacing: 0.08em;
+  font-weight: 700;
 }
 
 .navSubgroupTitle,
@@ -170,9 +161,9 @@
 .navItem {
   min-width: 0;
   border: 1px solid transparent;
-  border-radius: 0.5rem;
+  border-radius: 0.38rem;
   color: var(--ink-strong);
-  padding: 0.52rem 0.62rem;
+  padding: 0.5rem 0.58rem;
   text-decoration: none;
   min-height: 3rem;
   display: grid;
@@ -185,8 +176,8 @@
 }
 
 .navItem:hover {
-  border-color: color-mix(in srgb, var(--control-border-hover) 50%, transparent);
-  background: color-mix(in srgb, var(--surface-strong) 76%, var(--info-bg));
+  border-color: var(--surface-border);
+  background: var(--surface-alt);
   transform: none;
 }
 
@@ -206,7 +197,7 @@
 
 .navTitle {
   min-width: 0;
-  font-weight: 800;
+  font-weight: 650;
   font-size: 0.8rem;
   line-height: 1.2;
   overflow: hidden;
@@ -222,7 +213,7 @@
   min-width: 0;
   color: var(--ink-muted);
   font-size: 0.66rem;
-  font-weight: 650;
+  font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -249,14 +240,13 @@
 }
 
 .navPriorityItem {
-  border-color: color-mix(in srgb, var(--accent) 38%, var(--surface-border));
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--accent-soft) 70%, var(--surface-solid)), color-mix(in srgb, var(--info-bg) 36%, var(--surface-solid)));
+  border-color: var(--surface-border);
+  background: var(--surface-alt);
 }
 
 .navSummaryLine {
   border: 1px solid color-mix(in srgb, var(--surface-border) 80%, transparent);
-  border-radius: 0.5rem;
+  border-radius: 0.38rem;
   background: color-mix(in srgb, var(--surface-alt) 76%, transparent);
   padding: 0.5rem 0.58rem;
   display: grid;
@@ -274,13 +264,13 @@
 .navSummaryLine span {
   color: var(--ink-muted);
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .navSummaryLine strong {
   color: var(--ink-strong);
   font-size: 0.78rem;
-  font-weight: 850;
+  font-weight: 700;
 }
 
 .navCourseItem {
@@ -301,10 +291,9 @@
 }
 
 .navActive {
-  border-color: color-mix(in srgb, var(--control-focus) 46%, var(--surface-border));
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--accent-soft) 70%, var(--surface-solid)), color-mix(in srgb, var(--surface-strong) 82%, var(--info-bg)));
-  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--accent) 92%, var(--accent-secondary));
+  border-color: color-mix(in srgb, var(--control-focus) 34%, var(--surface-border));
+  background: color-mix(in srgb, var(--accent-soft) 58%, var(--surface-solid));
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .navActive .navDot {
@@ -380,11 +369,9 @@
   height: 100%;
   overflow: auto;
   overscroll-behavior: contain;
-  border-radius: 0.72rem;
-  padding: clamp(1rem, 1.6vw, 1.4rem);
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--surface-solid) 94%, transparent), color-mix(in srgb, var(--surface-alt) 88%, transparent)),
-    var(--surface-solid);
+  border-radius: 0.5rem;
+  padding: clamp(1.2rem, 1.8vw, 1.75rem);
+  background: var(--surface-solid);
 }
 
 .workspaceHeader {
@@ -402,20 +389,20 @@
 
 .workspaceEyebrow {
   margin: 0 0 0.32rem;
-  color: var(--accent-strong);
+  color: var(--ink-soft);
   font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .heading {
   margin: 0;
-  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
   color: var(--ink-strong);
-  font-size: clamp(1.55rem, 2.15vw, 2.25rem);
-  line-height: 1.05;
+  font-size: clamp(1.65rem, 2.1vw, 2.15rem);
+  line-height: 1.15;
   letter-spacing: 0;
+  font-weight: 750;
 }
 
 .subtitle {
@@ -444,13 +431,13 @@
   align-items: center;
   justify-content: center;
   min-height: 2.35rem;
-  border-radius: 0.55rem;
+  border-radius: 0.38rem;
   border: 1px solid var(--control-border);
   background: var(--control-surface);
   color: var(--ink-strong);
   text-decoration: none;
   font-size: 0.82rem;
-  font-weight: 800;
+  font-weight: 650;
   padding: 0.52rem 0.82rem;
   transition: border-color 170ms ease, background-color 170ms ease, transform 170ms ease;
 }
@@ -458,8 +445,8 @@
 .profileLink:hover,
 .logoutButton:hover:enabled {
   border-color: var(--control-border-hover);
-  background: color-mix(in srgb, var(--control-surface-strong) 78%, var(--accent-soft));
-  transform: translateY(-1px);
+  background: var(--surface-alt);
+  transform: none;
 }
 
 .profileLink:focus-visible,
@@ -475,8 +462,8 @@
 }
 
 .profileLinkActive {
-  border-color: color-mix(in srgb, var(--control-focus) 58%, var(--line-strong));
-  background: color-mix(in srgb, var(--accent-soft) 72%, var(--control-surface));
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-soft) 68%, var(--control-surface));
 }
 
 .content {
@@ -495,7 +482,7 @@
 .compactNavItem {
   min-width: 0;
   border: 1px solid var(--surface-border);
-  border-radius: 0.54rem;
+  border-radius: 0.38rem;
   background: color-mix(in srgb, var(--surface-strong) 82%, transparent);
   color: var(--ink-muted);
   text-decoration: none;
@@ -515,7 +502,7 @@
 .compactNavItem span {
   color: var(--ink-strong);
   font-size: 0.82rem;
-  font-weight: 850;
+  font-weight: 700;
 }
 
 .compactNavItem small {
@@ -542,15 +529,15 @@
 }
 
 .supportingInner {
-  border-radius: 0.72rem;
+  border-radius: 0.5rem;
   padding: 1rem;
 }
 
 .sideTitle {
   margin: 0;
   color: var(--ink-strong);
-  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
   font-size: 1rem;
+  font-weight: 700;
 }
 
 .sideSubtitle {
