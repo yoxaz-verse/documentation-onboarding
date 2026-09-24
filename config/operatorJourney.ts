@@ -258,11 +258,11 @@ const daySeeds: DaySeed[] = [
     buttonText: 'Confirm System Access',
     completionMessage: 'Your operator journey has started. From Day 2 onward, you will begin understanding the OBAOL execution model and your role inside the system.',
     formFields: [
-      baseField('dashboardReviewed', 'I opened and reviewed the operator dashboard', 'select', true, yesNo),
-      baseField('profileReviewed', 'I reviewed my operator profile', 'select', true, yesNo),
-      baseField('courseLibraryOpened', 'I opened and reviewed the course library', 'select', true, yesNo),
-      baseField('journeyPageOpened', 'I reviewed the 30-day journey workflow', 'select', true, yesNo),
-      baseField('communicationConfirmed', 'I confirmed access to the operator WhatsApp group', 'select', true, yesNo),
+      baseField('dashboardReviewed', 'I opened and reviewed the operator dashboard', 'select', true, ['Yes']),
+      baseField('profileReviewed', 'I reviewed my operator profile', 'select', true, ['Yes']),
+      baseField('courseLibraryOpened', 'I opened and reviewed the course library', 'select', true, ['Yes']),
+      baseField('journeyPageOpened', 'I reviewed the 30-day journey workflow', 'select', true, ['Yes']),
+      baseField('communicationConfirmed', 'I confirmed access to the operator WhatsApp group', 'select', true, ['Yes']),
       baseField('accessIssue', 'Any access issue', 'textarea', false),
       noteField('confirmationNote', 'Operator confirmation note'),
     ],
@@ -461,14 +461,24 @@ const momentumSeeds: DaySeed[] = [
 ];
 
 function toDayTemplate(seed: DaySeed): JourneyDayTemplate {
+  const tasks = seed.tasks.map((item, index): JourneyTask => typeof item === 'string'
+    ? {
+        title: item,
+        instruction: `Complete this action carefully, then record the result in the daily submission below. This is guide step ${index + 1} for Day ${seed.day}.`,
+      }
+    : item);
+
+  if (seed.href && !tasks.some((task) => task.href)) {
+    tasks[0] = {
+      ...tasks[0],
+      href: seed.href,
+      actionLabel: seed.actionLabel || 'Open related page',
+    };
+  }
+
   return {
     ...seed,
-    tasks: seed.tasks.map((item, index) => typeof item === 'string'
-      ? {
-          title: item,
-          instruction: `Complete this action carefully, then record the result in the daily submission below. This is guide step ${index + 1} for Day ${seed.day}.`,
-        }
-      : item),
+    tasks,
     phase: phaseByDay(seed.day),
     isActive: true,
     reviewRequired: seed.reviewRequired ?? seed.day >= reviewRequiredFromDay,

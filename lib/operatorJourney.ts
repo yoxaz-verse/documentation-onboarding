@@ -151,6 +151,12 @@ function normalizeTemplateRow(row: Partial<JourneyTemplateRecord>): JourneyDayTe
   const title = String(row.title || base.title || '').trim();
   const description = String(row.description || base.description || '').trim();
   if (!id || !day || !title || !description) return null;
+  const href = String(row.href || base.href || '').trim() || undefined;
+  const actionLabel = String(row.action_label || base.actionLabel || '').trim() || undefined;
+  const tasks = normalizeJourneyTasks(base.tasks, fallback?.tasks || []);
+  if (href && tasks.length && !tasks.some((task) => task.href)) {
+    tasks[0] = { ...tasks[0], href, actionLabel: actionLabel || 'Open related page' };
+  }
 
   return {
     ...base,
@@ -159,13 +165,13 @@ function normalizeTemplateRow(row: Partial<JourneyTemplateRecord>): JourneyDayTe
     title,
     description,
     category: (row.category as JourneyMilestone['category']) || base.category,
-    href: String(row.href || base.href || '').trim() || undefined,
-    actionLabel: String(row.action_label || base.actionLabel || '').trim() || undefined,
+    href,
+    actionLabel,
     isActive: row.is_active !== false,
     reviewRequired: row.review_required ?? base.reviewRequired,
     buttonText: String(row.button_text || base.buttonText || '').trim() || base.buttonText,
     completionMessage: String(row.completion_message || base.completionMessage || '').trim() || base.completionMessage,
-    tasks: normalizeJourneyTasks(base.tasks, fallback?.tasks || []),
+    tasks,
     formFields: Array.isArray(base.formFields) ? base.formFields : [],
     repeatGroups: Array.isArray(base.repeatGroups) ? base.repeatGroups : [],
   };
