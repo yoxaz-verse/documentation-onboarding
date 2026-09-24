@@ -158,6 +158,54 @@
   margin-top: 0.35rem;
 }
 
+.navGroupToggle {
+  width: calc(100% - 0.72rem);
+  border: 0;
+  padding: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.navGroupToggle:hover {
+  color: var(--ink-strong);
+}
+
+.navGroupToggle:focus-visible {
+  outline: none;
+  border-radius: 0.25rem;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--control-focus) 28%, transparent);
+}
+
+.navGroupToggle svg {
+  flex: 0 0 auto;
+  width: 0.9rem;
+  height: 0.9rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 170ms ease;
+}
+
+.navGroupChevronCollapsed {
+  transform: rotate(-90deg);
+}
+
+.onboardingSteps {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.onboardingSteps[hidden] {
+  display: none;
+}
+
 .navItem {
   min-width: 0;
   border: 1px solid transparent;
@@ -475,7 +523,7 @@
 .compactNav {
   display: none;
   margin-top: 0.8rem;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.48rem;
 }
 
@@ -605,8 +653,8 @@
   right: 0.72rem;
   bottom: calc(0.72rem + env(safe-area-inset-bottom, 0));
   z-index: 35;
-  grid-template-columns: repeat(auto-fit, minmax(3.4rem, 1fr));
-  gap: 0.45rem;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.28rem;
   padding: 0.52rem;
   border: 1px solid var(--surface-border);
   border-radius: 0.9rem;
@@ -707,6 +755,7 @@
 @media (prefers-reduced-motion: reduce) {
   .layout,
   .sidebarToggle,
+  .navGroupToggle svg,
   .navItem,
   .profileLink,
   .logoutButton,

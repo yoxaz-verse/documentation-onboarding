@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import ThemeToggle from '../../components/theme/ThemeToggle';
+import { LoadingButtonContent } from '../../components/LoadingState';
 import styles from './login.module.css';
 
 function getStatusTone(message: string): 'info' | 'success' | 'error' {
@@ -110,7 +111,7 @@ export default function AdminLoginPage() {
             />
 
             <button className={styles.primaryButton} type="submit" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? <LoadingButtonContent label="Signing in…" /> : 'Sign in'}
             </button>
           </form>
 

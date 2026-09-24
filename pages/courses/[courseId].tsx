@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
 import AuthGate from '../../components/AuthGate';
 import OnboardingLayout from '../../components/OnboardingLayout';
+import LoadingState from '../../components/LoadingState';
 import QuizModule from '../../components/QuizModule';
 import styles from '../onboarding.module.css';
 import { getCourseById, getSubModuleById } from '../../config/courses';
@@ -116,7 +117,7 @@ function ClassroomDetailContent() {
   if (!ready) {
     return (
       <OnboardingLayout title="Classroom" subtitle="Loading your course classroom..." loading>
-        <p className={styles.message}>Loading classroom...</p>
+        <LoadingState title="Opening your classroom" message="Loading lessons, progress, and course details…" preset="list" />
       </OnboardingLayout>
     );
   }

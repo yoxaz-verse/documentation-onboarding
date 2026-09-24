@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import styles from './AuthGate.module.css';
+import LoadingState from './LoadingState';
 
 type AdminUser = {
   username: string;
@@ -61,19 +62,7 @@ export default function AdminGate({ children }: AdminGateProps) {
   }, [router]);
 
   if (loading) {
-    return (
-      <main className={styles.loadingPage} role="status" aria-live="polite" aria-busy="true">
-        <div className={styles.glowA} aria-hidden="true" />
-        <div className={styles.glowB} aria-hidden="true" />
-        <section className={styles.statusCard}>
-          <div className={styles.statusRow}>
-            <span className={styles.spinner} aria-hidden="true" />
-            <h1 className={styles.heading}>Checking admin session</h1>
-          </div>
-          <p className={styles.message}>Opening admin dashboard...</p>
-        </section>
-      </main>
-    );
+    return <LoadingState variant="page" title="Checking admin session" message="Opening the admin dashboard…" />;
   }
 
   if (!user) {
@@ -83,7 +72,6 @@ export default function AdminGate({ children }: AdminGateProps) {
         <div className={styles.glowB} aria-hidden="true" />
         <section className={styles.statusCard}>
           <div className={styles.statusRow}>
-            <span className={styles.spinner} aria-hidden="true" />
             <h1 className={styles.heading}>Redirecting to admin login</h1>
           </div>
           <p className={styles.message}>Please sign in with admin credentials.</p>

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import ThemeToggle from '../components/theme/ThemeToggle';
 import authStyles from '../components/AuthGate.module.css';
 import OnboardingLayout from '../components/OnboardingLayout';
+import LoadingState from '../components/LoadingState';
 import styles from './onboarding.module.css';
 import { isHttpError, isUnauthorizedError } from '../lib/http';
 import { areCoursesUnlocked, getCompletedMilestoneCount, getNextMilestone, MILESTONES } from '../lib/onboarding';
@@ -145,7 +146,7 @@ function HomeContent({ user, onSessionExpired }: HomeContentProps) {
       loading={loadingProgress}
     >
       {loadingProgress ? (
-        <p className={styles.message}>Loading workspace progress...</p>
+        <LoadingState title="Preparing your dashboard" message="Loading workspace progress and your next required action…" preset="metrics" />
       ) : (
         <>
       {message ? <p className={`${styles.message} ${styles.messageError}`}>{message}</p> : null}
@@ -248,19 +249,7 @@ export default function HomePage() {
   }, []);
 
   if (state.status === 'loading') {
-    return (
-      <main className={authStyles.loadingPage}>
-        <div className={authStyles.glowA} aria-hidden="true" />
-        <div className={authStyles.glowB} aria-hidden="true" />
-        <section className={authStyles.statusCard}>
-          <div className={authStyles.statusRow}>
-            <span className={authStyles.spinner} aria-hidden="true" />
-            <h1 className={authStyles.heading}>Loading home</h1>
-          </div>
-          <p className={authStyles.message}>Checking your session and preparing the correct landing view...</p>
-        </section>
-      </main>
-    );
+    return <LoadingState variant="page" title="Loading home" message="Checking your session and preparing the correct landing view…" />;
   }
 
   if (state.status === 'signed_out') {

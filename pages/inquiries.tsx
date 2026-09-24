@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import AuthGate from '../components/AuthGate';
 import OnboardingLayout from '../components/OnboardingLayout';
+import LoadingState from '../components/LoadingState';
 import { isUnauthorizedError } from '../lib/http';
 import { areCoursesUnlocked } from '../lib/onboarding';
 import { getProgressBundle } from '../lib/progress';
@@ -91,7 +92,7 @@ function InquiriesContent({ user }: { user: SessionUser }) {
       courseProgress={courseProgress}
       loading={loading}
     >
-      {state.status === 'loading' ? <p className={styles.message}>Loading live inquiries...</p> : null}
+      {state.status === 'loading' ? <LoadingState title="Opening the inquiry board" message="Loading current requests and quantities…" preset="list" /> : null}
       {state.status === 'error' ? <p className={`${styles.message} ${styles.messageError}`}>{state.message}</p> : null}
 
       {state.status === 'ready' && locked ? (

@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import type { CourseSubModule } from '../config/courses';
 import styles from './QuizModule.module.css';
+import { LoadingButtonContent } from './LoadingState';
 
 type Props = {
   subModule: CourseSubModule;
@@ -147,10 +148,10 @@ export default function QuizModule({ subModule, initialAnswers = {}, onUpdated, 
         ) : (
           <div className={styles.actionRow}>
             <button type="button" className={styles.secondary} disabled={saving || submitting} onClick={saveDraft}>
-              {saving ? 'Saving...' : 'Save progress'}
+              {saving ? <LoadingButtonContent label="Saving…" /> : 'Save progress'}
             </button>
             <button type="submit" className={styles.submit} disabled={submitting || saving}>
-              {submitting ? 'Submitting...' : 'Submit quiz'}
+              {submitting ? <LoadingButtonContent label="Submitting…" /> : 'Submit quiz'}
             </button>
           </div>
         )}

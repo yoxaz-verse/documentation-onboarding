@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { areCoursesUnlocked, canAccessStep, getCompletedMilestoneCount, isMilestoneCompleted, MILESTONES, type MilestoneNumber } from '../lib/onboarding';
 import type { CourseProgressSummary, ProgressRecord } from '../lib/types';
 import ThemeToggle from './theme/ThemeToggle';
+import { LoadingButtonContent } from './LoadingState';
 import styles from './OnboardingLayout.module.css';
 
 type Props = {
@@ -23,10 +24,10 @@ type StepDef = {
   state: string;
 };
 
-type MobileTabIcon = 'home' | 'steps' | 'journey' | 'inquiries' | 'courses' | 'profile';
+type MobileTabIcon = 'home' | 'steps' | 'journey' | 'inquiries' | 'courses' | 'profile' | 'support';
 
 type MobileTabDef = {
-  key: 'home' | 'steps' | 'journey' | 'inquiries' | 'courses' | 'profile';
+  key: 'home' | 'steps' | 'journey' | 'inquiries' | 'courses' | 'profile' | 'support';
   label: string;
   href: string;
   active: boolean;
@@ -35,6 +36,8 @@ type MobileTabDef = {
 };
 
 const SIDEBAR_STORAGE_KEY = 'obaol:onboarding-sidebar-collapsed';
+const ONBOARDING_STEPS_STORAGE_KEY = 'obaol:onboarding-steps-collapsed';
+const ONBOARDING_STEPS_ID = 'onboarding-sidebar-steps';
 
 function getCourseStatusLabel(status: 'locked' | 'in_progress' | 'passed') {
   if (status === 'passed') return 'Passed';
@@ -98,6 +101,17 @@ function MobileTabIconGlyph({ icon }: { icon: MobileTabIcon }) {
     );
   }
 
+  if (icon === 'support') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M4 13v-2a8 8 0 0 1 16 0v2" />
+        <path d="M4 13a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2v-2Z" />
+        <path d="M20 13a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2v-2Z" />
+        <path d="M17 17c0 2-1.5 3-4 3" />
+      </svg>
+    );
+  }
+
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M19 21a7 7 0 0 0-14 0" />
@@ -110,10 +124,12 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [onboardingStepsCollapsed, setOnboardingStepsCollapsed] = useState(false);
   const inClassroom = router.pathname === '/courses' || router.pathname.startsWith('/courses/');
   const inJourney = router.pathname === '/journey';
   const inInquiries = router.pathname === '/inquiries';
   const inProfile = router.pathname === '/profile';
+  const inSupport = router.pathname === '/support';
   const activeStep = MILESTONES.find((milestone) => router.pathname === milestone.route) || null;
   const coursesUnlocked = loading ? false : areCoursesUnlocked(progress ?? null);
   const completedSteps = loading ? 0 : getCompletedMilestoneCount(progress ?? null);
@@ -157,6 +173,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
     { key: 'inquiries', label: 'Inquiries', href: coursesUnlocked ? '/inquiries' : '/step10', active: inInquiries, meta: coursesUnlocked ? 'Live orders' : 'Locked' },
     { key: 'courses', label: 'Courses', href: '/courses', active: inClassroom, meta: coursesUnlocked ? 'Library' : 'Locked' },
     { key: 'profile', label: 'Profile', href: '/profile', active: inProfile, meta: 'Account' },
+    { key: 'support', label: 'Support', href: '/support', active: inSupport, meta: 'Contact team' },
   ];
   const mobileTabs: MobileTabDef[] = loading
     ? [
@@ -166,6 +183,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
         { key: 'inquiries', label: 'Inquiries', href: '/step10', active: inInquiries, meta: 'Locked', icon: 'inquiries' },
         { key: 'courses', label: 'Courses', href: '/courses', active: inClassroom, meta: 'Checking', icon: 'courses' },
         { key: 'profile', label: 'Profile', href: '/profile', active: inProfile, meta: 'Account', icon: 'profile' },
+        { key: 'support', label: 'Support', href: '/support', active: inSupport, meta: 'Help', icon: 'support' },
       ]
     : [
         { key: 'home', label: 'Home', href: '/', active: router.pathname === '/', meta: 'Workspace', icon: 'home' },
@@ -174,6 +192,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
         { key: 'inquiries', label: 'Inquiries', href: coursesUnlocked ? '/inquiries' : '/step10', active: inInquiries, meta: coursesUnlocked ? 'Live' : 'Locked', icon: 'inquiries' },
         { key: 'courses', label: 'Courses', href: '/courses', active: inClassroom, meta: coursesUnlocked ? 'Library' : 'Locked', icon: 'courses' },
         { key: 'profile', label: 'Profile', href: '/profile', active: inProfile, meta: 'Account', icon: 'profile' },
+        { key: 'support', label: 'Support', href: '/support', active: inSupport, meta: 'Help', icon: 'support' },
       ];
 
   useEffect(() => {
@@ -184,11 +203,34 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
     }
   }, []);
 
+  useEffect(() => {
+    if (loading) return;
+
+    try {
+      const savedPreference = window.localStorage.getItem(ONBOARDING_STEPS_STORAGE_KEY);
+      setOnboardingStepsCollapsed(savedPreference === null ? coursesUnlocked : savedPreference === 'true');
+    } catch {
+      setOnboardingStepsCollapsed(coursesUnlocked);
+    }
+  }, [coursesUnlocked, loading]);
+
   const toggleSidebar = () => {
     setSidebarCollapsed((current) => {
       const next = !current;
       try {
         window.localStorage.setItem(SIDEBAR_STORAGE_KEY, String(next));
+      } catch {
+        // Non-critical preference; keep the in-memory state even if storage is unavailable.
+      }
+      return next;
+    });
+  };
+
+  const toggleOnboardingSteps = () => {
+    setOnboardingStepsCollapsed((current) => {
+      const next = !current;
+      try {
+        window.localStorage.setItem(ONBOARDING_STEPS_STORAGE_KEY, String(next));
       } catch {
         // Non-critical preference; keep the in-memory state even if storage is unavailable.
       }
@@ -265,39 +307,52 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                   <strong>{coursesUnlocked ? 'Training open' : 'Training locked'}</strong>
                 </div>
 
-                <p className={styles.navGroupTitle}>Onboarding steps</p>
-                {stepDefs.map((step) => {
-                  const isActive = router.pathname === step.href;
-                  const isDone = isMilestoneCompleted(progress, step.key);
-                  const isEnabled = canAccessStep(progress ?? null, step.key);
-                  const stateLabel = isActive ? 'Current' : isDone ? 'Done' : isEnabled ? 'Open' : 'Locked';
-                  const className = `${styles.navItem} ${isActive ? styles.navActive : ''} ${isDone ? styles.navDone : ''} ${
-                    !isEnabled ? styles.navDisabled : ''
-                  }`;
+                <button
+                  type="button"
+                  className={`${styles.navGroupTitle} ${styles.navGroupToggle}`}
+                  onClick={toggleOnboardingSteps}
+                  aria-expanded={!onboardingStepsCollapsed}
+                  aria-controls={ONBOARDING_STEPS_ID}
+                >
+                  <span>Onboarding steps</span>
+                  <svg className={onboardingStepsCollapsed ? styles.navGroupChevronCollapsed : ''} viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </button>
+                <div id={ONBOARDING_STEPS_ID} className={styles.onboardingSteps} hidden={onboardingStepsCollapsed}>
+                  {stepDefs.map((step) => {
+                    const isActive = router.pathname === step.href;
+                    const isDone = isMilestoneCompleted(progress, step.key);
+                    const isEnabled = canAccessStep(progress ?? null, step.key);
+                    const stateLabel = isActive ? 'Current' : isDone ? 'Done' : isEnabled ? 'Open' : 'Locked';
+                    const className = `${styles.navItem} ${isActive ? styles.navActive : ''} ${isDone ? styles.navDone : ''} ${
+                      !isEnabled ? styles.navDisabled : ''
+                    }`;
 
-                  if (!isEnabled) {
+                    if (!isEnabled) {
+                      return (
+                        <span key={step.href} className={className} aria-disabled="true">
+                          <span className={styles.navDot} aria-hidden="true" />
+                          <span className={styles.navTitle}>{step.label}</span>
+                          <span className={styles.navStateRow}>
+                            <span className={styles.navState}>{stateLabel}</span>
+                          </span>
+                        </span>
+                      );
+                    }
+
                     return (
-                      <span key={step.href} className={className} aria-disabled="true">
+                      <Link key={step.href} href={step.href} className={className} aria-current={isActive ? 'page' : undefined}>
                         <span className={styles.navDot} aria-hidden="true" />
                         <span className={styles.navTitle}>{step.label}</span>
                         <span className={styles.navStateRow}>
                           <span className={styles.navState}>{stateLabel}</span>
+                          {isActive ? <span className={styles.navChip}>Now</span> : null}
                         </span>
-                      </span>
+                      </Link>
                     );
-                  }
-
-                  return (
-                    <Link key={step.href} href={step.href} className={className} aria-current={isActive ? 'page' : undefined}>
-                      <span className={styles.navDot} aria-hidden="true" />
-                      <span className={styles.navTitle}>{step.label}</span>
-                      <span className={styles.navStateRow}>
-                        <span className={styles.navState}>{stateLabel}</span>
-                        {isActive ? <span className={styles.navChip}>Now</span> : null}
-                      </span>
-                    </Link>
-                  );
-                })}
+                  })}
+                </div>
 
                 <p className={styles.navGroupTitle}>Operator journey</p>
                 {coursesUnlocked ? (
@@ -384,6 +439,14 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                     {inProfile ? <span className={styles.navChip}>Now</span> : null}
                   </span>
                 </Link>
+                <Link href="/support" className={`${styles.navItem} ${inSupport ? styles.navActive : ''}`}>
+                  <span className={styles.navDot} aria-hidden="true" />
+                  <span className={styles.navTitle}>Operator support</span>
+                  <span className={styles.navStateRow}>
+                    <span className={styles.navState}>Call or WhatsApp the team</span>
+                    {inSupport ? <span className={styles.navChip}>Now</span> : null}
+                  </span>
+                </Link>
               </>
             )}
           </nav>
@@ -400,7 +463,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                   Profile
                 </Link>
                 <button type="button" className={`${styles.logoutButton} ${styles.desktopAction}`} onClick={handleLogout} disabled={loggingOut}>
-                  {loggingOut ? 'Logging out...' : 'Log out'}
+                  {loggingOut ? <LoadingButtonContent label="Logging out…" /> : 'Log out'}
                 </button>
                 <div className={styles.desktopAction}>
                   <ThemeToggle size="sm" variant="surface" />

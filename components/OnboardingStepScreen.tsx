@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import OnboardingLayout from './OnboardingLayout';
+import LoadingState, { LoadingButtonContent } from './LoadingState';
+import SupportContactList from './SupportContactList';
 import styles from '../pages/onboarding.module.css';
 import { isUnauthorizedError } from '../lib/http';
 import {
@@ -479,7 +481,7 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
         </label>
         <div className={styles.actionRow}>
           <button type="button" className={styles.primaryButton} onClick={saveExperience} disabled={saving}>
-            {saving ? 'Saving...' : 'Save and continue'}
+            {saving ? <LoadingButtonContent label="Saving…" /> : 'Save and continue'}
           </button>
         </div>
       </section>
@@ -503,7 +505,7 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
         </label>
         <div className={styles.actionRow}>
           <button type="button" className={styles.primaryButton} onClick={confirmWhatsappJoin} disabled={saving}>
-            {saving ? 'Saving...' : 'Confirm and continue'}
+            {saving ? <LoadingButtonContent label="Saving…" /> : 'Confirm and continue'}
           </button>
         </div>
       </section>
@@ -527,7 +529,7 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
         </label>
         <div className={styles.actionRow}>
           <button type="button" className={styles.primaryButton} onClick={confirmOperatorRegistration} disabled={saving}>
-            {saving ? 'Saving...' : 'Confirm registration and continue'}
+            {saving ? <LoadingButtonContent label="Saving…" /> : 'Confirm registration and continue'}
           </button>
         </div>
       </section>
@@ -539,13 +541,17 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
             Confirm that you joined the official operator WhatsApp group and reviewed how it should be used. This keeps team communication focused and useful for everyone.
           </p>
         </section>
+        <SupportContactList
+          title="Need onboarding or operator support?"
+          description="Contact an available team member before confirming your communication readiness."
+        />
         <label className={styles.message}>
           <input type="checkbox" checked={communicationReady} onChange={(event) => setCommunicationReady(event.target.checked)} />
           {' '}I joined the WhatsApp group and reviewed the communication guidelines.
         </label>
         <div className={styles.actionRow}>
           <button type="button" className={styles.primaryButton} onClick={confirmCommunicationReadiness} disabled={saving}>
-            {saving ? 'Saving...' : 'Confirm readiness and continue'}
+            {saving ? <LoadingButtonContent label="Saving…" /> : 'Confirm readiness and continue'}
           </button>
         </div>
       </section>
@@ -569,7 +575,7 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
         </div>
         <div className={styles.actionRow}>
           <button type="button" className={styles.primaryButton} onClick={openCourses} disabled={saving}>
-            {saving ? 'Opening...' : 'Open operator courses'}
+            {saving ? <LoadingButtonContent label="Opening…" /> : 'Open operator courses'}
           </button>
         </div>
       </section>
@@ -578,7 +584,7 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
         {infoCards[step]}
         <div className={styles.actionRow}>
           <button type="button" className={step === 2 ? `${styles.primaryButton} ${styles.followUpButton}` : styles.primaryButton} onClick={advance} disabled={saving || !canContinue}>
-            {saving ? 'Saving...' : step === 2 ? '2. I reviewed it, continue' : step === 5 ? 'I am comfortable, continue' : 'Continue'}
+            {saving ? <LoadingButtonContent label="Saving…" /> : step === 2 ? '2. I reviewed it, continue' : step === 5 ? 'I am comfortable, continue' : 'Continue'}
           </button>
         </div>
       </>
@@ -611,7 +617,7 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
 
       {message ? <p className={`${styles.message} ${messageTone}`}>{message}</p> : null}
 
-      {loading ? <p className={styles.message}>Loading onboarding step...</p> : stepContent}
+      {loading ? <LoadingState title={`Preparing Step ${milestone.number}`} message="Loading your saved progress and the next checkpoint…" preset="form" /> : stepContent}
 
     </OnboardingLayout>
   );

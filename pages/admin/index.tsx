@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import AdminGate from '../../components/AdminGate';
+import LoadingState from '../../components/LoadingState';
 import ThemeToggle from '../../components/theme/ThemeToggle';
 import type { AdminJourneyTrackStatus, AdminOnboardingStepStatus, AdminOperatorRow, AdminOverview } from '../../lib/adminTypes';
 import styles from './admin.module.css';
@@ -137,6 +138,7 @@ function DashboardContent() {
           </div>
           <div className={styles.actions}>
             <Link className={styles.linkButton} href="/admin/inquiries">Live Inquiries</Link>
+            <Link className={styles.linkButton} href="/admin/support-contacts">Support Contacts</Link>
             <Link className={styles.linkButton} href="/admin/journey">Edit Journey</Link>
             <Link className={styles.linkButton} href="/">Operator View</Link>
             <ThemeToggle size="sm" variant="surface" />
@@ -300,6 +302,9 @@ function DashboardContent() {
             </div>
           </div>
 
+          {loading ? (
+            <LoadingState variant="table" title="Loading operators" message="Refreshing progress, journey, and submission status…" />
+          ) : (
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead>
@@ -372,6 +377,7 @@ function DashboardContent() {
               </tbody>
             </table>
           </div>
+          )}
         </section>
       </div>
     </main>

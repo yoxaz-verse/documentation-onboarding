@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import AuthGate from '../components/AuthGate';
 import OnboardingLayout from '../components/OnboardingLayout';
+import LoadingState from '../components/LoadingState';
 import styles from './onboarding.module.css';
 import { isUnauthorizedError } from '../lib/http';
 import { areCoursesUnlocked } from '../lib/onboarding';
@@ -81,7 +82,7 @@ function ProfileContent() {
           </div>
         </section>
       ) : (
-        <p className={styles.message}>Loading profile...</p>
+        loadingProfile ? <LoadingState title="Preparing your profile" message="Loading your account and operator details…" preset="form" /> : null
       )}
     </OnboardingLayout>
   );

@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import ThemeToggle from '../../components/theme/ThemeToggle';
+import { LoadingButtonContent } from '../../components/LoadingState';
 import styles from './login.module.css';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -334,7 +335,7 @@ export default function LoginPage() {
                 </svg>
               </div>
               <button type="submit" className={styles.button} disabled={loading}>
-                <span>{loading ? 'Please wait...' : 'Send OTP'}</span>
+                {loading ? <LoadingButtonContent label="Sending OTP…" /> : <span>Send OTP</span>}
                 {!loading && (
                   <svg className={styles.buttonIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="5" y1="12" x2="19" y2="12" />
@@ -411,7 +412,7 @@ export default function LoginPage() {
                   </button>
                 </div>
                 <button type="submit" className={styles.button} disabled={loading}>
-                  <span>{loading ? 'Please wait...' : 'Verify OTP'}</span>
+                  {loading ? <LoadingButtonContent label="Verifying…" /> : <span>Verify OTP</span>}
                   {!loading && (
                     <svg className={styles.buttonIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />

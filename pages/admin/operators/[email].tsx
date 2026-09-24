@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
 import AdminGate from '../../../components/AdminGate';
+import LoadingState from '../../../components/LoadingState';
 import ThemeToggle from '../../../components/theme/ThemeToggle';
 import type { AdminOperatorDetail } from '../../../lib/adminTypes';
 import styles from '../admin.module.css';
@@ -83,7 +84,7 @@ function DetailContent() {
         </header>
 
         {error ? <article className={styles.card}>{error}</article> : null}
-        {!detail && !error ? <article className={styles.card}>Loading operator detail...</article> : null}
+        {!detail && !error ? <LoadingState title="Loading operator detail" message="Preparing onboarding, course, and journey activity…" preset="metrics" /> : null}
 
         {detail ? (
           <>

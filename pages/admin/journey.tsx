@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import AdminGate from '../../components/AdminGate';
+import LoadingState, { LoadingButtonContent } from '../../components/LoadingState';
 import ThemeToggle from '../../components/theme/ThemeToggle';
 import { JOURNEY_TOTAL_DAYS, type JourneyDayTemplate, type JourneyMilestoneCategory, type JourneySubmissionStatus, type JourneyTask } from '../../config/operatorJourney';
 import styles from './admin.module.css';
@@ -168,7 +169,7 @@ function JourneyTemplateEditor() {
           <div className={styles.actions}>
             <Link className={styles.linkButton} href="/admin">Dashboard</Link>
             <ThemeToggle size="sm" variant="surface" />
-            <button className={styles.actionButton} type="button" onClick={save} disabled={loading || saving}>{saving ? 'Saving...' : 'Save template'}</button>
+            <button className={styles.actionButton} type="button" onClick={save} disabled={loading || saving}>{saving ? <LoadingButtonContent label="Saving…" /> : 'Save template'}</button>
           </div>
         </header>
 
@@ -243,7 +244,7 @@ function JourneyTemplateEditor() {
           </div>
 
           {loading ? (
-            <p className={styles.emptyState}>Loading journey template...</p>
+            <LoadingState title="Loading journey template" message="Preparing milestones, fields, and review settings…" preset="form" />
           ) : (
             <div className={styles.journeyEditorList}>
               {milestones.map((milestone) => (

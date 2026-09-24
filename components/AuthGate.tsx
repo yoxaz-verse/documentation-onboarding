@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import type { SessionUser } from '../lib/types';
 import styles from './AuthGate.module.css';
+import LoadingState from './LoadingState';
 
 type AuthGateProps = {
   children: (user: SessionUser) => JSX.Element;
@@ -89,19 +90,7 @@ export default function AuthGate({ children }: AuthGateProps) {
   }, [router]);
 
   if (loading) {
-    return (
-      <main className={styles.loadingPage} role="status" aria-live="polite" aria-busy="true">
-        <div className={styles.glowA} aria-hidden="true" />
-        <div className={styles.glowB} aria-hidden="true" />
-        <section className={styles.statusCard}>
-          <div className={styles.statusRow}>
-            <span className={styles.spinner} aria-hidden="true" />
-            <h1 className={styles.heading}>{heading}</h1>
-          </div>
-          <p className={styles.message}>{message}</p>
-        </section>
-      </main>
-    );
+    return <LoadingState variant="page" title={heading} message={message} />;
   }
 
   if (!user) {
@@ -111,7 +100,6 @@ export default function AuthGate({ children }: AuthGateProps) {
         <div className={styles.glowB} aria-hidden="true" />
         <section className={styles.statusCard}>
           <div className={styles.statusRow}>
-            <span className={styles.spinner} aria-hidden="true" />
             <h1 className={styles.heading}>{heading}</h1>
           </div>
           <p className={styles.message}>{message}</p>

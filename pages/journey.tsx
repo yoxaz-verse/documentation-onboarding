@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import AuthGate from '../components/AuthGate';
 import OnboardingLayout from '../components/OnboardingLayout';
+import SupportContactList from '../components/SupportContactList';
+import { LoadingButtonContent, SkeletonBlock, Spinner } from '../components/LoadingState';
 import { JOURNEY_PAGE_COPY, JOURNEY_TOTAL_DAYS, type JourneyDayTemplate, type JourneyFormField, type JourneyRepeatGroup } from '../config/operatorJourney';
 import { isUnauthorizedError } from '../lib/http';
 import type { CourseProgressSummary, JourneyResponse, JourneySummary, ProgressRecord } from '../lib/types';
@@ -186,10 +188,6 @@ function FieldInput({
   );
 }
 
-function SkeletonBlock({ className = '' }: { className?: string }) {
-  return <span className={`${styles.skeletonBlock} ${className}`} aria-hidden="true" />;
-}
-
 function JourneyLoadingState() {
   return (
     <div className={styles.loadingWorkspace} role="status" aria-live="polite" aria-busy="true">
@@ -199,7 +197,7 @@ function JourneyLoadingState() {
             <p className={styles.homeHeroEyebrow}>Operator execution path</p>
             <h2 className={styles.homeHeroTitle}>Preparing your 30-day path</h2>
           </div>
-          <span className={styles.loadingSpinner} aria-hidden="true" />
+          <Spinner size="large" />
         </div>
         <p className={styles.calloutText}>Fetching your milestones, daily form, and progress snapshot.</p>
         <div className={styles.progressTrack} aria-hidden="true">
@@ -638,7 +636,7 @@ function JourneyContent() {
             <p className={styles.kpiValue}>{checksComplete ? 'Ready for Day 1' : 'Finish checklist'}</p>
             <p className={styles.sectionHint}>Your Day 1 count begins once. After it starts, daily forms can be submitted, reviewed, corrected, and completed.</p>
             <button type="button" className={styles.primaryButton} disabled={!checksComplete || savingCheckIds.size > 0 || savingId === 'journey-start'} onClick={startJourney}>
-              {savingId === 'journey-start' ? 'Starting...' : 'Start Day 1'}
+              {savingId === 'journey-start' ? <LoadingButtonContent label="Starting…" /> : 'Start Day 1'}
             </button>
           </aside>
         </section>
@@ -713,6 +711,12 @@ function JourneyContent() {
                   <h3>Required output</h3>
                   <p>{selectedTemplate.requiredOutput}</p>
                 </div>
+                {selectedTemplate.day === 1 ? (
+                  <SupportContactList
+                    title="Available operator support"
+                    description="If you have an access or onboarding problem, call or WhatsApp an available support person before submitting Day 1."
+                  />
+                ) : null}
               </div>
 
               <div className={`${styles.journeyFormPanel} ${selectedIsLockedPreview ? styles.journeyFormPanelPreview : ''}`}>
@@ -816,11 +820,11 @@ function JourneyContent() {
 
                     <div className={styles.journeySubmitActions}>
                       <button type="button" className={styles.primaryButton} disabled={savingId === `submit-${selectedTemplate.day}`} onClick={submitDay}>
-                        {savingId === `submit-${selectedTemplate.day}` ? 'Submitting...' : selectedTemplate.buttonText}
+                        {savingId === `submit-${selectedTemplate.day}` ? <LoadingButtonContent label="Submitting…" /> : selectedTemplate.buttonText}
                       </button>
                       {selectedStatus.submission ? (
                         <button type="button" className={styles.secondaryButton} disabled={savingId === `reopen-${selectedTemplate.day}`} onClick={reopenDay}>
-                          {savingId === `reopen-${selectedTemplate.day}` ? 'Reopening...' : 'Reopen'}
+                          {savingId === `reopen-${selectedTemplate.day}` ? <LoadingButtonContent label="Reopening…" /> : 'Reopen'}
                         </button>
                       ) : null}
                     </div>

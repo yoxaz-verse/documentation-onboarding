@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import AdminGate from '../../components/AdminGate';
+import LoadingState, { LoadingButtonContent } from '../../components/LoadingState';
 import ThemeToggle from '../../components/theme/ThemeToggle';
 import type { InquiryProductLineItem, LiveInquiry } from '../../lib/types';
 import styles from './admin.module.css';
@@ -271,7 +272,7 @@ function InquiriesAdminContent() {
           </div>
 
           <div className={styles.formActions}>
-            <button className={styles.actionButton} type="button" onClick={saveInquiry} disabled={saving}>{saving ? 'Saving...' : form.id ? 'Update inquiry' : 'Create inquiry'}</button>
+            <button className={styles.actionButton} type="button" onClick={saveInquiry} disabled={saving}>{saving ? <LoadingButtonContent label="Saving…" /> : form.id ? 'Update inquiry' : 'Create inquiry'}</button>
             <button className={styles.linkButton} type="button" onClick={resetForm} disabled={saving}>Clear</button>
           </div>
         </section>
@@ -283,7 +284,7 @@ function InquiriesAdminContent() {
           </div>
 
           <div className={styles.inquiryAdminList}>
-            {loading ? <p className={styles.emptyState}>Loading inquiries...</p> : null}
+            {loading ? <LoadingState variant="table" title="Loading inquiries" message="Fetching current drafts and published inquiries…" /> : null}
             {!loading && inquiries.length === 0 ? <p className={styles.emptyState}>No inquiries have been posted yet.</p> : null}
             {inquiries.map((inquiry) => (
               <article key={inquiry.id} className={styles.inquiryAdminCard}>

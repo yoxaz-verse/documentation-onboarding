@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import AuthGate from '../../components/AuthGate';
 import OnboardingLayout from '../../components/OnboardingLayout';
+import LoadingState from '../../components/LoadingState';
 import styles from '../onboarding.module.css';
 import { getAllCourses } from '../../config/courses';
 import { isUnauthorizedError } from '../../lib/http';
@@ -89,7 +90,7 @@ function ClassroomCatalogContent() {
   if (!ready) {
     return (
       <OnboardingLayout title="Classroom" subtitle="Loading your classroom catalog, progress, and leaderboard..." loading>
-        <p className={styles.message}>Loading classroom...</p>
+        <LoadingState title="Preparing the classroom" message="Loading your course catalog, progress, and leaderboard…" preset="cards" />
       </OnboardingLayout>
     );
   }
