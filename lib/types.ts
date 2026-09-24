@@ -29,11 +29,18 @@ export type ProgressResponse = {
   courseProgress: CourseProgressSummary;
 };
 
-export type JourneyResponse = {
-  progress: ProgressRecord;
-  courseProgress: CourseProgressSummary;
-  journey: JourneySummary;
-};
+export type JourneyResponse =
+  | {
+      access: 'locked';
+      progress: ProgressRecord;
+      courseProgress: CourseProgressSummary;
+    }
+  | {
+      access: 'ready';
+      progress: ProgressRecord;
+      courseProgress: CourseProgressSummary;
+      journey: JourneySummary;
+    };
 
 export type LeaderboardEntry = {
   rank: number;

@@ -98,7 +98,7 @@ function InquiriesContent({ user }: { user: SessionUser }) {
         <section className={styles.emptyInquiryState}>
           <span className={styles.homeStatusPill}>Locked</span>
           <h2>Live inquiries unlock after Step 10.</h2>
-          <p>Complete the Zoho completion check first. Once Step 10 is done, live inquiries and courses will open in this workspace.</p>
+          <p>Complete the communication readiness check first. Once Step 10 is done, live inquiries and courses will open in this workspace.</p>
         </section>
       ) : null}
 

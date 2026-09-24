@@ -1279,7 +1279,7 @@
 
 .journeyWorkspace {
   display: grid;
-  grid-template-columns: minmax(20rem, 0.92fr) minmax(26rem, 1.08fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.8rem;
   align-items: start;
 }
@@ -1370,6 +1370,72 @@
   color: var(--ink);
   font-size: 0.84rem;
   line-height: 1.55;
+}
+
+.journeyInfoBlock ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.journeyInfoBlock li {
+  color: var(--ink);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.journeyGuideList {
+  display: grid;
+  gap: 0.62rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.journeyGuideStep {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: 0.72rem;
+  padding: 0.82rem;
+  border: 1px solid color-mix(in srgb, var(--surface-border) 82%, transparent);
+  border-radius: 0.68rem;
+  background: color-mix(in srgb, var(--surface) 58%, transparent);
+}
+
+.journeyGuideNumber {
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.journeyGuideBody {
+  min-width: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.journeyGuideBody h3,
+.journeyRequiredOutput h3 {
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: 0.88rem;
+}
+
+.journeyGuideBody p,
+.journeyRequiredOutput p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.journeyRequiredOutput {
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--surface-border));
 }
 
 .journeyListGrid ul,
@@ -2144,15 +2210,22 @@
 }
 
 .formSection {
-  padding: 1rem;
+  padding: clamp(1.1rem, 2.5vw, 1.5rem);
   display: grid;
-  gap: 0.9rem;
+  gap: 1.25rem;
 }
 
 .formGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.82rem;
+}
+
+.experienceGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 1.25rem;
+  row-gap: 1rem;
 }
 
 .inputGroup {
@@ -2224,6 +2297,7 @@
   .journeyWorkspace,
   .homeSummaryGrid,
   .formGrid,
+  .experienceGrid,
   .profileGrid {
     grid-template-columns: 1fr;
   }

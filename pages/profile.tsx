@@ -26,7 +26,6 @@ function ProfileContent() {
         ['Experience', profile.total_work_experience_years || 'Not set'],
         ['Agro trade', profile.group_trading_experience_years || 'Not set'],
         ['Language', profile.preferred_language || 'Not set'],
-        ['Official email', profile.official_company_email || 'Not set'],
         ['Email', profile.email],
       ]
     : [];

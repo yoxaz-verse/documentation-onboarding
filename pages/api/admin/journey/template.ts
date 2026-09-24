@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { JOURNEY_DAY_TEMPLATES, JOURNEY_TOTAL_DAYS, type JourneyDayTemplate, type JourneyMilestoneCategory } from '../../../../config/operatorJourney';
+import { JOURNEY_DAY_TEMPLATES, JOURNEY_TOTAL_DAYS, normalizeJourneyTasks, type JourneyDayTemplate, type JourneyMilestoneCategory } from '../../../../config/operatorJourney';
 import { requireAdminSession } from '../../../../lib/adminAuth';
 import { normalizeJourneyDayTemplates, type JourneyTemplateRecord } from '../../../../lib/operatorJourney';
 import { isMissingSupabaseTableError } from '../../../../lib/supabaseErrors';
@@ -43,7 +43,7 @@ function normalizeInputMilestone(value: unknown, index: number): JourneyDayTempl
     dayType: String(item.dayType || fallback?.dayType || ''),
     purpose: String(item.purpose || fallback?.purpose || ''),
     learn: Array.isArray(item.learn) ? item.learn.map(String) : fallback?.learn || [],
-    tasks: Array.isArray(item.tasks) ? item.tasks.map(String) : fallback?.tasks || [],
+    tasks: normalizeJourneyTasks(item.tasks, fallback?.tasks || []),
     requiredOutput: String(item.requiredOutput || fallback?.requiredOutput || ''),
     buttonText: String(item.buttonText || fallback?.buttonText || 'Submit Day'),
     completionMessage: String(item.completionMessage || fallback?.completionMessage || ''),

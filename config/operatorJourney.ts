@@ -52,12 +52,45 @@ export type JourneyMetricMap = {
   mode: 'countGroupEntries' | 'countTruthy' | 'numericField' | 'scoreAverage';
 };
 
+export type JourneyTask = {
+  title: string;
+  instruction: string;
+  href?: string;
+  actionLabel?: string;
+};
+
+export function normalizeJourneyTasks(value: unknown, fallback: JourneyTask[] = []): JourneyTask[] {
+  if (!Array.isArray(value)) return fallback;
+
+  return value.flatMap((item, index) => {
+    if (typeof item === 'string' && item.trim()) {
+      return [{
+        title: item.trim(),
+        instruction: 'Complete this action carefully, then record the result in the daily submission below.',
+      }];
+    }
+    if (!item || typeof item !== 'object') return [];
+
+    const task = item as Partial<JourneyTask>;
+    const title = String(task.title || '').trim();
+    const instruction = String(task.instruction || '').trim();
+    if (!title && !instruction) return [];
+
+    return [{
+      title: title || `Guide step ${index + 1}`,
+      instruction: instruction || title,
+      href: String(task.href || '').trim() || undefined,
+      actionLabel: String(task.actionLabel || '').trim() || undefined,
+    }];
+  });
+}
+
 export type JourneyDayTemplate = JourneyMilestone & {
   phase: string;
   dayType: string;
   purpose: string;
   learn: string[];
-  tasks: string[];
+  tasks: JourneyTask[];
   requiredOutput: string;
   buttonText: string;
   completionMessage: string;
@@ -166,7 +199,7 @@ type DaySeed = {
   dayType: string;
   purpose: string;
   learn: string[];
-  tasks: string[];
+  tasks: Array<string | JourneyTask>;
   requiredOutput: string;
   buttonText: string;
   completionMessage: string;
@@ -189,15 +222,47 @@ const daySeeds: DaySeed[] = [
     dayType: 'Setup',
     purpose: 'The operator must understand where the workspace, journey tracker, profile, courses, and daily tasks are located before outreach begins.',
     learn: ['Operator dashboard location', 'Onboarding and daily completion tracking', 'Course library and profile locations', 'Where supplier, buyer, product, availability, and requirement entries will be added'],
-    tasks: ['Open the operator dashboard', 'Check profile completion', 'Open the course library', 'Open the 30-day journey page', 'Confirm where daily work will be tracked'],
+    tasks: [
+      {
+        title: 'Open the operator dashboard',
+        instruction: 'Review the dashboard navigation and identify where your onboarding progress, daily work, courses, profile, and operator tools are located.',
+        href: '/',
+        actionLabel: 'Open dashboard',
+      },
+      {
+        title: 'Review your operator profile',
+        instruction: 'Verify that your account and setup details are complete and correct. Update them before continuing if anything is missing.',
+        href: '/profile',
+        actionLabel: 'Review profile',
+      },
+      {
+        title: 'Open the course library',
+        instruction: 'Review where your training tracks and lessons are located so you can return to them during the 30-day journey.',
+        href: '/courses',
+        actionLabel: 'Open course library',
+      },
+      {
+        title: 'Review the 30-day journey',
+        instruction: 'Understand how daily guides, required outputs, submissions, reviews, and locked future days work on this page.',
+        href: '/journey',
+        actionLabel: 'Review journey page',
+      },
+      {
+        title: 'Confirm communication access',
+        instruction: 'Open the official operator WhatsApp group and confirm that you can receive operator coordination messages and updates.',
+        href: 'https://chat.whatsapp.com/LO1Hq98MF1X9lVc1PIlAwn?mode=gi_t',
+        actionLabel: 'Open WhatsApp group',
+      },
+    ],
     requiredOutput: 'Confirm profile, course library, journey page, dashboard, and communication access.',
     buttonText: 'Confirm System Access',
     completionMessage: 'Your operator journey has started. From Day 2 onward, you will begin understanding the OBAOL execution model and your role inside the system.',
     formFields: [
-      baseField('profileReviewed', 'Profile reviewed', 'select', true, yesNo),
-      baseField('courseLibraryOpened', 'Course library opened', 'select', true, yesNo),
-      baseField('journeyPageOpened', 'Journey page opened', 'select', true, yesNo),
-      baseField('communicationConfirmed', 'Communication access confirmed', 'select', true, yesNo),
+      baseField('dashboardReviewed', 'I opened and reviewed the operator dashboard', 'select', true, yesNo),
+      baseField('profileReviewed', 'I reviewed my operator profile', 'select', true, yesNo),
+      baseField('courseLibraryOpened', 'I opened and reviewed the course library', 'select', true, yesNo),
+      baseField('journeyPageOpened', 'I reviewed the 30-day journey workflow', 'select', true, yesNo),
+      baseField('communicationConfirmed', 'I confirmed access to the operator WhatsApp group', 'select', true, yesNo),
       baseField('accessIssue', 'Any access issue', 'textarea', false),
       noteField('confirmationNote', 'Operator confirmation note'),
     ],
@@ -398,6 +463,12 @@ const momentumSeeds: DaySeed[] = [
 function toDayTemplate(seed: DaySeed): JourneyDayTemplate {
   return {
     ...seed,
+    tasks: seed.tasks.map((item, index) => typeof item === 'string'
+      ? {
+          title: item,
+          instruction: `Complete this action carefully, then record the result in the daily submission below. This is guide step ${index + 1} for Day ${seed.day}.`,
+        }
+      : item),
     phase: phaseByDay(seed.day),
     isActive: true,
     reviewRequired: seed.reviewRequired ?? seed.day >= reviewRequiredFromDay,

@@ -163,25 +163,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       );
     }
 
-    if (milestone.number === 8) {
-      note = profile?.official_company_email
-        ? 'Official communication email saved for operator communication.'
-        : 'The official email has not been saved yet.';
-      fields.push({
-        label: 'Official company email',
-        value: formatFieldValue(profile?.official_company_email),
-      });
+    if (milestone.number === 7) {
+      note = status === 'complete'
+        ? 'The operator confirmed joining the official WhatsApp group.'
+        : 'WhatsApp group membership has not been confirmed yet.';
+    }
+
+    if (milestone.number === 9) {
+      note = status === 'complete'
+        ? 'The operator completed the WhatsApp group orientation.'
+        : 'The WhatsApp group orientation has not been completed yet.';
     }
 
     if (milestone.number === 10) {
-      note = profile?.zoho_acknowledged_at
-        ? 'Zoho completion was acknowledged and support escalation timing is available below.'
-        : 'Zoho completion has not been acknowledged yet.';
-      fields.push(
-        { label: 'Acknowledged at', value: formatFieldValue(profile?.zoho_acknowledged_at) },
-        { label: 'Support stage', value: formatFieldValue(profile?.zoho_support_stage) },
-        { label: 'Support contact revealed', value: formatFieldValue(profile?.zoho_contact_revealed_at) }
-      );
+      note = status === 'complete'
+        ? 'The operator confirmed WhatsApp communication readiness.'
+        : 'WhatsApp communication readiness has not been confirmed yet.';
     }
 
     return {

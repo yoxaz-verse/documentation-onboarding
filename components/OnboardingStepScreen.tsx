@@ -14,44 +14,13 @@ import {
 } from '../lib/onboarding';
 import { completeStep, getProgressBundle } from '../lib/progress';
 import { getProfile, saveProfile } from '../lib/profile';
-import type { CourseProgressSummary, OperatorProfile, ProgressRecord } from '../lib/types';
+import type { CourseProgressSummary, ProgressRecord } from '../lib/types';
 
-const SUPPORT_PHONE = process.env.NEXT_PUBLIC_ONBOARDING_SUPPORT_PHONE || 'Support number not configured';
-
-function parseElapsedState(acknowledgedAt: string | null) {
-  if (!acknowledgedAt) return { reveal: false, stage: 'pending' };
-  const diffMs = Date.now() - new Date(acknowledgedAt).getTime();
-  if (diffMs >= 6 * 60 * 60 * 1000) return { reveal: true, stage: 'six_hours' };
-  if (diffMs >= 60 * 60 * 1000) return { reveal: true, stage: 'one_hour' };
-  return { reveal: false, stage: 'pending' };
-}
+const WHATSAPP_GROUP_URL = 'https://chat.whatsapp.com/LO1Hq98MF1X9lVc1PIlAwn?mode=gi_t';
 
 function nextRouteAfter(step: MilestoneNumber) {
   const next = getMilestone(step + 1);
   return next?.route || '/courses';
-}
-
-function emptyProfile(): OperatorProfile {
-  return {
-    email: '',
-    full_name: '',
-    phone: '',
-    role_title: '',
-    city: '',
-    state: '',
-    years_experience: '',
-    total_work_experience_years: '',
-    group_trading_experience_years: '',
-    preferred_language: '',
-    operator_background: '',
-    motivation: '',
-    official_company_email: '',
-    zoho_acknowledged_at: null,
-    zoho_contact_revealed_at: null,
-    zoho_support_stage: 'pending',
-    created_at: null,
-    updated_at: null,
-  };
 }
 
 export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }) {
@@ -59,7 +28,6 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
   const milestone = getMilestone(step);
   const [progress, setProgress] = useState<ProgressRecord | null>(null);
   const [courseProgress, setCourseProgress] = useState<CourseProgressSummary | null>(null);
-  const [profile, setProfile] = useState<OperatorProfile>(emptyProfile());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -76,19 +44,14 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
     operator_background: '',
     motivation: '',
   });
-  const [officialEmail, setOfficialEmail] = useState('');
+  const [whatsappJoined, setWhatsappJoined] = useState(false);
   const [registrationChecked, setRegistrationChecked] = useState(false);
-  const [zohoChecked, setZohoChecked] = useState(false);
+  const [communicationReady, setCommunicationReady] = useState(false);
   const [expectationsChecked, setExpectationsChecked] = useState({
     notSalaried: false,
     noGuarantees: false,
     agriSystem: false,
   });
-
-  const revealState = useMemo(
-    () => parseElapsedState(profile.zoho_acknowledged_at),
-    [profile.zoho_acknowledged_at]
-  );
 
   const canContinue = useMemo(() => {
     if (step === 2) {
@@ -104,7 +67,6 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
     const [bundle, currentProfile] = await Promise.all([getProgressBundle(), getProfile()]);
     setProgress(bundle.progress);
     setCourseProgress(bundle.courseProgress);
-    setProfile(currentProfile);
     setExperienceForm({
       full_name: currentProfile.full_name || '',
       phone: currentProfile.phone || '',
@@ -116,8 +78,6 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
       operator_background: currentProfile.operator_background || '',
       motivation: currentProfile.motivation || '',
     });
-    setOfficialEmail(currentProfile.official_company_email || '');
-    setZohoChecked(Boolean(currentProfile.zoho_acknowledged_at));
   };
 
   useEffect(() => {
@@ -148,26 +108,6 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
   }, [router, step]);
 
   useEffect(() => {
-    if (step !== 10) return;
-    if (!profile.zoho_acknowledged_at) return;
-    if (profile.zoho_support_stage === revealState.stage && (!revealState.reveal || profile.zoho_contact_revealed_at)) return;
-
-    const sync = async () => {
-      try {
-        const updated = await saveProfile({
-          zoho_support_stage: revealState.stage,
-          zoho_contact_revealed_at: revealState.reveal ? profile.zoho_contact_revealed_at || new Date().toISOString() : null,
-        });
-        setProfile(updated);
-      } catch {
-        // Best effort: the timer UI can still render from the acknowledgement timestamp.
-      }
-    };
-
-    sync();
-  }, [step, profile.zoho_acknowledged_at, profile.zoho_support_stage, profile.zoho_contact_revealed_at, revealState.stage, revealState.reveal]);
-
-  useEffect(() => {
     if (!progress || loading) return;
     if (!canAccessStep(progress, step)) {
       const next = getNextMilestone(progress);
@@ -177,7 +117,7 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
 
   if (!milestone) return null;
 
-  const messageTone = message.toLowerCase().includes('failed') || message.toLowerCase().includes('required') || message.toLowerCase().includes('valid')
+  const messageTone = message.toLowerCase().includes('failed') || message.toLowerCase().includes('required') || message.toLowerCase().includes('valid') || message.toLowerCase().includes('please')
     ? styles.messageError
     : message
       ? styles.messageSuccess
@@ -231,26 +171,24 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
     }
   };
 
-  const saveOfficialEmail = async () => {
-    const normalized = officialEmail.trim().toLowerCase();
-    if (!normalized || !normalized.includes('@')) {
-      setMessage('Enter a valid official email before continuing.');
+  const confirmWhatsappJoin = async () => {
+    if (!whatsappJoined) {
+      setMessage('Please confirm that you joined the WhatsApp group.');
       return;
     }
 
     setSaving(true);
     try {
-      await saveProfile({ official_company_email: normalized });
       await completeStep(step);
       await load();
-      setMessage('Official email saved.');
+      setMessage('WhatsApp group membership confirmed.');
       router.push(nextRouteAfter(step));
     } catch (error) {
       if (isUnauthorizedError(error)) {
         router.replace('/');
         return;
       }
-      setMessage(error instanceof Error ? error.message : 'Failed to save the official email.');
+      setMessage(error instanceof Error ? error.message : 'Failed to confirm WhatsApp group membership.');
     } finally {
       setSaving(false);
     }
@@ -279,28 +217,24 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
     }
   };
 
-  const saveZohoAck = async () => {
-    if (!zohoChecked) {
-      setMessage('Please confirm that you completed the Zoho step.');
+  const confirmCommunicationReadiness = async () => {
+    if (!communicationReady) {
+      setMessage('Please confirm that you joined the WhatsApp group and reviewed the guidelines.');
       return;
     }
 
     setSaving(true);
     try {
-      await saveProfile({
-        zoho_acknowledged_at: profile.zoho_acknowledged_at || new Date().toISOString(),
-        zoho_support_stage: 'pending',
-      });
       await completeStep(step);
       await load();
-      setMessage('Zoho completion recorded.');
+      setMessage('Communication readiness confirmed.');
       router.push(nextRouteAfter(step));
     } catch (error) {
       if (isUnauthorizedError(error)) {
         router.replace('/');
         return;
       }
-      setMessage(error instanceof Error ? error.message : 'Failed to save the Zoho confirmation.');
+      setMessage(error instanceof Error ? error.message : 'Failed to confirm communication readiness.');
     } finally {
       setSaving(false);
     }
@@ -474,20 +408,21 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
     9: (
       <>
         <section className={styles.callout}>
-          <h2 className={styles.calloutTitle}>Why Zoho Cliq is used</h2>
+          <h2 className={styles.calloutTitle}>How to use the operator WhatsApp group</h2>
           <p className={styles.calloutText}>
-            Zoho Cliq is only the communication layer. It is where operators can coordinate, ask questions, and receive structured follow-up during execution.
+            The group is the shared communication space for operator coordination, relevant questions, and important updates. Keep messages clear, professional, and focused on operator work.
           </p>
           <div className={styles.actionRow}>
-            <a href="https://cliq.zoho.com/" className={styles.cta} target="_blank" rel="noreferrer">
-              Open Zoho Cliq
+            <a href={WHATSAPP_GROUP_URL} className={styles.cta} target="_blank" rel="noopener noreferrer">
+              Open WhatsApp group
             </a>
           </div>
         </section>
         <ul className={styles.stepList}>
-          <li>Use the official email you created in the previous step.</li>
-          <li>Join only for relevant operator communication and coordination.</li>
-          <li>After setup, return here and confirm completion in the next step.</li>
+          <li>Use the group for relevant operator communication, coordination, and questions.</li>
+          <li>Keep conversations respectful, concise, and useful to the group.</li>
+          <li>Review important updates and avoid unrelated or promotional messages.</li>
+          <li>After reviewing these guidelines, continue to the readiness check.</li>
         </ul>
       </>
     ),
@@ -504,7 +439,7 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
             </p>
           </div>
         </div>
-        <div className={styles.profileGrid}>
+        <div className={styles.experienceGrid}>
           <label className={styles.inputGroup}>
             <span className={styles.inputLabel}>Full name</span>
             <input className={styles.textInput} value={experienceForm.full_name} onChange={(event) => setExperienceForm((prev) => ({ ...prev, full_name: event.target.value }))} />
@@ -551,19 +486,24 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
     ) : step === 7 ? (
       <section className={styles.formSection}>
         <section className={styles.callout}>
-          <h2 className={styles.calloutTitle}>Create your official email first</h2>
+          <h2 className={styles.calloutTitle}>Join the official operator WhatsApp group</h2>
           <p className={styles.calloutText}>
-            Use a professional naming format such as <strong>name.company@provider.com</strong>. This email is mainly for Zoho Workspace access and official company communication.
+            Join the group to receive operator updates, coordinate with the team, and ask relevant questions during onboarding and execution.
           </p>
-          <p className={styles.calloutHint}>Example: `jacob.obaol@gmail.com` or `jacob.obaol@outlook.com`. You can also reuse this same email in the next step when registering on OBAOL.</p>
+          <div className={styles.actionRow}>
+            <a href={WHATSAPP_GROUP_URL} className={styles.cta} target="_blank" rel="noopener noreferrer">
+              Join WhatsApp group
+            </a>
+          </div>
+          <p className={styles.calloutHint}>The invitation opens in a new tab. Join the group, then return here to confirm.</p>
         </section>
-        <label className={styles.inputGroup}>
-          <span className={styles.inputLabel}>Official company email</span>
-          <input className={styles.textInput} type="email" value={officialEmail} onChange={(event) => setOfficialEmail(event.target.value)} placeholder="name.company@provider.com" />
+        <label className={styles.message}>
+          <input type="checkbox" checked={whatsappJoined} onChange={(event) => setWhatsappJoined(event.target.checked)} />
+          {' '}I joined the official operator WhatsApp group.
         </label>
         <div className={styles.actionRow}>
-          <button type="button" className={styles.primaryButton} onClick={saveOfficialEmail} disabled={saving}>
-            {saving ? 'Saving...' : 'Save email and continue'}
+          <button type="button" className={styles.primaryButton} onClick={confirmWhatsappJoin} disabled={saving}>
+            {saving ? 'Saving...' : 'Confirm and continue'}
           </button>
         </div>
       </section>
@@ -572,14 +512,14 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
         <section className={styles.callout}>
           <h2 className={styles.calloutTitle}>Register on the operator platform next</h2>
           <p className={styles.calloutText}>
-            Now go to the operator registration page and create your OBAOL operator account. It is recommended to use the same official company email you just created so Zoho access and platform activity stay organized separately from your personal email.
+            Go to the operator registration page and create your OBAOL operator account. Complete the registration there, then return to this page to confirm and continue onboarding.
           </p>
           <div className={styles.actionRow}>
             <a href="https://www.obaol.com/auth/operator/register" className={styles.cta} target="_blank" rel="noreferrer">
               Open operator registration
             </a>
           </div>
-          <p className={styles.calloutHint}>Using the same official email is best practice for organization, but it is not mandatory. Complete the registration, then return here and confirm it before continuing.</p>
+          <p className={styles.calloutHint}>Complete the registration, then return here and confirm it before continuing.</p>
         </section>
         <label className={styles.message}>
           <input type="checkbox" checked={registrationChecked} onChange={(event) => setRegistrationChecked(event.target.checked)} />
@@ -594,30 +534,18 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
     ) : step === 10 ? (
       <section className={styles.formSection}>
         <section className={styles.callout}>
-          <h2 className={styles.calloutTitle}>Confirm the Zoho setup</h2>
+          <h2 className={styles.calloutTitle}>Confirm your communication readiness</h2>
           <p className={styles.calloutText}>
-            Once you have completed the Zoho step, confirm it here. If there is no response after the waiting window, the support number becomes visible so the operator can call directly.
+            Confirm that you joined the official operator WhatsApp group and reviewed how it should be used. This keeps team communication focused and useful for everyone.
           </p>
         </section>
         <label className={styles.message}>
-          <input type="checkbox" checked={zohoChecked} onChange={(event) => setZohoChecked(event.target.checked)} />
-          {' '}I completed the Zoho/Cliq setup using my official email.
+          <input type="checkbox" checked={communicationReady} onChange={(event) => setCommunicationReady(event.target.checked)} />
+          {' '}I joined the WhatsApp group and reviewed the communication guidelines.
         </label>
-        {profile.zoho_acknowledged_at ? (
-          <section className={styles.codePanel}>
-            <p className={styles.codeLabel}>Support escalation</p>
-            <p className={styles.calloutText}>
-              Acknowledged at {new Date(profile.zoho_acknowledged_at).toLocaleString()}.
-            </p>
-            <p className={styles.calloutHint}>
-              Support stage: {revealState.stage === 'six_hours' ? '6 hour follow-up' : revealState.stage === 'one_hour' ? '1 hour follow-up' : 'Waiting window active'}
-            </p>
-            {revealState.reveal ? <p className={styles.codeValue}>{SUPPORT_PHONE}</p> : null}
-          </section>
-        ) : null}
         <div className={styles.actionRow}>
-          <button type="button" className={styles.primaryButton} onClick={saveZohoAck} disabled={saving}>
-            {saving ? 'Saving...' : 'Confirm Zoho completion'}
+          <button type="button" className={styles.primaryButton} onClick={confirmCommunicationReadiness} disabled={saving}>
+            {saving ? 'Saving...' : 'Confirm readiness and continue'}
           </button>
         </div>
       </section>

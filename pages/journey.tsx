@@ -4,8 +4,6 @@ import AuthGate from '../components/AuthGate';
 import OnboardingLayout from '../components/OnboardingLayout';
 import { JOURNEY_PAGE_COPY, JOURNEY_TOTAL_DAYS, type JourneyDayTemplate, type JourneyFormField, type JourneyRepeatGroup } from '../config/operatorJourney';
 import { isUnauthorizedError } from '../lib/http';
-import { areCoursesUnlocked } from '../lib/onboarding';
-import { getProgressBundle } from '../lib/progress';
 import type { CourseProgressSummary, JourneyResponse, JourneySummary, ProgressRecord } from '../lib/types';
 import styles from './onboarding.module.css';
 
@@ -28,6 +26,10 @@ function clampTimelineDay(day: number | null) {
 
 function categoryLabel(category: string) {
   return category.charAt(0).toUpperCase() + category.slice(1);
+}
+
+function isExternalHref(href: string) {
+  return /^https?:\/\//i.test(href);
 }
 
 function emptyEntry(group: JourneyRepeatGroup) {
@@ -282,6 +284,7 @@ function JourneyLoadingState() {
 function JourneyContent() {
   const [state, setState] = useState<JourneyPageState>({ status: 'loading' });
   const [savingId, setSavingId] = useState('');
+  const [savingCheckIds, setSavingCheckIds] = useState<Set<string>>(() => new Set());
   const [message, setMessage] = useState('');
   const [formErrors, setFormErrors] = useState<FormError[]>([]);
   const [localNotice, setLocalNotice] = useState('');
@@ -290,23 +293,24 @@ function JourneyContent() {
 
   const load = async () => {
     try {
-      const bundle = await getProgressBundle();
-      if (!areCoursesUnlocked(bundle.progress)) {
-        setState({ status: 'locked', progress: bundle.progress, courseProgress: bundle.courseProgress });
-        setMessage('');
-        return;
-      }
-
       const response = await fetch('/api/journey', { credentials: 'include', cache: 'no-store' });
       const payload = (await response.json().catch(() => ({}))) as Partial<JourneyResponse> & { error?: string };
 
-      if (!response.ok || !payload.progress || !payload.courseProgress || !payload.journey) {
+      if (!response.ok || !payload.progress || !payload.courseProgress || !payload.access) {
         if (response.status === 401) {
           window.location.assign('/');
           return;
         }
         throw new Error(payload.error || 'Failed to load operator journey.');
       }
+
+      if (payload.access === 'locked') {
+        setState({ status: 'locked', progress: payload.progress, courseProgress: payload.courseProgress });
+        setMessage('');
+        return;
+      }
+
+      if (!payload.journey) throw new Error('Failed to load operator journey.');
 
       setState({ status: 'ready', progress: payload.progress, courseProgress: payload.courseProgress, journey: payload.journey });
       setSelectedDay((current) => (current && payload.journey!.dayTemplates.some((template) => template.day === current) ? current : getNextActionableDay(payload.journey!)));
@@ -325,8 +329,27 @@ function JourneyContent() {
   }, []);
 
   const toggleCheck = async (checkId: string, completed: boolean) => {
-    setSavingId(checkId);
+    if (savingCheckIds.has(checkId)) return;
+
+    setSavingCheckIds((current) => new Set(current).add(checkId));
     setMessage('');
+    setState((current) => {
+      if (current.status !== 'ready') return current;
+
+      const completedChecks = new Set(current.journey.completedChecks);
+      if (completed) completedChecks.add(checkId);
+      else completedChecks.delete(checkId);
+
+      return {
+        ...current,
+        journey: {
+          ...current.journey,
+          completedChecks: Array.from(completedChecks),
+          completedCheckCount: completedChecks.size,
+        },
+      };
+    });
+
     try {
       const response = await fetch('/api/journey/checks', {
         method: 'POST',
@@ -336,11 +359,30 @@ function JourneyContent() {
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload?.error || 'Failed to update checklist.');
-      await load();
     } catch (error) {
+      setState((current) => {
+        if (current.status !== 'ready') return current;
+
+        const completedChecks = new Set(current.journey.completedChecks);
+        if (completed) completedChecks.delete(checkId);
+        else completedChecks.add(checkId);
+
+        return {
+          ...current,
+          journey: {
+            ...current.journey,
+            completedChecks: Array.from(completedChecks),
+            completedCheckCount: completedChecks.size,
+          },
+        };
+      });
       setMessage(error instanceof Error ? error.message : 'Failed to update checklist.');
     } finally {
-      setSavingId('');
+      setSavingCheckIds((current) => {
+        const next = new Set(current);
+        next.delete(checkId);
+        return next;
+      });
     }
   };
 
@@ -497,7 +539,7 @@ function JourneyContent() {
         <section className={styles.emptyInquiryState}>
           <span className={styles.homeStatusPill}>Locked</span>
           <h2>30-day journey unlocks after Step 10.</h2>
-          <p>Complete the Zoho completion check first. Once Step 10 is done, live inquiries, courses, and the 30-day journey will open in this workspace.</p>
+          <p>Complete the communication readiness check first. Once Step 10 is done, live inquiries, courses, and the 30-day journey will open in this workspace.</p>
         </section>
       </OnboardingLayout>
     );
@@ -584,7 +626,7 @@ function JourneyContent() {
                 const checked = completedCheckSet.has(check.id);
                 return (
                   <label key={check.id} className={`${styles.journeyCheckItem} ${checked ? styles.journeyCheckItemDone : ''}`}>
-                    <input type="checkbox" checked={checked} disabled={savingId === check.id} onChange={(event) => toggleCheck(check.id, event.target.checked)} />
+                    <input type="checkbox" checked={checked} disabled={savingCheckIds.has(check.id)} onChange={(event) => toggleCheck(check.id, event.target.checked)} />
                     <span><strong>{check.label}</strong><small>{check.description}</small></span>
                   </label>
                 );
@@ -595,7 +637,7 @@ function JourneyContent() {
             <p className={styles.kpiLabel}>Start condition</p>
             <p className={styles.kpiValue}>{checksComplete ? 'Ready for Day 1' : 'Finish checklist'}</p>
             <p className={styles.sectionHint}>Your Day 1 count begins once. After it starts, daily forms can be submitted, reviewed, corrected, and completed.</p>
-            <button type="button" className={styles.primaryButton} disabled={!checksComplete || savingId === 'journey-start'} onClick={startJourney}>
+            <button type="button" className={styles.primaryButton} disabled={!checksComplete || savingCheckIds.size > 0 || savingId === 'journey-start'} onClick={startJourney}>
               {savingId === 'journey-start' ? 'Starting...' : 'Start Day 1'}
             </button>
           </aside>
@@ -640,28 +682,37 @@ function JourneyContent() {
                     <p>{selectedTemplate.purpose}</p>
                   </article>
                   <article className={styles.journeyInfoBlock}>
-                    <h3>Required output</h3>
-                    <p>{selectedTemplate.requiredOutput}</p>
-                  </article>
-                </div>
-                <p className={styles.journeySectionLabel}>What to do</p>
-                <div className={styles.journeyListGrid}>
-                  <article className={styles.journeyInfoBlock}>
                     <h3>What to learn</h3>
                     <ul>{selectedTemplate.learn.map((item) => <li key={item}>{item}</li>)}</ul>
                   </article>
-                  <article className={styles.journeyInfoBlock}>
-                    <h3>Tasks</h3>
-                    <ol>{selectedTemplate.tasks.map((item) => <li key={item}>{item}</li>)}</ol>
-                  </article>
                 </div>
-                {selectedTemplate.href ? (
-                  selectedIsLockedPreview ? (
-                    <span className={`${styles.journeySecondaryLink} ${styles.journeySecondaryLinkDisabled}`}>{selectedTemplate.actionLabel || 'Open related page'}</span>
-                  ) : (
-                    <Link href={selectedTemplate.href} className={styles.journeySecondaryLink}>{selectedTemplate.actionLabel || 'Open related page'}</Link>
-                  )
-                ) : null}
+
+                <p className={styles.journeySectionLabel}>Follow this guide</p>
+                <ol className={styles.journeyGuideList}>
+                  {selectedTemplate.tasks.map((task, index) => (
+                    <li key={`${task.title}-${index}`} className={styles.journeyGuideStep}>
+                      <span className={styles.journeyGuideNumber} aria-hidden="true">{index + 1}</span>
+                      <div className={styles.journeyGuideBody}>
+                        <h3>{task.title}</h3>
+                        <p>{task.instruction}</p>
+                        {task.href ? (
+                          isExternalHref(task.href) ? (
+                            <a href={task.href} className={styles.journeySecondaryLink} target="_blank" rel="noopener noreferrer">
+                              {task.actionLabel || 'Open resource'}
+                            </a>
+                          ) : (
+                            <Link href={task.href} className={styles.journeySecondaryLink}>{task.actionLabel || 'Open page'}</Link>
+                          )
+                        ) : null}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+
+                <div className={`${styles.journeyInfoBlock} ${styles.journeyRequiredOutput}`}>
+                  <h3>Required output</h3>
+                  <p>{selectedTemplate.requiredOutput}</p>
+                </div>
               </div>
 
               <div className={`${styles.journeyFormPanel} ${selectedIsLockedPreview ? styles.journeyFormPanelPreview : ''}`}>

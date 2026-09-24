@@ -3,6 +3,7 @@ import {
   JOURNEY_DAY_TEMPLATES,
   JOURNEY_MILESTONES,
   JOURNEY_TOTAL_DAYS,
+  normalizeJourneyTasks,
   type JourneyCheck,
   type JourneyDashboardMetrics,
   type JourneyDayTemplate,
@@ -164,6 +165,7 @@ function normalizeTemplateRow(row: Partial<JourneyTemplateRecord>): JourneyDayTe
     reviewRequired: row.review_required ?? base.reviewRequired,
     buttonText: String(row.button_text || base.buttonText || '').trim() || base.buttonText,
     completionMessage: String(row.completion_message || base.completionMessage || '').trim() || base.completionMessage,
+    tasks: normalizeJourneyTasks(base.tasks, fallback?.tasks || []),
     formFields: Array.isArray(base.formFields) ? base.formFields : [],
     repeatGroups: Array.isArray(base.repeatGroups) ? base.repeatGroups : [],
   };

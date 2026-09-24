@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import AdminGate from '../../components/AdminGate';
 import ThemeToggle from '../../components/theme/ThemeToggle';
-import { JOURNEY_TOTAL_DAYS, type JourneyDayTemplate, type JourneyMilestoneCategory, type JourneySubmissionStatus } from '../../config/operatorJourney';
+import { JOURNEY_TOTAL_DAYS, type JourneyDayTemplate, type JourneyMilestoneCategory, type JourneySubmissionStatus, type JourneyTask } from '../../config/operatorJourney';
 import styles from './admin.module.css';
 
 const CATEGORY_OPTIONS: JourneyMilestoneCategory[] = ['setup', 'learning', 'outreach', 'platform', 'deal'];
@@ -268,7 +268,7 @@ function JourneyTemplateEditor() {
                     <label className={`${styles.adminInputGroup} ${styles.adminInputWide}`}><span>Description</span><textarea value={milestone.description} onChange={(event) => updateMilestone(milestone.day, { description: event.target.value })} rows={2} /></label>
                     <label className={`${styles.adminInputGroup} ${styles.adminInputWide}`}><span>Purpose</span><textarea value={milestone.purpose} onChange={(event) => updateMilestone(milestone.day, { purpose: event.target.value })} rows={3} /></label>
                     <label className={`${styles.adminInputGroup} ${styles.adminInputWide}`}><span>Learn JSON</span><textarea value={jsonText(milestone.learn)} onChange={(event) => updateMilestone(milestone.day, { learn: parseJson<string[]>(event.target.value, milestone.learn) })} rows={4} /></label>
-                    <label className={`${styles.adminInputGroup} ${styles.adminInputWide}`}><span>Tasks JSON</span><textarea value={jsonText(milestone.tasks)} onChange={(event) => updateMilestone(milestone.day, { tasks: parseJson<string[]>(event.target.value, milestone.tasks) })} rows={4} /></label>
+                    <label className={`${styles.adminInputGroup} ${styles.adminInputWide}`}><span>Guide steps JSON</span><textarea value={jsonText(milestone.tasks)} onChange={(event) => updateMilestone(milestone.day, { tasks: parseJson<JourneyTask[]>(event.target.value, milestone.tasks) })} rows={8} /></label>
                     <label className={`${styles.adminInputGroup} ${styles.adminInputWide}`}><span>Required output</span><textarea value={milestone.requiredOutput} onChange={(event) => updateMilestone(milestone.day, { requiredOutput: event.target.value })} rows={2} /></label>
                     <label className={styles.adminInputGroup}><span>Button text</span><input value={milestone.buttonText} onChange={(event) => updateMilestone(milestone.day, { buttonText: event.target.value })} /></label>
                     <label className={styles.adminInputGroup}><span>Action link</span><input value={milestone.href || ''} onChange={(event) => updateMilestone(milestone.day, { href: event.target.value })} /></label>
