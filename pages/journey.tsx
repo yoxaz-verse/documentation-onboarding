@@ -699,7 +699,14 @@ function JourneyContent() {
                               {task.actionLabel || 'Open resource'}
                             </a>
                           ) : (
-                            <Link href={task.href} className={styles.journeySecondaryLink}>{task.actionLabel || 'Open page'}</Link>
+                            <Link
+                              href={task.href}
+                              className={styles.journeySecondaryLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {task.actionLabel || 'Open page'}
+                            </Link>
                           )
                         ) : null}
                       </div>
