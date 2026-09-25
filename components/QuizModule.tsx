@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import type { CourseSubModule } from '../config/courses';
+import { shuffledCopy } from '../lib/shuffle';
 import styles from './QuizModule.module.css';
 import { LoadingButtonContent } from './LoadingState';
 
@@ -8,6 +9,8 @@ type Props = {
   initialAnswers?: Record<string, string>;
   onUpdated: (completedSubModuleId?: string) => Promise<void>;
   status?: 'passed' | 'in_progress' | 'locked';
+  nextSubModule?: { id: string; title: string; order: number; isLocked: boolean } | null;
+  onSelectSubModule?: (id: string) => void;
 };
 
 function getMessageTone(message: string): 'neutral' | 'success' | 'error' {
@@ -17,16 +20,34 @@ function getMessageTone(message: string): 'neutral' | 'success' | 'error' {
   return 'neutral';
 }
 
-export default function QuizModule({ subModule, initialAnswers = {}, onUpdated, status }: Props) {
+export default function QuizModule({ subModule, initialAnswers = {}, onUpdated, status, nextSubModule, onSelectSubModule }: Props) {
   const [answers, setAnswers] = useState<Record<string, string>>(initialAnswers);
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [optionOrder, setOptionOrder] = useState<Record<string, string[]>>({});
+  const [passResult, setPassResult] = useState<{
+    score: number;
+    totalQuestions: number;
+    passScore: number;
+  } | null>(null);
 
   useEffect(() => {
     setAnswers(initialAnswers || {});
     setMessage('');
+    setPassResult(null);
   }, [subModule.id, initialAnswers]);
+
+  useEffect(() => {
+    setOptionOrder((current) => {
+      const next = { ...current };
+      subModule.questions.forEach((question) => {
+        const key = `${subModule.id}:${question.id}`;
+        if (!next[key]) next[key] = shuffledCopy(question.options);
+      });
+      return next;
+    });
+  }, [subModule.id, subModule.questions]);
 
   const messageTone = useMemo(() => getMessageTone(message), [message]);
 
@@ -87,18 +108,80 @@ export default function QuizModule({ subModule, initialAnswers = {}, onUpdated, 
     }
 
     if (!passed) {
-      setMessage(`Score ${score}/${subModule.questions.length}. You need ${subModule.passScore} to pass.`);
+      setMessage(`Score ${score}/${subModule.questions.length}. You need ${subModule.passScore} correct answers to pass. Please review the lesson and try again!`);
       setSubmitting(false);
       return;
     }
 
     await onUpdated(subModule.id);
-    setMessage(`Passed with ${score}/${subModule.questions.length}. Sub-module completed.`);
+    setPassResult({
+      score,
+      totalQuestions: subModule.questions.length,
+      passScore: subModule.passScore,
+    });
     setSubmitting(false);
+  };
+
+  const handleContinueToNext = () => {
+    if (nextSubModule && !nextSubModule.isLocked && onSelectSubModule) {
+      onSelectSubModule(nextSubModule.id);
+    } else {
+      setPassResult(null);
+    }
   };
 
   return (
     <section className={styles.wrap}>
+      {passResult ? (
+        <div className={styles.advancementCard}>
+          <div className={styles.advancementHeader}>
+            <span className={styles.advancementBadge}>🎉 LEVEL ADVANCED</span>
+            <span className={styles.advancementScorePill}>
+              {passResult.score}/{passResult.totalQuestions} Correct ({Math.round((passResult.score / passResult.totalQuestions) * 100)}%)
+            </span>
+          </div>
+          <h3 className={styles.advancementTitle}>Lesson Passed: {subModule.title}!</h3>
+          <p className={styles.advancementDesc}>
+            Great job! You have passed this lesson quiz and earned <strong>+25 Workspace Points</strong>.
+          </p>
+
+          <div className={styles.advancementGrid}>
+            <div className={styles.advancementStatBox}>
+              <span className={styles.advancementStatLabel}>Status</span>
+              <strong className={styles.advancementStatValuePassed}>✓ Passed</strong>
+            </div>
+            <div className={styles.advancementStatBox}>
+              <span className={styles.advancementStatLabel}>Points Earned</span>
+              <strong className={styles.advancementStatValue}>+25 pts</strong>
+            </div>
+            <div className={styles.advancementStatBox}>
+              <span className={styles.advancementStatLabel}>Next Level</span>
+              <strong className={styles.advancementStatValue}>
+                {nextSubModule ? `Lesson ${nextSubModule.order}` : 'Course Complete'}
+              </strong>
+            </div>
+          </div>
+
+          {nextSubModule && !nextSubModule.isLocked ? (
+            <div className={styles.nextLevelPreview}>
+              <div className={styles.nextLevelMeta}>
+                <span className={styles.nextLevelTag}>UNLOCKED NEXT LEVEL</span>
+                <span className={styles.nextLevelTitle}>Lesson {nextSubModule.order}: {nextSubModule.title}</span>
+              </div>
+              <button type="button" className={styles.advancementCta} onClick={handleContinueToNext}>
+                Continue to Lesson {nextSubModule.order} →
+              </button>
+            </div>
+          ) : (
+            <div className={styles.advancementActions}>
+              <button type="button" className={styles.advancementCta} onClick={() => setPassResult(null)}>
+                Review Quiz Answers
+              </button>
+            </div>
+          )}
+        </div>
+      ) : null}
+
       <header className={styles.head}>
         <h2 className={styles.title}>{subModule.title}</h2>
         <p className={styles.description}>{subModule.description}</p>
@@ -154,7 +237,7 @@ export default function QuizModule({ subModule, initialAnswers = {}, onUpdated, 
         {subModule.questions.map((question) => (
           <fieldset key={question.id} className={styles.question}>
             <legend className={styles.legend}>{question.question}</legend>
-            {question.options.map((option) => {
+            {(optionOrder[`${subModule.id}:${question.id}`] || question.options).map((option) => {
               const isSelected = answers[question.id] === option;
               const isPassed = status === 'passed';
               const optionClass = `${styles.option} ${
@@ -181,11 +264,22 @@ export default function QuizModule({ subModule, initialAnswers = {}, onUpdated, 
 
         {status === 'passed' ? (
           <div className={styles.passedBanner}>
-            <span className={styles.passedIcon}>✓</span>
-            <div className={styles.passedText}>
-              <h3 className={styles.passedTitle}>Lesson Completed</h3>
-              <p className={styles.passedDesc}>You have successfully passed this lesson quiz.</p>
+            <div className={styles.passedContent}>
+              <span className={styles.passedIcon}>✓</span>
+              <div className={styles.passedText}>
+                <h3 className={styles.passedTitle}>Lesson Passed & Saved</h3>
+                <p className={styles.passedDesc}>You have passed this lesson quiz. Progress and points are recorded.</p>
+              </div>
             </div>
+            {nextSubModule && !nextSubModule.isLocked && onSelectSubModule ? (
+              <button
+                type="button"
+                className={styles.nextLessonBtn}
+                onClick={() => onSelectSubModule(nextSubModule.id)}
+              >
+                Go to Lesson {nextSubModule.order} →
+              </button>
+            ) : null}
           </div>
         ) : (
           <div className={styles.actionRow}>

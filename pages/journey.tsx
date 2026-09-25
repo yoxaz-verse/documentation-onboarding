@@ -6,6 +6,7 @@ import SupportContactList from '../components/SupportContactList';
 import { LoadingButtonContent, SkeletonBlock, Spinner } from '../components/LoadingState';
 import { JOURNEY_PAGE_COPY, JOURNEY_TOTAL_DAYS, type JourneyDayTemplate, type JourneyFormField, type JourneyRepeatGroup } from '../config/operatorJourney';
 import { isUnauthorizedError } from '../lib/http';
+import { shuffledCopy } from '../lib/shuffle';
 import type { CourseProgressSummary, JourneyResponse, JourneySummary, ProgressRecord } from '../lib/types';
 import styles from './onboarding.module.css';
 
@@ -326,6 +327,7 @@ function JourneyContent() {
   const [scenarioGrade, setScenarioGrade] = useState<ScenarioGrade | null>(null);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [answers, setAnswers] = useState<Answers>({});
+  const [scenarioOptionOrder, setScenarioOptionOrder] = useState<Record<string, string[]>>({});
   const journeyWorkspaceRef = useRef<HTMLElement | null>(null);
   const scrollToWorkspaceAfterLoadRef = useRef(false);
 
@@ -460,6 +462,14 @@ function JourneyContent() {
       const normalized = normalizeAnswers(selectedTemplate, selectedStatus?.submission?.answers || null);
       setAnswers(normalized);
       setScenarioGrade(selectedStatus?.submission ? gradeScenarioAnswers(selectedTemplate, normalized) : null);
+      setScenarioOptionOrder((current) => {
+        const next = { ...current };
+        selectedTemplate.scenarioQuestions?.forEach((scenario) => {
+          const key = `${selectedTemplate.id}:${scenario.id}`;
+          if (!next[key]) next[key] = shuffledCopy(scenario.options);
+        });
+        return next;
+      });
       setFormErrors([]);
       setLocalNotice('');
     }
@@ -860,7 +870,7 @@ function JourneyContent() {
                             <p className={styles.journeyScenarioSituation}>{scenario.situation}</p>
                             <p className={styles.journeyScenarioQuestion}>{scenario.question}</p>
                             <div className={styles.journeyScenarioOptions}>
-                              {scenario.options.map((option) => (
+                              {(scenarioOptionOrder[`${selectedTemplate.id}:${scenario.id}`] || scenario.options).map((option) => (
                                 <label key={option} className={`${styles.journeyScenarioOption} ${selectedAnswer === option ? styles.journeyScenarioOptionSelected : ''}`}>
                                   <input
                                     type="radio"

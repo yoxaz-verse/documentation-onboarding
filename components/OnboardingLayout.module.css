@@ -326,6 +326,84 @@
   padding-block: 0.48rem;
 }
 
+.navGroupParent {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.navParentHeader {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.navParentLink {
+  width: 100%;
+  padding-right: 2.3rem;
+}
+
+.navChevronToggle {
+  position: absolute;
+  right: 0.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  padding: 0;
+  border-radius: 0.32rem;
+  background: transparent;
+  color: var(--ink-soft);
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background-color 170ms ease, color 170ms ease;
+}
+
+.navChevronToggle:hover {
+  background: color-mix(in srgb, var(--surface-alt) 88%, var(--control-surface));
+  color: var(--ink-strong);
+}
+
+.navChevronToggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--control-focus);
+}
+
+.navChevronToggle svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 170ms ease;
+}
+
+.navChevronCollapsed {
+  transform: rotate(-90deg);
+}
+
+.coursesSubList {
+  display: grid;
+  gap: 0.2rem;
+  margin-left: 0.65rem;
+  padding-left: 0.45rem;
+  border-left: 1.5px solid color-mix(in srgb, var(--surface-border) 80%, transparent);
+}
+
+.coursesSubList[hidden] {
+  display: none;
+}
+
+.navSubItem {
+  min-height: 2.5rem;
+  padding: 0.42rem 0.5rem;
+}
+
 .navChip {
   border: 1px solid color-mix(in srgb, var(--accent) 46%, var(--control-focus));
   color: var(--accent-strong);
@@ -409,6 +487,20 @@
   grid-row: auto;
   width: 0.82rem;
   height: 0.82rem;
+}
+
+.navCollapsed .navParentLink {
+  padding-right: 0.35rem;
+}
+
+.navCollapsed .navChevronToggle {
+  display: none;
+}
+
+.navCollapsed .coursesSubList {
+  margin-left: 0;
+  padding-left: 0;
+  border-left: none;
 }
 
 .mainCard {

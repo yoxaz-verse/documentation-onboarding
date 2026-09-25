@@ -38,6 +38,8 @@ type MobileTabDef = {
 const SIDEBAR_STORAGE_KEY = 'obaol:onboarding-sidebar-collapsed';
 const ONBOARDING_STEPS_STORAGE_KEY = 'obaol:onboarding-steps-collapsed';
 const ONBOARDING_STEPS_ID = 'onboarding-sidebar-steps';
+const COURSES_STORAGE_KEY = 'obaol:courses-collapsed';
+const COURSES_NAV_ID = 'onboarding-sidebar-courses';
 
 function getCourseStatusLabel(status: 'locked' | 'in_progress' | 'passed') {
   if (status === 'passed') return 'Passed';
@@ -125,6 +127,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
   const [loggingOut, setLoggingOut] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [onboardingStepsCollapsed, setOnboardingStepsCollapsed] = useState(false);
+  const [coursesCollapsed, setCoursesCollapsed] = useState(false);
   const inClassroom = router.pathname === '/courses' || router.pathname.startsWith('/courses/');
   const inJourney = router.pathname === '/journey';
   const inInquiries = router.pathname === '/inquiries';
@@ -214,6 +217,17 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
     }
   }, [coursesUnlocked, loading]);
 
+  useEffect(() => {
+    if (loading) return;
+
+    try {
+      const savedPreference = window.localStorage.getItem(COURSES_STORAGE_KEY);
+      setCoursesCollapsed(savedPreference === 'true');
+    } catch {
+      setCoursesCollapsed(false);
+    }
+  }, [loading]);
+
   const toggleSidebar = () => {
     setSidebarCollapsed((current) => {
       const next = !current;
@@ -233,6 +247,20 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
         window.localStorage.setItem(ONBOARDING_STEPS_STORAGE_KEY, String(next));
       } catch {
         // Non-critical preference; keep the in-memory state even if storage is unavailable.
+      }
+      return next;
+    });
+  };
+
+  const toggleCourses = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCoursesCollapsed((current) => {
+      const next = !current;
+      try {
+        window.localStorage.setItem(COURSES_STORAGE_KEY, String(next));
+      } catch {
+        // Non-critical preference; keep in-memory state even if storage fails.
       }
       return next;
     });
@@ -394,32 +422,62 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
 
                 <p className={styles.navGroupTitle}>Training library</p>
                 {coursesUnlocked ? (
-                  <>
-                    <Link href="/courses" className={`${styles.navItem} ${inClassroom ? styles.navActive : ''}`}>
-                      <span className={styles.navDot} aria-hidden="true" />
-                      <span className={styles.navTitle}>Courses</span>
-                      <span className={styles.navStateRow}>
-                        <span className={styles.navState}>{classroomSummary}</span>
-                        {inClassroom ? <span className={styles.navChip}>Now</span> : null}
-                      </span>
-                    </Link>
-                    {(courseProgress?.courses || []).length ? <p className={styles.navSubgroupTitle}>Course queue</p> : null}
-                    {(courseProgress?.courses || []).map((course) => (
+                  <div className={styles.navGroupParent}>
+                    <div className={styles.navParentHeader}>
                       <Link
-                        key={course.id}
-                        href={`/courses/${course.id}`}
-                        className={`${styles.navItem} ${styles.navCourseItem} ${course.status === 'passed' ? styles.navDone : ''} ${router.asPath === `/courses/${course.id}` ? styles.navActive : ''}`}
+                        href="/courses"
+                        className={`${styles.navItem} ${styles.navParentLink} ${inClassroom ? styles.navActive : ''}`}
+                        aria-current={router.pathname === '/courses' ? 'page' : undefined}
                       >
                         <span className={styles.navDot} aria-hidden="true" />
-                        <span className={styles.navTitle}>{course.title}</span>
+                        <span className={styles.navTitle}>Courses</span>
                         <span className={styles.navStateRow}>
-                          <span className={styles.navState}>
-                            {course.completedSubModules}/{course.totalSubModules} lessons · {getCourseStatusLabel(course.status)}
-                          </span>
+                          <span className={styles.navState}>{classroomSummary}</span>
+                          {inClassroom ? <span className={styles.navChip}>Now</span> : null}
                         </span>
                       </Link>
-                    ))}
-                  </>
+                      {(courseProgress?.courses || []).length > 0 ? (
+                        <button
+                          type="button"
+                          className={styles.navChevronToggle}
+                          onClick={toggleCourses}
+                          aria-expanded={!coursesCollapsed}
+                          aria-controls={COURSES_NAV_ID}
+                          aria-label={coursesCollapsed ? 'Expand courses' : 'Collapse courses'}
+                          title={coursesCollapsed ? 'Expand courses' : 'Collapse courses'}
+                        >
+                          <svg className={coursesCollapsed ? styles.navChevronCollapsed : ''} viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="m6 9 6 6 6-6" />
+                          </svg>
+                        </button>
+                      ) : null}
+                    </div>
+
+                    {(courseProgress?.courses || []).length > 0 ? (
+                      <div id={COURSES_NAV_ID} className={styles.coursesSubList} hidden={coursesCollapsed}>
+                        {(courseProgress?.courses || []).map((course) => {
+                          const isCourseActive = router.asPath === `/courses/${course.id}` || (router.pathname === '/courses/[courseId]' && router.query?.courseId === course.id);
+                          return (
+                            <Link
+                              key={course.id}
+                              href={`/courses/${course.id}`}
+                              className={`${styles.navItem} ${styles.navSubItem} ${styles.navCourseItem} ${course.status === 'passed' ? styles.navDone : ''} ${isCourseActive ? styles.navActive : ''}`}
+                              aria-current={isCourseActive ? 'page' : undefined}
+                            >
+                              <span className={styles.navDot} aria-hidden="true" />
+                              <span className={styles.navTitle}>{course.title}</span>
+                              <span className={styles.navStateRow}>
+                                <span className={styles.navState}>
+                                  {course.completedSubModules}/{course.totalSubModules} lessons · {getCourseStatusLabel(course.status)}
+                                </span>
+                                {isCourseActive ? <span className={styles.navChip}>Now</span> : null}
+                              </span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    ) : null}
+                  </div>
                 ) : (
                   <span className={`${styles.navItem} ${styles.navDisabled}`} aria-disabled="true">
                     <span className={styles.navDot} aria-hidden="true" />
