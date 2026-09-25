@@ -44,6 +44,95 @@
   display: block;
 }
 
+.reading {
+  display: grid;
+  gap: 0.82rem;
+}
+
+.readingSection,
+.callout,
+.quizIntro {
+  border: 1px solid var(--surface-border);
+  border-radius: 1.2rem;
+  background: var(--surface);
+  box-shadow: var(--elev-shadow), var(--inset-highlight);
+  padding: clamp(1rem, 2vw, 1.3rem);
+}
+
+.readingTitle,
+.calloutTitle,
+.quizTitle {
+  margin: 0;
+  color: var(--ink-strong);
+  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+}
+
+.readingTitle {
+  font-size: 1.05rem;
+}
+
+.readingText,
+.calloutText,
+.quizHint {
+  margin: 0.55rem 0 0;
+  color: var(--ink);
+  line-height: 1.65;
+}
+
+.readingList {
+  margin: 0.62rem 0 0;
+  padding-left: 1.25rem;
+  color: var(--ink);
+}
+
+.readingList li {
+  padding-left: 0.18rem;
+  line-height: 1.6;
+}
+
+.readingList li + li {
+  margin-top: 0.42rem;
+}
+
+.callout {
+  border-left-width: 4px;
+}
+
+.callout_key {
+  border-left-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-soft) 42%, var(--surface));
+}
+
+.callout_example {
+  border-left-color: var(--success);
+  background: color-mix(in srgb, var(--success-bg) 55%, var(--surface));
+}
+
+.callout_warning {
+  border-left-color: var(--accent-secondary);
+  background: color-mix(in srgb, var(--accent-soft) 22%, var(--surface));
+}
+
+.calloutLabel,
+.quizEyebrow {
+  margin: 0 0 0.28rem;
+  color: var(--ink-muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.calloutTitle,
+.quizTitle {
+  font-size: 1rem;
+}
+
+.quizIntro {
+  margin-top: 0.3rem;
+  background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
+}
+
 .form {
   display: grid;
   gap: 0.75rem;
@@ -160,7 +249,10 @@
 @media (max-width: 640px) {
   .head,
   .question,
-  .videoWrap {
+  .videoWrap,
+  .readingSection,
+  .callout,
+  .quizIntro {
     border-radius: 1rem;
   }
 

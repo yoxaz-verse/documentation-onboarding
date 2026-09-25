@@ -1,3 +1,5 @@
+import { INTERNATIONAL_TRADE_BASICS_LESSONS } from './internationalTradeBasics';
+
 export type QuizQuestion = {
   id: string;
   question: string;
@@ -16,13 +18,28 @@ export type CourseCatalogMeta = {
   coverSubtitle: string;
 };
 
+export type CourseContentBlock =
+  | {
+      type: 'section';
+      heading: string;
+      paragraphs?: string[];
+      bullets?: string[];
+    }
+  | {
+      type: 'callout';
+      tone: 'key' | 'example' | 'warning';
+      title: string;
+      text: string;
+    };
+
 export type CourseSubModule = {
   id: string;
   courseId: string;
   order: number;
   title: string;
-  videoUrl: string;
+  videoUrl?: string;
   description: string;
+  content?: CourseContentBlock[];
   passScore: number;
   questions: QuizQuestion[];
 };
@@ -42,6 +59,7 @@ export type CourseStatus = 'locked' | 'in_progress' | 'passed';
 export type SubModuleStatus = CourseStatus;
 
 const beginnerOperatorCourseId = 'beginner-operator-foundations';
+const internationalTradeBasicsCourseId = 'international-trade-basics';
 
 export const COURSES: Course[] = [
   {
@@ -363,6 +381,25 @@ export const COURSES: Course[] = [
         ],
       },
     ],
+  },
+  {
+    id: internationalTradeBasicsCourseId,
+    order: 2,
+    division: 'operator-core',
+    divisionLabel: 'Operator Core',
+    title: 'International Trade Basics: Incoterms, Payments & Execution',
+    description:
+      'Build practical trade knowledge across Incoterms® 2020, payment structures, documents, logistics, customs, risk, and end-to-end execution.',
+    catalog: {
+      summary:
+        'Learn how an international transaction moves from quotation to delivery, how responsibilities are divided, and which commercial details must be confirmed before execution.',
+      theme: 'product',
+      badge: 'Beginner',
+      icon: 'trade',
+      coverTitle: 'International Trade Basics',
+      coverSubtitle: 'INCOTERMS · PAYMENTS · EXECUTION',
+    },
+    subModules: INTERNATIONAL_TRADE_BASICS_LESSONS,
   },
 ];
 

@@ -1117,8 +1117,26 @@
   background: color-mix(in srgb, var(--accent-soft) 78%, var(--surface));
 }
 
+.journeyTimelineItemNext {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-soft) 88%, var(--surface-strong));
+  color: var(--accent-strong);
+}
+
+.journeyTimelineItemNext strong {
+  color: var(--accent-strong);
+}
+
 .journeyTimelineItemSelected {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--control-focus) 24%, transparent);
+  border-color: var(--control-focus);
+  background: color-mix(in srgb, var(--accent-soft) 72%, var(--surface-strong));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--control-focus) 34%, transparent), 0 8px 18px color-mix(in srgb, var(--control-focus) 12%, transparent);
+  transform: translateY(-1px);
+}
+
+.journeyTimelineItemSelected span,
+.journeyTimelineItemSelected strong {
+  color: var(--ink-strong);
 }
 
 .journeyTimelineItemDue {
@@ -1148,6 +1166,20 @@
 .journeyTimelineItemLocked.journeyTimelineItemSelected {
   border-color: color-mix(in srgb, var(--accent-secondary) 58%, var(--surface-border));
   background: color-mix(in srgb, var(--accent-soft) 38%, var(--surface));
+}
+
+.journeyFormPanelReadOnly input:disabled,
+.journeyFormPanelReadOnly select:disabled,
+.journeyFormPanelReadOnly textarea:disabled {
+  color: var(--ink-strong);
+  -webkit-text-fill-color: var(--ink-strong);
+  opacity: 1;
+  cursor: not-allowed;
+  background: color-mix(in srgb, var(--surface) 84%, var(--surface-strong));
+}
+
+.journeyFormPanelReadOnly .journeyBoolean {
+  opacity: 0.82;
 }
 
 .journeyCalendarNotice {
@@ -1563,6 +1595,164 @@
   gap: 0.72rem;
   border-top: 1px solid var(--surface-border);
   padding-top: 0.82rem;
+}
+
+.journeyScenarioAssessment,
+.journeyScenarioList {
+  display: grid;
+  gap: 0.72rem;
+}
+
+.journeyScenarioAssessment {
+  border-top: 1px solid var(--surface-border);
+  padding-top: 0.82rem;
+}
+
+.journeyScenarioHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.journeyScenarioHeader h3,
+.journeyScenarioHeader p {
+  margin: 0;
+}
+
+.journeyScenarioHeader h3 {
+  color: var(--ink-strong);
+  font-size: 1rem;
+}
+
+.journeyScenarioHeader > div > p:last-child {
+  margin-top: 0.35rem;
+  color: var(--ink-muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.journeyScenarioScore {
+  flex: 0 0 auto;
+  border: 1px solid var(--surface-border);
+  border-radius: 999px;
+  padding: 0.38rem 0.68rem;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.journeyScenarioScorePassed {
+  border-color: var(--success-border);
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.journeyScenarioScoreRetry {
+  border-color: var(--error-border);
+  background: var(--error-bg);
+  color: var(--error);
+}
+
+.journeyScenarioCard {
+  min-width: 0;
+  margin: 0;
+  border: 1px solid var(--surface-border);
+  border-radius: 0.78rem;
+  padding: 0.86rem;
+  background: color-mix(in srgb, var(--surface) 62%, transparent);
+}
+
+.journeyScenarioCard legend {
+  padding: 0 0.3rem;
+  color: var(--ink-strong);
+  font-size: 0.92rem;
+  font-weight: 850;
+}
+
+.journeyScenarioCard legend span {
+  margin-right: 0.42rem;
+  color: var(--accent-strong);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.journeyScenarioSituation,
+.journeyScenarioQuestion,
+.journeyScenarioFeedback p {
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+.journeyScenarioSituation {
+  margin: 0;
+  font-size: 0.86rem;
+}
+
+.journeyScenarioQuestion {
+  margin: 0.65rem 0 0;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.journeyScenarioOptions {
+  display: grid;
+  gap: 0.42rem;
+  margin-top: 0.6rem;
+}
+
+.journeyScenarioOption {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid var(--surface-border);
+  border-radius: 0.62rem;
+  padding: 0.62rem 0.7rem;
+  background: var(--surface-strong);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.journeyScenarioOptionSelected {
+  border-color: color-mix(in srgb, var(--accent) 54%, var(--surface-border));
+  background: color-mix(in srgb, var(--accent-soft) 60%, var(--surface-strong));
+}
+
+.journeyScenarioOption input {
+  accent-color: var(--accent);
+}
+
+.journeyScenarioCardCorrect {
+  border-color: var(--success-border);
+}
+
+.journeyScenarioCardIncorrect {
+  border-color: var(--error-border);
+}
+
+.journeyScenarioFeedback {
+  margin-top: 0.68rem;
+  border-radius: 0.62rem;
+  padding: 0.62rem 0.7rem;
+}
+
+.journeyScenarioFeedback strong {
+  font-size: 0.84rem;
+}
+
+.journeyScenarioFeedback p {
+  margin: 0.22rem 0 0;
+  font-size: 0.82rem;
+}
+
+.journeyScenarioFeedbackCorrect {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.journeyScenarioFeedbackIncorrect {
+  background: var(--error-bg);
+  color: var(--error);
 }
 
 .journeyRepeatEntry {
@@ -2469,6 +2659,7 @@
 
   .journeyOverviewHeader,
   .journeyFormHeader,
+  .journeyScenarioHeader,
   .journeySubmitFooter {
     flex-direction: column;
     align-items: stretch;

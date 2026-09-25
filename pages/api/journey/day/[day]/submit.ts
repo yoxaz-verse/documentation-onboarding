@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { ensureOperatorSeed } from '../../../../../lib/ensureOperatorSeed';
-import { computeJourneySubmissionMetrics, normalizeJourneyDayTemplates, validateJourneyAnswers, type JourneyTemplateRecord } from '../../../../../lib/operatorJourney';
+import { computeJourneySubmissionMetrics, gradeJourneyScenarios, normalizeJourneyDayTemplates, validateJourneyAnswers, type JourneyTemplateRecord } from '../../../../../lib/operatorJourney';
 import { areCoursesUnlocked, normalizeProgressRecord } from '../../../../../lib/onboarding';
 import { requireSession } from '../../../../../lib/serverAuth';
 import { isMissingSupabaseTableError } from '../../../../../lib/supabaseErrors';
@@ -45,8 +45,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!validation.valid) return res.status(400).json({ error: 'Please complete the required day fields.', errors: validation.errors });
 
   const now = new Date().toISOString();
-  const status = template.reviewRequired ? 'under_review' : 'completed';
   const computedMetrics = computeJourneySubmissionMetrics(template, answers);
+  const scenarioGrade = gradeJourneyScenarios(template, answers);
+
+  if (!scenarioGrade.passed) {
+    const { error: pendingError } = await supabaseAdmin
+      .from('operator_journey_day_submissions')
+      .upsert({
+        email: session.email,
+        template_id: template.id,
+        day_number: day,
+        status: 'pending',
+        answers,
+        computed_metrics: computedMetrics,
+        submitted_at: now,
+        reviewed_at: null,
+        reviewed_by: null,
+        review_note: null,
+      }, { onConflict: 'email,day_number' });
+
+    if (pendingError) return res.status(500).json({ error: pendingError.message });
+    return res.status(400).json({
+      error: `Score ${scenarioGrade.score}/${scenarioGrade.total}. You need ${scenarioGrade.passScore} correct answers to complete Day ${day}.`,
+      scenarioGrade,
+    });
+  }
+
+  const status = template.reviewRequired ? 'under_review' : 'completed';
 
   const { data: submission, error } = await supabaseAdmin
     .from('operator_journey_day_submissions')
@@ -76,5 +101,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .upsert({ email: session.email, milestone_id: template.id, completed_at: now }, { onConflict: 'email,milestone_id' });
   }
 
-  return res.status(200).json({ submission, status, completionMessage: template.completionMessage });
+  return res.status(200).json({
+    submission,
+    status,
+    completionMessage: template.completionMessage,
+    ...(template.scenarioQuestions?.length ? { scenarioGrade } : {}),
+  });
 }

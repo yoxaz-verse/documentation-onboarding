@@ -295,11 +295,49 @@ export function validateJourneyAnswers(template: JourneyDayTemplate, answers: Re
     if (missing.length) errors.push(`The answer for ${rule.fieldId} must mention: ${missing.join(', ')}.`);
   });
 
+  if (template.scenarioQuestions?.length) {
+    const scenarioAnswers = answers.scenarioAnswers && typeof answers.scenarioAnswers === 'object'
+      ? answers.scenarioAnswers as Record<string, unknown>
+      : {};
+    template.scenarioQuestions.forEach((scenario) => {
+      if (isEmptyValue(scenarioAnswers[scenario.id])) errors.push(`${scenario.title} needs an answer.`);
+    });
+  }
+
   return { valid: errors.length === 0, errors };
+}
+
+export type JourneyScenarioResult = {
+  id: string;
+  correct: boolean;
+  correctAnswer: string;
+  explanation: string;
+};
+
+export function gradeJourneyScenarios(template: JourneyDayTemplate, answers: Record<string, unknown>) {
+  const scenarioAnswers = answers.scenarioAnswers && typeof answers.scenarioAnswers === 'object'
+    ? answers.scenarioAnswers as Record<string, unknown>
+    : {};
+  const results: JourneyScenarioResult[] = (template.scenarioQuestions || []).map((scenario) => ({
+    id: scenario.id,
+    correct: String(scenarioAnswers[scenario.id] || '') === scenario.correctAnswer,
+    correctAnswer: scenario.correctAnswer,
+    explanation: scenario.explanation,
+  }));
+  const score = results.filter((result) => result.correct).length;
+  const passScore = template.scenarioPassScore || results.length;
+  return { score, total: results.length, passScore, passed: results.length === 0 || score >= passScore, results };
 }
 
 export function computeJourneySubmissionMetrics(template: JourneyDayTemplate, answers: Record<string, unknown>) {
   const metrics: Record<string, unknown> = {};
+
+  if (template.scenarioQuestions?.length) {
+    const grade = gradeJourneyScenarios(template, answers);
+    metrics.scenarioScore = grade.score;
+    metrics.scenarioTotal = grade.total;
+    metrics.scenarioPassed = grade.passed;
+  }
 
   if (template.day === 24) metrics.matchesAttempted = 1;
   if (template.day === 30) {

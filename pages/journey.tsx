@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import AuthGate from '../components/AuthGate';
 import OnboardingLayout from '../components/OnboardingLayout';
 import SupportContactList from '../components/SupportContactList';
@@ -19,6 +19,13 @@ type Answers = Record<string, unknown>;
 type FormError = {
   key: string;
   message: string;
+};
+type ScenarioGrade = {
+  score: number;
+  total: number;
+  passScore: number;
+  passed: boolean;
+  results: Array<{ id: string; correct: boolean; correctAnswer: string; explanation: string }>;
 };
 
 function clampTimelineDay(day: number | null) {
@@ -51,7 +58,26 @@ function normalizeAnswers(template: JourneyDayTemplate, submissionAnswers?: Reco
       answers[group.id] = Array.from({ length: group.minEntries }, () => emptyEntry(group));
     }
   });
+  if (template.scenarioQuestions?.length && (!answers.scenarioAnswers || typeof answers.scenarioAnswers !== 'object')) {
+    answers.scenarioAnswers = {};
+  }
   return answers;
+}
+
+function gradeScenarioAnswers(template: JourneyDayTemplate, answers: Answers): ScenarioGrade | null {
+  if (!template.scenarioQuestions?.length) return null;
+  const scenarioAnswers = answers.scenarioAnswers && typeof answers.scenarioAnswers === 'object'
+    ? answers.scenarioAnswers as Record<string, unknown>
+    : {};
+  const results = template.scenarioQuestions.map((scenario) => ({
+    id: scenario.id,
+    correct: String(scenarioAnswers[scenario.id] || '') === scenario.correctAnswer,
+    correctAnswer: scenario.correctAnswer,
+    explanation: scenario.explanation,
+  }));
+  const score = results.filter((result) => result.correct).length;
+  const passScore = template.scenarioPassScore || results.length;
+  return { score, total: results.length, passScore, passed: score >= passScore, results };
 }
 
 function isEmptyValue(value: unknown) {
@@ -113,6 +139,17 @@ function validateAnswers(template: JourneyDayTemplate, answers: Answers): FormEr
       errors.push({ key: fieldKey(rule.fieldId), message: `The answer must mention: ${missing.join(', ')}.` });
     }
   });
+
+  if (template.scenarioQuestions?.length) {
+    const scenarioAnswers = answers.scenarioAnswers && typeof answers.scenarioAnswers === 'object'
+      ? answers.scenarioAnswers as Record<string, unknown>
+      : {};
+    template.scenarioQuestions.forEach((scenario) => {
+      if (isEmptyValue(scenarioAnswers[scenario.id])) {
+        errors.push({ key: `scenario:${scenario.id}`, message: `${scenario.title} needs an answer.` });
+      }
+    });
+  }
 
   return errors;
 }
@@ -286,10 +323,13 @@ function JourneyContent() {
   const [message, setMessage] = useState('');
   const [formErrors, setFormErrors] = useState<FormError[]>([]);
   const [localNotice, setLocalNotice] = useState('');
+  const [scenarioGrade, setScenarioGrade] = useState<ScenarioGrade | null>(null);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [answers, setAnswers] = useState<Answers>({});
+  const journeyWorkspaceRef = useRef<HTMLElement | null>(null);
+  const scrollToWorkspaceAfterLoadRef = useRef(false);
 
-  const load = async () => {
+  const load = async ({ selectNextActionable = false }: { selectNextActionable?: boolean } = {}) => {
     try {
       const response = await fetch('/api/journey', { credentials: 'include', cache: 'no-store' });
       const payload = (await response.json().catch(() => ({}))) as Partial<JourneyResponse> & { error?: string };
@@ -311,7 +351,12 @@ function JourneyContent() {
       if (!payload.journey) throw new Error('Failed to load operator journey.');
 
       setState({ status: 'ready', progress: payload.progress, courseProgress: payload.courseProgress, journey: payload.journey });
-      setSelectedDay((current) => (current && payload.journey!.dayTemplates.some((template) => template.day === current) ? current : getNextActionableDay(payload.journey!)));
+      setSelectedDay((current) => {
+        if (selectNextActionable) return getNextActionableDay(payload.journey!);
+        return current && payload.journey!.dayTemplates.some((template) => template.day === current)
+          ? current
+          : getNextActionableDay(payload.journey!);
+      });
       setMessage('');
     } catch (error) {
       if (isUnauthorizedError(error)) {
@@ -412,11 +457,21 @@ function JourneyContent() {
 
   useEffect(() => {
     if (selectedTemplate) {
-      setAnswers(normalizeAnswers(selectedTemplate, selectedStatus?.submission?.answers || null));
+      const normalized = normalizeAnswers(selectedTemplate, selectedStatus?.submission?.answers || null);
+      setAnswers(normalized);
+      setScenarioGrade(selectedStatus?.submission ? gradeScenarioAnswers(selectedTemplate, normalized) : null);
       setFormErrors([]);
       setLocalNotice('');
     }
   }, [selectedTemplate?.id, selectedStatus?.submission?.id]);
+
+  useEffect(() => {
+    if (!scrollToWorkspaceAfterLoadRef.current || !selectedTemplate) return;
+    scrollToWorkspaceAfterLoadRef.current = false;
+    window.requestAnimationFrame(() => {
+      journeyWorkspaceRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [selectedTemplate?.id]);
 
   const setField = (fieldId: string, value: unknown) => {
     setAnswers((current) => ({ ...current, [fieldId]: value }));
@@ -430,6 +485,19 @@ function JourneyContent() {
       return { ...current, [group.id]: entries };
     });
     setFormErrors((current) => current.filter((error) => error.key !== groupFieldKey(group.id, index, fieldId) && error.key !== `group:${group.id}`));
+  };
+
+  const setScenarioAnswer = (scenarioId: string, value: string) => {
+    setAnswers((current) => ({
+      ...current,
+      scenarioAnswers: {
+        ...(current.scenarioAnswers && typeof current.scenarioAnswers === 'object' ? current.scenarioAnswers as Record<string, unknown> : {}),
+        [scenarioId]: value,
+      },
+    }));
+    setScenarioGrade(null);
+    setLocalNotice('');
+    setFormErrors((current) => current.filter((error) => error.key !== `scenario:${scenarioId}`));
   };
 
   const addGroupEntry = (group: JourneyRepeatGroup) => {
@@ -471,13 +539,17 @@ function JourneyContent() {
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
+        if (payload?.scenarioGrade) setScenarioGrade(payload.scenarioGrade as ScenarioGrade);
         const apiErrors = Array.isArray(payload?.errors) ? payload.errors.map((error: string) => ({ key: 'api', message: error })) : [];
         setFormErrors(apiErrors);
         setLocalNotice(payload?.error || 'Please complete the required day fields.');
         return;
       }
+      const completedAutomatically = payload?.status === 'completed';
+      if (payload?.scenarioGrade) setScenarioGrade(payload.scenarioGrade as ScenarioGrade);
       setMessage(payload?.completionMessage || (payload?.status === 'under_review' ? 'Submitted for admin review.' : 'Day completed.'));
-      await load();
+      if (completedAutomatically) scrollToWorkspaceAfterLoadRef.current = true;
+      await load({ selectNextActionable: completedAutomatically });
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to submit day.');
     } finally {
@@ -553,6 +625,12 @@ function JourneyContent() {
   const dueCount = journey.dayStatuses.filter((item) => ['catch_up', 'needs_correction', 'pending'].includes(item.status) && item.day <= visibleDay).length;
   const formErrorKeys = new Set(formErrors.map((error) => error.key));
   const selectedIsLockedPreview = Boolean(selectedTemplate && !isDayAccessible(journey, selectedTemplate.day));
+  const selectedIsCompleted = selectedStatus?.status === 'completed';
+  const selectedIsUnderReview = selectedStatus?.status === 'under_review' || selectedStatus?.status === 'submitted';
+  const selectedIsReadOnly = Boolean(selectedIsLockedPreview || selectedIsCompleted || selectedIsUnderReview);
+  const selectedIsResubmission = Boolean(selectedStatus?.submission && ['pending', 'needs_correction'].includes(selectedStatus.status));
+  const nextActionableDay = getNextActionableDay(journey);
+  const nextActionLabel = journey.completedMilestoneCount >= journey.totalMilestoneCount ? 'Journey complete' : `Day ${nextActionableDay}`;
   const lockedPreviewNotice = selectedIsLockedPreview && selectedTemplate ? `Preview only. ${lockedReason(journey, selectedTemplate.day).replace('opening', 'working on')}` : '';
   const journeyMetricItems = [
     ['Suppliers', journey.metrics.suppliersAdded],
@@ -585,6 +663,7 @@ function JourneyContent() {
       </div>
       <div className={styles.journeyAsideStack}>
         <div className={styles.journeyAsideItem}><span>Operator day</span><strong>{currentDay ? `Day ${currentDay}` : 'Not started'}</strong></div>
+        <div className={styles.journeyAsideItem}><span>Next action</span><strong>{nextActionLabel}</strong></div>
         <div className={styles.journeyAsideItem}><span>Completed days</span><strong>{journey.completedMilestoneCount}/{journey.totalMilestoneCount}</strong></div>
         <div className={styles.journeyAsideItem}><span>Review/catch-up</span><strong>{dueCount}</strong></div>
       </div>
@@ -644,9 +723,9 @@ function JourneyContent() {
         <>
           <section className={styles.journeyStatusStrip}>
             <article className={styles.kpiCard}><p className={styles.kpiLabel}>Current operator day</p><p className={styles.kpiValue}>Day {currentDay}</p></article>
-            <article className={styles.kpiCard}><p className={styles.kpiLabel}>30-day path</p><p className={styles.kpiValue}>{dayPercent}% elapsed</p></article>
+            <article className={styles.kpiCard}><p className={styles.kpiLabel}>Next action</p><p className={styles.kpiValue}>{nextActionLabel}</p></article>
             <article className={styles.kpiCard}><p className={styles.kpiLabel}>Milestones done</p><p className={styles.kpiValue}>{journey.completedMilestoneCount}/{journey.totalMilestoneCount}</p></article>
-            <article className={styles.kpiCard}><p className={styles.kpiLabel}>Track status</p><p className={styles.kpiValue}>{dueCount ? `${dueCount} to handle` : 'On track'}</p></article>
+            <article className={styles.kpiCard}><p className={styles.kpiLabel}>30-day path</p><p className={styles.kpiValue}>{dayPercent}% elapsed</p></article>
           </section>
 
           <details className={styles.journeyProgressDetails}>
@@ -662,7 +741,7 @@ function JourneyContent() {
           </details>
 
           {selectedTemplate && selectedStatus ? (
-            <section className={styles.journeyWorkspace}>
+            <section ref={journeyWorkspaceRef} className={styles.journeyWorkspace}>
               <div className={styles.journeyDayContent}>
                 <div className={styles.journeyOverviewHeader}>
                   <div>
@@ -726,7 +805,7 @@ function JourneyContent() {
                 ) : null}
               </div>
 
-              <div className={`${styles.journeyFormPanel} ${selectedIsLockedPreview ? styles.journeyFormPanelPreview : ''}`}>
+              <div className={`${styles.journeyFormPanel} ${selectedIsLockedPreview ? styles.journeyFormPanelPreview : ''} ${selectedIsReadOnly && !selectedIsLockedPreview ? styles.journeyFormPanelReadOnly : ''}`}>
                 <div className={styles.journeyFormHeader}>
                   <div>
                     <h2 className={styles.courseCardTitle}>{selectedIsLockedPreview ? 'Day submission preview' : 'Day submission'}</h2>
@@ -748,6 +827,66 @@ function JourneyContent() {
                   </div>
                 ) : null}
 
+                {selectedTemplate.scenarioQuestions?.length ? (
+                  <section className={styles.journeyScenarioAssessment} aria-labelledby={`scenario-heading-${selectedTemplate.day}`}>
+                    <div className={styles.journeyScenarioHeader}>
+                      <div>
+                        <p className={styles.journeySectionLabel}>Applied scenarios</p>
+                        <h3 id={`scenario-heading-${selectedTemplate.day}`}>Choose the best Incoterms® 2020 answer</h3>
+                        <p>Answer all {selectedTemplate.scenarioQuestions.length} scenarios. A score of {selectedTemplate.scenarioPassScore || selectedTemplate.scenarioQuestions.length}/{selectedTemplate.scenarioQuestions.length} is required.</p>
+                      </div>
+                      {scenarioGrade ? (
+                        <span className={`${styles.journeyScenarioScore} ${scenarioGrade.passed ? styles.journeyScenarioScorePassed : styles.journeyScenarioScoreRetry}`}>
+                          {scenarioGrade.score}/{scenarioGrade.total}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <div className={styles.journeyScenarioList}>
+                      {selectedTemplate.scenarioQuestions.map((scenario, index) => {
+                        const scenarioAnswers = answers.scenarioAnswers && typeof answers.scenarioAnswers === 'object'
+                          ? answers.scenarioAnswers as Record<string, unknown>
+                          : {};
+                        const selectedAnswer = String(scenarioAnswers[scenario.id] || '');
+                        const result = scenarioGrade?.results.find((item) => item.id === scenario.id);
+                        const invalid = !selectedIsLockedPreview && formErrorKeys.has(`scenario:${scenario.id}`);
+                        return (
+                          <fieldset
+                            key={scenario.id}
+                            data-field-key={`scenario:${scenario.id}`}
+                            className={`${styles.journeyScenarioCard} ${invalid ? styles.journeyFieldInvalid : ''} ${result?.correct ? styles.journeyScenarioCardCorrect : result ? styles.journeyScenarioCardIncorrect : ''}`}
+                          >
+                            <legend><span>Scenario {index + 1}</span>{scenario.title}</legend>
+                            <p className={styles.journeyScenarioSituation}>{scenario.situation}</p>
+                            <p className={styles.journeyScenarioQuestion}>{scenario.question}</p>
+                            <div className={styles.journeyScenarioOptions}>
+                              {scenario.options.map((option) => (
+                                <label key={option} className={`${styles.journeyScenarioOption} ${selectedAnswer === option ? styles.journeyScenarioOptionSelected : ''}`}>
+                                  <input
+                                    type="radio"
+                                    name={`scenario-${scenario.id}`}
+                                    value={option}
+                                    checked={selectedAnswer === option}
+                                    onChange={() => setScenarioAnswer(scenario.id, option)}
+                                    disabled={selectedIsReadOnly}
+                                  />
+                                  <span>{option}</span>
+                                </label>
+                              ))}
+                            </div>
+                            {result ? (
+                              <div className={`${styles.journeyScenarioFeedback} ${result.correct ? styles.journeyScenarioFeedbackCorrect : styles.journeyScenarioFeedbackIncorrect}`} role="status">
+                                <strong>{result.correct ? 'Correct' : `Review: ${result.correctAnswer}`}</strong>
+                                <p>{result.explanation}</p>
+                              </div>
+                            ) : null}
+                          </fieldset>
+                        );
+                      })}
+                    </div>
+                  </section>
+                ) : null}
+
                 <div className={styles.journeyFormGrid}>
                   {selectedTemplate.formFields.map((field) => (
                     <label key={field.id} className={`${styles.journeyField} ${field.type === 'textarea' ? styles.journeyFieldWide : ''} ${!selectedIsLockedPreview && formErrorKeys.has(fieldKey(field.id)) ? styles.journeyFieldInvalid : ''}`}>
@@ -758,7 +897,7 @@ function JourneyContent() {
                         onChange={(value) => setField(field.id, value)}
                         invalid={!selectedIsLockedPreview && formErrorKeys.has(fieldKey(field.id))}
                         inputKey={fieldKey(field.id)}
-                        disabled={selectedIsLockedPreview}
+                        disabled={selectedIsReadOnly}
                       />
                     </label>
                   ))}
@@ -773,7 +912,7 @@ function JourneyContent() {
                           <h3 className={styles.journeyMilestoneTitle}>{group.label}</h3>
                           <p className={styles.sectionHint}>Minimum {group.minEntries} entries required.</p>
                         </div>
-                        <button type="button" className={styles.secondaryButton} disabled={selectedIsLockedPreview} onClick={() => addGroupEntry(group)}>Add entry</button>
+                        <button type="button" className={styles.secondaryButton} disabled={selectedIsReadOnly} onClick={() => addGroupEntry(group)}>Add entry</button>
                       </div>
                       {entries.map((entry, index) => (
                         <article key={`${group.id}-${index}`} className={styles.journeyRepeatEntry}>
@@ -788,7 +927,7 @@ function JourneyContent() {
                                   onChange={(value) => setGroupField(group, index, field.id, value)}
                                   invalid={!selectedIsLockedPreview && formErrorKeys.has(groupFieldKey(group.id, index, field.id))}
                                   inputKey={groupFieldKey(group.id, index, field.id)}
-                                  disabled={selectedIsLockedPreview}
+                                  disabled={selectedIsReadOnly}
                                 />
                               </label>
                             ))}
@@ -818,20 +957,26 @@ function JourneyContent() {
                 ) : (
                   <div className={styles.journeySubmitFooter}>
                     <p className={styles.journeySubmitHint}>
-                      {selectedStatus.status === 'under_review'
-                        ? 'This day is submitted and waiting for admin review.'
-                        : selectedStatus.status === 'completed'
-                          ? 'This day is completed. Reopen only if you need to correct it.'
+                      {selectedIsUnderReview
+                        ? 'Waiting for review. This submission is read-only until an admin responds.'
+                        : selectedIsCompleted
+                          ? 'Completed. Reopen this day only if you need to make a correction.'
                           : 'Fill all required fields to confirm this day.'}
                     </p>
 
                     <div className={styles.journeySubmitActions}>
-                      <button type="button" className={styles.primaryButton} disabled={savingId === `submit-${selectedTemplate.day}`} onClick={submitDay}>
-                        {savingId === `submit-${selectedTemplate.day}` ? <LoadingButtonContent label="Submitting…" /> : selectedTemplate.buttonText}
-                      </button>
-                      {selectedStatus.submission ? (
+                      {!selectedIsCompleted && !selectedIsUnderReview ? (
+                        <button type="button" className={styles.primaryButton} disabled={savingId === `submit-${selectedTemplate.day}`} onClick={submitDay}>
+                          {savingId === `submit-${selectedTemplate.day}`
+                            ? <LoadingButtonContent label={selectedIsResubmission ? 'Resubmitting…' : 'Submitting…'} />
+                            : selectedIsResubmission
+                              ? `Resubmit ${selectedTemplate.buttonText.replace(/^Complete\s+/i, '')}`
+                              : selectedTemplate.buttonText}
+                        </button>
+                      ) : null}
+                      {selectedIsCompleted ? (
                         <button type="button" className={styles.secondaryButton} disabled={savingId === `reopen-${selectedTemplate.day}`} onClick={reopenDay}>
-                          {savingId === `reopen-${selectedTemplate.day}` ? <LoadingButtonContent label="Reopening…" /> : 'Reopen'}
+                          {savingId === `reopen-${selectedTemplate.day}` ? <LoadingButtonContent label="Reopening…" /> : 'Reopen to edit'}
                         </button>
                       ) : null}
                     </div>
@@ -856,18 +1001,25 @@ function JourneyContent() {
                 const done = item.status === 'completed';
                 const needsAttention = ['catch_up', 'needs_correction', 'under_review'].includes(item.status);
                 const locked = !isDayAccessible(journey, item.day);
-                const className = `${styles.journeyTimelineItem} ${done ? styles.journeyTimelineItemDone : ''} ${isToday && !locked ? styles.journeyTimelineItemToday : ''} ${needsAttention && !locked ? styles.journeyTimelineItemDue : ''} ${isSelected ? styles.journeyTimelineItemSelected : ''} ${locked ? styles.journeyTimelineItemLocked : ''}`;
+                const isNextActionable = item.day === nextActionableDay && !done && !locked;
+                const displayLabel = locked
+                  ? 'Locked'
+                  : isNextActionable && ['upcoming', 'today', 'pending'].includes(item.status)
+                    ? 'Next day'
+                    : item.label;
+                const className = `${styles.journeyTimelineItem} ${done ? styles.journeyTimelineItemDone : ''} ${isToday && !locked ? styles.journeyTimelineItemToday : ''} ${isNextActionable ? styles.journeyTimelineItemNext : ''} ${needsAttention && !locked ? styles.journeyTimelineItemDue : ''} ${isSelected ? styles.journeyTimelineItemSelected : ''} ${locked ? styles.journeyTimelineItemLocked : ''}`;
                 return (
                   <button
                     key={item.templateId}
                     type="button"
                     className={className}
-                    aria-disabled={false}
-                    title={locked ? `${lockedReason(journey, item.day)} You can preview this day now.` : item.label}
+                    aria-current={isSelected ? 'step' : undefined}
+                    aria-label={`Day ${item.day}: ${displayLabel}${isSelected ? ', selected' : ''}${locked ? ', preview available' : ''}`}
+                    title={locked ? `${lockedReason(journey, item.day)} You can preview this day now.` : displayLabel}
                     onClick={() => selectTimelineDay(item.day)}
                   >
                     <span>Day {item.day}</span>
-                    <strong>{locked ? 'Locked' : item.label}</strong>
+                    <strong>{displayLabel}</strong>
                   </button>
                 );
               })}

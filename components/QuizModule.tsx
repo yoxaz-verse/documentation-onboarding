@@ -30,6 +30,12 @@ export default function QuizModule({ subModule, initialAnswers = {}, onUpdated, 
 
   const messageTone = useMemo(() => getMessageTone(message), [message]);
 
+  const calloutLabel = (tone: 'key' | 'example' | 'warning') => {
+    if (tone === 'example') return 'Example';
+    if (tone === 'warning') return 'Important';
+    return 'Key point';
+  };
+
   const saveDraft = async () => {
     setSaving(true);
     setMessage('');
@@ -98,14 +104,50 @@ export default function QuizModule({ subModule, initialAnswers = {}, onUpdated, 
         <p className={styles.description}>{subModule.description}</p>
       </header>
 
-      <div className={styles.videoWrap}>
-        <iframe
-          className={styles.video}
-          src={subModule.videoUrl}
-          title={subModule.title}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
+      {subModule.videoUrl ? (
+        <div className={styles.videoWrap}>
+          <iframe
+            className={styles.video}
+            src={subModule.videoUrl}
+            title={subModule.title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      ) : null}
+
+      {subModule.content?.length ? (
+        <article className={styles.reading} aria-label={`${subModule.title} reading material`}>
+          {subModule.content.map((block, index) => {
+            if (block.type === 'callout') {
+              return (
+                <aside key={`${block.type}-${index}`} className={`${styles.callout} ${styles[`callout_${block.tone}`]}`}>
+                  <p className={styles.calloutLabel}>{calloutLabel(block.tone)}</p>
+                  <h3 className={styles.calloutTitle}>{block.title}</h3>
+                  <p className={styles.calloutText}>{block.text}</p>
+                </aside>
+              );
+            }
+
+            return (
+              <section key={`${block.type}-${index}`} className={styles.readingSection}>
+                <h3 className={styles.readingTitle}>{block.heading}</h3>
+                {block.paragraphs?.map((paragraph) => <p key={paragraph} className={styles.readingText}>{paragraph}</p>)}
+                {block.bullets?.length ? (
+                  <ul className={styles.readingList}>
+                    {block.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}
+                  </ul>
+                ) : null}
+              </section>
+            );
+          })}
+        </article>
+      ) : null}
+
+      <div className={styles.quizIntro}>
+        <p className={styles.quizEyebrow}>Knowledge check</p>
+        <h3 className={styles.quizTitle}>Complete the lesson quiz</h3>
+        <p className={styles.quizHint}>Answer all three questions. You need {subModule.passScore} correct answers to pass.</p>
       </div>
 
       <form onSubmit={submitQuiz} className={styles.form}>
