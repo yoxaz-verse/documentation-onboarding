@@ -205,12 +205,19 @@ function ClassroomDetailContent() {
         <Link href="/courses" className={styles.backLink}>
           ← All Classrooms
         </Link>
-        <h2 className={styles.railTitle}>Lesson queue</h2>
-        <p className={styles.railDesc}>
-          {course.subModules.length === 1
-            ? 'Complete the orientation lesson to finish this course in one clean pass.'
-            : 'Work through the lessons in order. Passed lessons stay recorded automatically.'}
-        </p>
+        <div className={styles.railTitleRow}>
+          <h2 className={styles.railTitle}>Lesson Queue</h2>
+          <span className={styles.railBadge}>{completedLessons}/{totalLessons} Passed</span>
+        </div>
+        <div className={styles.railProgressContainer}>
+          <div className={styles.progressTrack}>
+            <span className={styles.progressFill} style={{ width: `${percentComplete}%` }} />
+          </div>
+          <div className={styles.railProgressMeta}>
+            <span>Course Progression</span>
+            <strong>{percentComplete}% Complete</strong>
+          </div>
+        </div>
       </div>
       <div className={styles.lessonList}>
         {courseSummary?.subModules.map((sub) => {
@@ -218,7 +225,6 @@ function ClassroomDetailContent() {
           const isLocked = sub.status === 'locked';
           const isPassed = sub.status === 'passed';
           const isCurrent = sub.status === 'in_progress';
-          const status = isPassed ? 'Passed' : isCurrent ? 'Current' : 'Locked';
 
           return (
             <button
@@ -230,17 +236,23 @@ function ClassroomDetailContent() {
                 isPassed ? styles.lessonItemPassed : ''
               } ${isCurrent ? styles.lessonItemCurrent : ''}`}
             >
-              <span className={styles.lessonItemRow}>
+              <div className={styles.lessonItemRow}>
                 <span className={styles.lessonOrder}>Lesson {sub.order}</span>
-                <span
-                  className={`${styles.lessonStatus} ${isPassed ? styles.lessonStatusPassed : ''} ${
-                    isCurrent ? styles.lessonStatusCurrent : ''
-                  } ${isLocked ? styles.lessonStatusLocked : ''}`}
-                >
-                  {status}
-                </span>
-              </span>
+                <div className={styles.lessonBadgesGroup}>
+                  {isSelected ? <span className={styles.lessonActivePill}>NOW VIEWING</span> : null}
+                  <span
+                    className={`${styles.lessonStatus} ${isPassed ? styles.lessonStatusPassed : ''} ${
+                      isCurrent ? styles.lessonStatusCurrent : ''
+                    } ${isLocked ? styles.lessonStatusLocked : ''}`}
+                  >
+                    {isPassed ? '✓ Passed' : isCurrent ? '⚡ Current' : '🔒 Locked'}
+                  </span>
+                </div>
+              </div>
               <span className={styles.lessonTitle}>{sub.title}</span>
+              {isCurrent && !isSelected ? (
+                <span className={styles.lessonResumeHint}>Click to open quiz →</span>
+              ) : null}
             </button>
           );
         })}
@@ -248,20 +260,30 @@ function ClassroomDetailContent() {
     </>
   );
 
-  const renderLessonStage = () =>
-    selectedSubModule && selectedSubModuleProgress ? (
+  const renderLessonStage = () => {
+    if (!selectedSubModule || !selectedSubModuleProgress) {
+      return (
+        <section className={styles.codePanel}>
+          <p className={styles.codeLabel}>Choose a lesson</p>
+          <p className={styles.codeValue}>Open an unlocked lesson to continue this course inside your operator workspace.</p>
+        </section>
+      );
+    }
+
+    const currentIndex = courseSummary?.subModules.findIndex((item) => item.id === selectedSubModule.id) ?? -1;
+    const nextSub = currentIndex >= 0 ? courseSummary?.subModules[currentIndex + 1] : null;
+
+    return (
       <QuizModule
         subModule={selectedSubModule}
         initialAnswers={selectedSubModuleProgress.draftAnswers}
         status={selectedSubModuleProgress.status}
         onUpdated={reload}
+        nextSubModule={nextSub ? { id: nextSub.id, title: nextSub.title, order: nextSub.order, isLocked: nextSub.status === 'locked' } : null}
+        onSelectSubModule={(id) => setSelectedSubModuleId(id)}
       />
-    ) : (
-      <section className={styles.codePanel}>
-        <p className={styles.codeLabel}>Choose a lesson</p>
-        <p className={styles.codeValue}>Open an unlocked lesson to continue this course inside your operator workspace.</p>
-      </section>
     );
+  };
 
   const renderLeaderboard = () => (
     <>
