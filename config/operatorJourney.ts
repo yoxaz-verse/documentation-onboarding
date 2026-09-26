@@ -521,10 +521,10 @@ const momentumSeeds: DaySeed[] = [
 ];
 
 function toDayTemplate(seed: DaySeed): JourneyDayTemplate {
-  const tasks = seed.tasks.map((item, index): JourneyTask => typeof item === 'string'
+  const tasks = seed.tasks.map((item): JourneyTask => typeof item === 'string'
     ? {
         title: item,
-        instruction: `Complete this action carefully, then record the result in the level submission below. This is guide step ${index + 1} for Level ${seed.day}.`,
+        instruction: 'Complete this action carefully, then record the result in the level submission below.',
       }
     : item);
 
