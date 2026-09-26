@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="obaol-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B1329"/>
+      <stop offset="50%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="obaol-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FEF08A"/>
+      <stop offset="30%" stop-color="#F59E0B"/>
+      <stop offset="70%" stop-color="#D97706"/>
+      <stop offset="100%" stop-color="#B45309"/>
+    </linearGradient>
+    <linearGradient id="obaol-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+  
+  <!-- Base Container -->
+  <rect width="512" height="512" rx="112" fill="url(#obaol-bg)"/>
+  <rect width="504" height="504" x="4" y="4" rx="108" fill="none" stroke="url(#obaol-gold)" stroke-width="4" stroke-opacity="0.35"/>
+  
+  <!-- Outer Ring Emblem -->
+  <circle cx="256" cy="256" r="142" fill="none" stroke="url(#obaol-gold)" stroke-width="28" filter="url(#shadow)"/>
+  
+  <!-- Inner Ring Emblem -->
+  <circle cx="256" cy="256" r="88" fill="none" stroke="url(#obaol-gold)" stroke-width="20" stroke-opacity="0.9"/>
+  
+  <!-- Orbital Arc with Arrowhead -->
+  <path d="M 115 320 C 130 220, 240 120, 395 130 C 420 132, 410 160, 385 160 C 260 150, 160 230, 145 325 Z" fill="url(#obaol-gold)" filter="url(#shadow)"/>
+  <path d="M 370 110 L 425 130 L 395 180 Z" fill="url(#obaol-gold)"/>
+  
+  <!-- Center Core Monogram -->
+  <text x="256" y="278" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="900" font-size="76" fill="url(#obaol-gold)" text-anchor="middle" letter-spacing="2">OB</text>
+</svg>
