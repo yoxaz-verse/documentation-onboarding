@@ -273,13 +273,16 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
           <nav className={`${styles.nav} ${sidebarCollapsed ? styles.navCollapsed : ''}`} aria-label="Onboarding and courses">
             <div className={styles.sidebarHeader}>
               <Link href="/" className={styles.sidebarBrand} aria-label="OBAOL Operator Workspace home">
-                <span className={styles.brandMark}>
-                  <img src="/favicon.svg" alt="OBAOL Logo" className={styles.brandMarkImg} />
-                </span>
-                <span className={styles.brandText}>
-                  <span className={styles.brandName}>OBAOL</span>
-                  <span className={styles.brandSubline}>Operator workspace</span>
-                </span>
+                {sidebarCollapsed ? (
+                  <span className={styles.brandMark}>
+                    <img src="/favicon.svg" alt="OBAOL" className={styles.brandMarkImg} />
+                  </span>
+                ) : (
+                  <div className={styles.brandLogoBlock}>
+                    <img src="/obaol-logo.svg" alt="OBAOL" className={styles.brandLogoSvg} />
+                    <span className={styles.brandSubline}>Operator workspace</span>
+                  </div>
+                )}
               </Link>
               <button
                 type="button"

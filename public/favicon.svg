@@ -1,39 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <linearGradient id="obaol-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0B1329"/>
-      <stop offset="50%" stop-color="#0F172A"/>
-      <stop offset="100%" stop-color="#020617"/>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="50%" stop-color="#020617"/>
+      <stop offset="100%" stop-color="#0F172A"/>
     </linearGradient>
-    <linearGradient id="obaol-gold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FEF08A"/>
-      <stop offset="30%" stop-color="#F59E0B"/>
-      <stop offset="70%" stop-color="#D97706"/>
+    <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="50%" stop-color="#D97706"/>
       <stop offset="100%" stop-color="#B45309"/>
     </linearGradient>
-    <linearGradient id="obaol-glow" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#38BDF8"/>
-      <stop offset="100%" stop-color="#3B82F6"/>
-    </linearGradient>
-    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.5"/>
-    </filter>
   </defs>
-  
-  <!-- Base Container -->
-  <rect width="512" height="512" rx="112" fill="url(#obaol-bg)"/>
-  <rect width="504" height="504" x="4" y="4" rx="108" fill="none" stroke="url(#obaol-gold)" stroke-width="4" stroke-opacity="0.35"/>
-  
-  <!-- Outer Ring Emblem -->
-  <circle cx="256" cy="256" r="142" fill="none" stroke="url(#obaol-gold)" stroke-width="28" filter="url(#shadow)"/>
-  
-  <!-- Inner Ring Emblem -->
-  <circle cx="256" cy="256" r="88" fill="none" stroke="url(#obaol-gold)" stroke-width="20" stroke-opacity="0.9"/>
-  
-  <!-- Orbital Arc with Arrowhead -->
-  <path d="M 115 320 C 130 220, 240 120, 395 130 C 420 132, 410 160, 385 160 C 260 150, 160 230, 145 325 Z" fill="url(#obaol-gold)" filter="url(#shadow)"/>
-  <path d="M 370 110 L 425 130 L 395 180 Z" fill="url(#obaol-gold)"/>
-  
-  <!-- Center Core Monogram -->
-  <text x="256" y="278" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="900" font-size="76" fill="url(#obaol-gold)" text-anchor="middle" letter-spacing="2">OB</text>
+
+  <!-- Dark Rounded Container -->
+  <rect width="512" height="512" rx="112" fill="url(#bg-grad)"/>
+  <rect width="502" height="502" x="5" y="5" rx="107" fill="none" stroke="url(#gold-grad)" stroke-width="4" stroke-opacity="0.4"/>
+
+  <g transform="translate(46, 50) scale(1.65)">
+    <!-- Outer Ring 'O' -->
+    <path d="M 125 35 C 172 35 210 73 210 120 C 210 167 172 205 125 205 C 78 205 40 167 40 120 C 40 73 78 35 125 35 Z M 125 75 C 100 75 80 95 80 120 C 80 145 100 165 125 165 C 150 165 170 145 170 120 C 170 95 150 75 125 75 Z" fill="#FFFFFF"/>
+    
+    <!-- Pin Node inside 'O' -->
+    <circle cx="125" cy="120" r="22" fill="none" stroke="url(#gold-grad)" stroke-width="12"/>
+    <circle cx="125" cy="120" r="8" fill="#FFFFFF"/>
+
+    <!-- Golden Pin Stem & Underline Wire -->
+    <path d="M 119 120 L 131 120 L 131 190 L 225 190 C 232 190 238 184 238 177 L 238 140 L 250 140 L 250 177 C 250 191 239 202 225 202 L 119 202 Z" fill="url(#gold-grad)"/>
+  </g>
 </svg>

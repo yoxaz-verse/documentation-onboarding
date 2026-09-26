@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="obaol-gold-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#D97706"/>
+      <stop offset="50%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+  </defs>
+
+  <!-- OBAOL LOGO MARK -->
+  <g class="obaol-logo-group">
+    <!-- Letter 1: 'O' with Pin Node -->
+    <!-- Outer Ring O -->
+    <path d="M 160 55 C 207 55 245 93 245 140 C 245 187 207 225 160 225 C 113 225 75 187 75 140 C 75 93 113 55 160 55 Z M 160 95 C 135 95 115 115 115 140 C 115 165 135 185 160 185 C 185 185 205 165 205 140 C 205 115 185 95 160 95 Z" fill="currentColor"/>
+    
+    <!-- Pin Node inside O -->
+    <circle cx="160" cy="140" r="22" fill="none" stroke="url(#obaol-gold-grad)" stroke-width="12"/>
+    <circle cx="160" cy="140" r="8" fill="currentColor"/>
+
+    <!-- Pin Vertical Stem -->
+    <rect x="154" y="140" width="12" height="75" fill="url(#obaol-gold-grad)"/>
+
+    <!-- Letter 2: 'B' -->
+    <path d="M 270 55 L 340 55 C 365 55 385 70 385 92.5 C 385 107 375 120 360 125 C 380 130 390 145 390 162.5 C 390 188 368 205 340 205 L 270 205 Z M 312 87 L 312 115 L 335 115 C 344 115 352 109 352 101 C 352 93 344 87 335 87 Z M 312 143 L 312 173 L 338 173 C 348 173 356 166 356 158 C 356 150 348 143 338 143 Z" fill="currentColor"/>
+
+    <!-- Letter 3: 'A' -->
+    <path d="M 445 55 C 475 55 498 75 498 108 L 498 205 L 456 205 L 456 182 C 448 198 432 208 410 208 C 382 208 362 190 362 165 C 362 138 385 122 430 120 L 456 119 L 456 106 C 456 95 447 88 432 88 C 418 88 405 94 398 102 L 378 78 C 395 64 420 55 445 55 Z M 456 144 L 435 145 C 414 146 404 154 404 165 C 404 175 413 182 425 182 C 443 182 456 169 456 152 Z" fill="currentColor"/>
+
+    <!-- Letter 4: 'O' -->
+    <path d="M 610 55 C 657 55 695 93 695 140 C 695 187 657 225 610 225 C 563 225 525 187 525 140 C 525 93 563 55 610 55 Z M 610 95 C 585 95 565 115 565 140 C 565 165 585 185 610 185 C 635 185 655 165 655 140 C 655 115 635 95 610 95 Z" fill="currentColor"/>
+
+    <!-- Letter 5: 'L' base -->
+    <path d="M 720 55 L 762 55 L 762 165 L 815 165 L 815 205 L 720 205 Z" fill="currentColor"/>
+
+    <!-- Golden Underline Connected Wire & L Accent -->
+    <path d="M 154 209 L 815 209 C 825 209 832 202 832 192 L 832 75 C 832 65 825 58 815 58 L 785 58 C 775 58 768 65 768 75 L 768 192 L 154 192 Z" fill="url(#obaol-gold-grad)"/>
+  </g>
+</svg>

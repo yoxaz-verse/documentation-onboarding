@@ -70,6 +70,20 @@
   gap: 0.62rem;
 }
 
+.brandLogoBlock {
+  min-width: 0;
+  display: grid;
+  gap: 0.18rem;
+}
+
+.brandLogoSvg {
+  height: 2.1rem;
+  width: auto;
+  max-width: 140px;
+  object-fit: contain;
+  display: block;
+}
+
 .brandMark {
   flex: 0 0 auto;
   width: 2.25rem;
