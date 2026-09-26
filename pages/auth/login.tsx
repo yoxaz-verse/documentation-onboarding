@@ -227,7 +227,10 @@ export default function LoginPage() {
       </div>
       <section className={styles.heroLayout} aria-label="Operator onboarding and login">
         <section className={styles.heroPanel} aria-label="Operator onboarding overview">
-          <p className={styles.brand}>OBAOL</p>
+          <div className={styles.brandContainer}>
+            <img src="/obaol-logo-light.png" alt="OBAOL" className={`${styles.brandLogoImg} ${styles.logoLight}`} />
+            <img src="/obaol-logo-dark.png" alt="OBAOL" className={`${styles.brandLogoImg} ${styles.logoDark}`} />
+          </div>
           <p className={styles.heroKicker}>Operator workspace</p>
           <h1 className={styles.heroTitle}>
             <span>One workspace.</span>

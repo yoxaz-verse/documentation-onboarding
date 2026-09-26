@@ -69,13 +69,33 @@
   border-left: 3px solid color-mix(in srgb, var(--accent) 84%, var(--accent-secondary));
 }
 
-.brand {
+.brandContainer {
   margin: 0;
-  font-family: 'Sora', sans-serif;
-  color: var(--ink-strong);
-  font-size: 1.58rem;
-  font-weight: 800;
-  letter-spacing: 0;
+  display: block;
+}
+
+.brandLogoImg {
+  height: 2.8rem;
+  width: auto;
+  max-width: 190px;
+  object-fit: contain;
+  display: block;
+}
+
+.logoLight {
+  display: block;
+}
+
+.logoDark {
+  display: none;
+}
+
+:global([data-theme='dark']) .logoLight {
+  display: none;
+}
+
+:global([data-theme='dark']) .logoDark {
+  display: block;
 }
 
 .heroKicker {

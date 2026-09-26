@@ -168,8 +168,8 @@ function isDayAccessible(journey: JourneySummary, day: number) {
 
 function lockedReason(journey: JourneySummary, day: number) {
   const previousIncomplete = journey.dayStatuses.find((item) => item.day < day && item.status !== 'completed');
-  if (previousIncomplete) return `Complete Day ${previousIncomplete.day} before opening Day ${day}.`;
-  return `Complete the current day before opening Day ${day}.`;
+  if (previousIncomplete) return `Complete Level ${previousIncomplete.day} before opening Level ${day}.`;
+  return `Complete the current level before opening Level ${day}.`;
 }
 
 function FieldInput({
@@ -233,11 +233,11 @@ function JourneyLoadingState() {
         <div className={styles.homeHeroHeader}>
           <div>
             <p className={styles.homeHeroEyebrow}>Operator execution path</p>
-            <h2 className={styles.homeHeroTitle}>Preparing your 30-day path</h2>
+            <h2 className={styles.homeHeroTitle}>Preparing your 30-level path</h2>
           </div>
           <Spinner size="large" />
         </div>
-        <p className={styles.calloutText}>Fetching your milestones, daily form, and progress snapshot.</p>
+        <p className={styles.calloutText}>Fetching your milestones, level form, and progress snapshot.</p>
         <div className={styles.progressTrack} aria-hidden="true">
           <span className={`${styles.progressFill} ${styles.loadingProgressFill}`} />
         </div>
@@ -437,10 +437,10 @@ function JourneyContent() {
     try {
       const response = await fetch('/api/journey/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include' });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(payload?.error || 'Failed to start Day 1.');
+      if (!response.ok) throw new Error(payload?.error || 'Failed to start Level 1.');
       await load();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Failed to start Day 1.');
+      setMessage(error instanceof Error ? error.message : 'Failed to start Level 1.');
     } finally {
       setSavingId('');
     }
@@ -552,16 +552,16 @@ function JourneyContent() {
         if (payload?.scenarioGrade) setScenarioGrade(payload.scenarioGrade as ScenarioGrade);
         const apiErrors = Array.isArray(payload?.errors) ? payload.errors.map((error: string) => ({ key: 'api', message: error })) : [];
         setFormErrors(apiErrors);
-        setLocalNotice(payload?.error || 'Please complete the required day fields.');
+        setLocalNotice(payload?.error || 'Please complete the required level fields.');
         return;
       }
       const completedAutomatically = payload?.status === 'completed';
       if (payload?.scenarioGrade) setScenarioGrade(payload.scenarioGrade as ScenarioGrade);
-      setMessage(payload?.completionMessage || (payload?.status === 'under_review' ? 'Submitted for admin review.' : 'Day completed.'));
+      setMessage(payload?.completionMessage || (payload?.status === 'under_review' ? 'Submitted for admin review.' : 'Level completed.'));
       if (completedAutomatically) scrollToWorkspaceAfterLoadRef.current = true;
       await load({ selectNextActionable: completedAutomatically });
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Failed to submit day.');
+      setMessage(error instanceof Error ? error.message : 'Failed to submit level.');
     } finally {
       setSavingId('');
     }
@@ -582,11 +582,11 @@ function JourneyContent() {
     try {
       const response = await fetch(`/api/journey/day/${selectedTemplate.day}/reopen`, { method: 'POST', credentials: 'include' });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(payload?.error || 'Failed to reopen day.');
-      setMessage('Day reopened. Update the form and submit again.');
+      if (!response.ok) throw new Error(payload?.error || 'Failed to reopen level.');
+      setMessage('Level reopened. Update the form and submit again.');
       await load();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Failed to reopen day.');
+      setMessage(error instanceof Error ? error.message : 'Failed to reopen level.');
     } finally {
       setSavingId('');
     }
@@ -594,7 +594,7 @@ function JourneyContent() {
 
   if (state.status === 'loading') {
     return (
-      <OnboardingLayout title="Operator Journey" subtitle="Loading your Day 1 path and milestone progress..." loading>
+      <OnboardingLayout title="Operator Journey" subtitle="Loading your Level 1 path and milestone progress..." loading>
         <JourneyLoadingState />
       </OnboardingLayout>
     );
@@ -612,14 +612,14 @@ function JourneyContent() {
     return (
       <OnboardingLayout
         title="Operator Journey"
-        subtitle="The 30-day journey unlocks after the guided onboarding path reaches Step 10 completion."
+        subtitle="The 30-level journey unlocks after the guided onboarding path reaches Step 10 completion."
         progress={state.progress}
         courseProgress={state.courseProgress}
       >
         <section className={styles.emptyInquiryState}>
           <span className={styles.homeStatusPill}>Locked</span>
-          <h2>30-day journey unlocks after Step 10.</h2>
-          <p>Complete the communication readiness check first. Once Step 10 is done, live inquiries, courses, and the 30-day journey will open in this workspace.</p>
+          <h2>30-level journey unlocks after Step 10.</h2>
+          <p>Complete the communication readiness check first. Once Step 10 is done, live inquiries, courses, and the 30-level journey will open in this workspace.</p>
         </section>
       </OnboardingLayout>
     );
@@ -640,7 +640,7 @@ function JourneyContent() {
   const selectedIsReadOnly = Boolean(selectedIsLockedPreview || selectedIsCompleted || selectedIsUnderReview);
   const selectedIsResubmission = Boolean(selectedStatus?.submission && ['pending', 'needs_correction'].includes(selectedStatus.status));
   const nextActionableDay = getNextActionableDay(journey);
-  const nextActionLabel = journey.completedMilestoneCount >= journey.totalMilestoneCount ? 'Journey complete' : `Day ${nextActionableDay}`;
+  const nextActionLabel = journey.completedMilestoneCount >= journey.totalMilestoneCount ? 'Journey complete' : `Level ${nextActionableDay}`;
   const lockedPreviewNotice = selectedIsLockedPreview && selectedTemplate ? `Preview only. ${lockedReason(journey, selectedTemplate.day).replace('opening', 'working on')}` : '';
   const journeyMetricItems = [
     ['Suppliers', journey.metrics.suppliersAdded],
@@ -668,13 +668,13 @@ function JourneyContent() {
       <div className={styles.sectionHeader}>
         <div>
           <h2 className={styles.sideTitleLike}>Journey snapshot</h2>
-          <p className={styles.sectionHint}>Your operator day count, course progress, and workflow status in one place.</p>
+          <p className={styles.sectionHint}>Your operator level, course progress, and workflow status in one place.</p>
         </div>
       </div>
       <div className={styles.journeyAsideStack}>
-        <div className={styles.journeyAsideItem}><span>Operator day</span><strong>{currentDay ? `Day ${currentDay}` : 'Not started'}</strong></div>
+        <div className={styles.journeyAsideItem}><span>Operator level</span><strong>{currentDay ? `Level ${currentDay}` : 'Not started'}</strong></div>
         <div className={styles.journeyAsideItem}><span>Next action</span><strong>{nextActionLabel}</strong></div>
-        <div className={styles.journeyAsideItem}><span>Completed days</span><strong>{journey.completedMilestoneCount}/{journey.totalMilestoneCount}</strong></div>
+        <div className={styles.journeyAsideItem}><span>Completed levels</span><strong>{journey.completedMilestoneCount}/{journey.totalMilestoneCount}</strong></div>
         <div className={styles.journeyAsideItem}><span>Review/catch-up</span><strong>{dueCount}</strong></div>
       </div>
     </section>
@@ -688,7 +688,7 @@ function JourneyContent() {
         <div className={styles.homeHeroHeader}>
           <div>
             <p className={styles.homeHeroEyebrow}>Operator execution path</p>
-            <h2 className={styles.homeHeroTitle}>{currentDay ? `Day ${currentDay}: build market momentum` : 'Start the 30-day execution path'}</h2>
+            <h2 className={styles.homeHeroTitle}>{currentDay ? `Level ${currentDay}: build market momentum` : 'Start the 30-level execution path'}</h2>
           </div>
           <span className={styles.homeStatusPill}>{currentDay ? `${completionPercent}% complete` : `${journey.completedCheckCount}/${journey.totalCheckCount} checks`}</span>
         </div>
@@ -704,7 +704,7 @@ function JourneyContent() {
             <div className={styles.sectionHeader}>
               <div>
                 <h2 className={styles.courseCardTitle}>Preflight checklist</h2>
-                <p className={styles.sectionHint}>Every item must be confirmed before the Day 1 counter can start.</p>
+                <p className={styles.sectionHint}>Every item must be confirmed before Level 1 can start.</p>
               </div>
               <span className={styles.pointsBadge}>{checksComplete ? 'Ready' : 'Required'}</span>
             </div>
@@ -722,20 +722,20 @@ function JourneyContent() {
           </div>
           <aside className={styles.journeyStartPanel}>
             <p className={styles.kpiLabel}>Start condition</p>
-            <p className={styles.kpiValue}>{checksComplete ? 'Ready for Day 1' : 'Finish checklist'}</p>
-            <p className={styles.sectionHint}>Your Day 1 count begins once. After it starts, daily forms can be submitted, reviewed, corrected, and completed.</p>
+            <p className={styles.kpiValue}>{checksComplete ? 'Ready for Level 1' : 'Finish checklist'}</p>
+            <p className={styles.sectionHint}>Your journey begins at Level 1. After it starts, level forms can be submitted, reviewed, corrected, and completed.</p>
             <button type="button" className={styles.primaryButton} disabled={!checksComplete || savingCheckIds.size > 0 || savingId === 'journey-start'} onClick={startJourney}>
-              {savingId === 'journey-start' ? <LoadingButtonContent label="Starting…" /> : 'Start Day 1'}
+              {savingId === 'journey-start' ? <LoadingButtonContent label="Starting…" /> : 'Start Level 1'}
             </button>
           </aside>
         </section>
       ) : (
         <>
           <section className={styles.journeyStatusStrip}>
-            <article className={styles.kpiCard}><p className={styles.kpiLabel}>Current operator day</p><p className={styles.kpiValue}>Day {currentDay}</p></article>
+            <article className={styles.kpiCard}><p className={styles.kpiLabel}>Current operator level</p><p className={styles.kpiValue}>Level {currentDay}</p></article>
             <article className={styles.kpiCard}><p className={styles.kpiLabel}>Next action</p><p className={styles.kpiValue}>{nextActionLabel}</p></article>
             <article className={styles.kpiCard}><p className={styles.kpiLabel}>Milestones done</p><p className={styles.kpiValue}>{journey.completedMilestoneCount}/{journey.totalMilestoneCount}</p></article>
-            <article className={styles.kpiCard}><p className={styles.kpiLabel}>30-day path</p><p className={styles.kpiValue}>{dayPercent}% elapsed</p></article>
+            <article className={styles.kpiCard}><p className={styles.kpiLabel}>30-level path</p><p className={styles.kpiValue}>{dayPercent}% elapsed</p></article>
           </section>
 
           <details className={styles.journeyProgressDetails}>
@@ -755,7 +755,7 @@ function JourneyContent() {
               <div className={styles.journeyDayContent}>
                 <div className={styles.journeyOverviewHeader}>
                   <div>
-                    <span className={styles.journeyDayBadge}>Day {selectedTemplate.day}</span>
+                    <span className={styles.journeyDayBadge}>Level {selectedTemplate.day}</span>
                     <p className={styles.homeHeroEyebrow}>{selectedTemplate.phase} · {selectedTemplate.dayType}</p>
                   </div>
                   <span className={styles.courseBadge}>{selectedIsLockedPreview ? 'Locked preview' : selectedStatus.label}</span>
@@ -810,7 +810,7 @@ function JourneyContent() {
                 {selectedTemplate.day === 1 ? (
                   <SupportContactList
                     title="Available operator support"
-                    description="If you have an access or onboarding problem, call or WhatsApp an available support person before submitting Day 1."
+                    description="If you have an access or onboarding problem, call or WhatsApp an available support person before submitting Level 1."
                   />
                 ) : null}
               </div>
@@ -818,13 +818,13 @@ function JourneyContent() {
               <div className={`${styles.journeyFormPanel} ${selectedIsLockedPreview ? styles.journeyFormPanelPreview : ''} ${selectedIsReadOnly && !selectedIsLockedPreview ? styles.journeyFormPanelReadOnly : ''}`}>
                 <div className={styles.journeyFormHeader}>
                   <div>
-                    <h2 className={styles.courseCardTitle}>{selectedIsLockedPreview ? 'Day submission preview' : 'Day submission'}</h2>
+                    <h2 className={styles.courseCardTitle}>{selectedIsLockedPreview ? 'Level submission preview' : 'Level submission'}</h2>
                     <p className={styles.sectionHint}>
                       {selectedIsLockedPreview
-                        ? 'You can review the form requirements now. Editing unlocks after earlier days are completed.'
+                        ? 'You can review the form requirements now. Editing unlocks after earlier levels are completed.'
                         : selectedTemplate.reviewRequired
-                          ? 'This day requires admin review after submission.'
-                          : 'Complete the required fields below. This day completes automatically when validation passes.'}
+                          ? 'This level requires admin review after submission.'
+                          : 'Complete the required fields below. This level completes automatically when validation passes.'}
                     </p>
                   </div>
                   <span className={styles.pointsBadge}>{categoryLabel(selectedTemplate.category)}</span>
@@ -833,7 +833,7 @@ function JourneyContent() {
                 {selectedIsLockedPreview ? (
                   <div className={styles.journeyPreviewNotice} role="note">
                     <strong>{lockedPreviewNotice}</strong>
-                    <p>This form unlocks after earlier required days are completed.</p>
+                    <p>This form unlocks after earlier required levels are completed.</p>
                   </div>
                 ) : null}
 
@@ -962,7 +962,7 @@ function JourneyContent() {
 
                 {selectedIsLockedPreview ? (
                   <div className={styles.journeySubmitFooter}>
-                    <p className={styles.journeySubmitHint}>This form unlocks after earlier required days are completed.</p>
+                    <p className={styles.journeySubmitHint}>This form unlocks after earlier required levels are completed.</p>
                   </div>
                 ) : (
                   <div className={styles.journeySubmitFooter}>
@@ -970,8 +970,8 @@ function JourneyContent() {
                       {selectedIsUnderReview
                         ? 'Waiting for review. This submission is read-only until an admin responds.'
                         : selectedIsCompleted
-                          ? 'Completed. Reopen this day only if you need to make a correction.'
-                          : 'Fill all required fields to confirm this day.'}
+                          ? 'Completed. Reopen this level only if you need to make a correction.'
+                          : 'Fill all required fields to confirm this level.'}
                     </p>
 
                     <div className={styles.journeySubmitActions}>
@@ -996,11 +996,11 @@ function JourneyContent() {
             </section>
           ) : null}
 
-          <section className={styles.journeyTimelinePanel} aria-label="30-day journey timeline">
+          <section className={styles.journeyTimelinePanel} aria-label="30-level journey timeline">
             <div className={styles.sectionHeader}>
               <div>
-                <h2 className={styles.courseCardTitle}>30-day workflow calendar</h2>
-                <p className={styles.sectionHint}>Complete each day in order. Locked days will open after earlier required days are completed.</p>
+                <h2 className={styles.courseCardTitle}>30-level journey</h2>
+                <p className={styles.sectionHint}>Complete each level in order. Locked levels will open after earlier required levels are completed.</p>
               </div>
             </div>
             {localNotice && !formErrors.length ? <p className={styles.journeyCalendarNotice}>{localNotice}</p> : null}
@@ -1015,7 +1015,7 @@ function JourneyContent() {
                 const displayLabel = locked
                   ? 'Locked'
                   : isNextActionable && ['upcoming', 'today', 'pending'].includes(item.status)
-                    ? 'Next day'
+                    ? 'Next level'
                     : item.label;
                 const className = `${styles.journeyTimelineItem} ${done ? styles.journeyTimelineItemDone : ''} ${isToday && !locked ? styles.journeyTimelineItemToday : ''} ${isNextActionable ? styles.journeyTimelineItemNext : ''} ${needsAttention && !locked ? styles.journeyTimelineItemDue : ''} ${isSelected ? styles.journeyTimelineItemSelected : ''} ${locked ? styles.journeyTimelineItemLocked : ''}`;
                 return (
@@ -1024,11 +1024,11 @@ function JourneyContent() {
                     type="button"
                     className={className}
                     aria-current={isSelected ? 'step' : undefined}
-                    aria-label={`Day ${item.day}: ${displayLabel}${isSelected ? ', selected' : ''}${locked ? ', preview available' : ''}`}
-                    title={locked ? `${lockedReason(journey, item.day)} You can preview this day now.` : displayLabel}
+                    aria-label={`Level ${item.day}: ${displayLabel}${isSelected ? ', selected' : ''}${locked ? ', preview available' : ''}`}
+                    title={locked ? `${lockedReason(journey, item.day)} You can preview this level now.` : displayLabel}
                     onClick={() => selectTimelineDay(item.day)}
                   >
-                    <span>Day {item.day}</span>
+                    <span>Level {item.day}</span>
                     <strong>{displayLabel}</strong>
                   </button>
                 );

@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const day = Number(req.query.day);
-  if (!Number.isInteger(day) || day < 1 || day > 30) return res.status(400).json({ error: 'Invalid journey day.' });
+  if (!Number.isInteger(day) || day < 1 || day > 30) return res.status(400).json({ error: 'Invalid journey level.' });
 
   const seedError = await ensureOperatorSeed(session.email);
   if (seedError) return res.status(500).json({ error: `Failed to ensure operator record: ${seedError}` });
@@ -26,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (progressError) return res.status(500).json({ error: progressError.message });
   if (!areCoursesUnlocked(normalizeProgressRecord(progress))) {
-    return res.status(403).json({ error: 'Complete Step 10 before submitting journey days.' });
+    return res.status(403).json({ error: 'Complete Step 10 before submitting journey levels.' });
   }
 
   const { data: templateRows, error: templateError } = await supabaseAdmin
@@ -38,11 +38,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const templates = normalizeJourneyDayTemplates(templateError ? null : (templateRows || []) as JourneyTemplateRecord[]);
   const template = templates.find((item) => item.day === day && item.isActive !== false);
-  if (!template) return res.status(404).json({ error: 'Journey day is not available.' });
+  if (!template) return res.status(404).json({ error: 'Journey level is not available.' });
 
   const answers = req.body?.answers && typeof req.body.answers === 'object' ? req.body.answers as Record<string, unknown> : {};
   const validation = validateJourneyAnswers(template, answers);
-  if (!validation.valid) return res.status(400).json({ error: 'Please complete the required day fields.', errors: validation.errors });
+  if (!validation.valid) return res.status(400).json({ error: 'Please complete the required level fields.', errors: validation.errors });
 
   const now = new Date().toISOString();
   const computedMetrics = computeJourneySubmissionMetrics(template, answers);
@@ -66,7 +66,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (pendingError) return res.status(500).json({ error: pendingError.message });
     return res.status(400).json({
-      error: `Score ${scenarioGrade.score}/${scenarioGrade.total}. You need ${scenarioGrade.passScore} correct answers to complete Day ${day}.`,
+      error: `Score ${scenarioGrade.score}/${scenarioGrade.total}. You need ${scenarioGrade.passScore} correct answers to complete Level ${day}.`,
       scenarioGrade,
     });
   }

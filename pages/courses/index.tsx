@@ -132,7 +132,7 @@ function ClassroomCatalogContent() {
         <section className={styles.emptyInquiryState}>
           <span className={styles.homeStatusPill}>Locked</span>
           <h2>Courses unlock after Step 10.</h2>
-          <p>Complete the communication readiness check first. Once Step 10 is done, courses, live inquiries, and the 30-day journey will open in this workspace.</p>
+          <p>Complete the communication readiness check first. Once Step 10 is done, courses, live inquiries, and the 30-level journey will open in this workspace.</p>
         </section>
       ) : null}
 

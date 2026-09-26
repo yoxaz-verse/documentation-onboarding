@@ -11,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const day = Number(req.query.day);
-  if (!Number.isInteger(day) || day < 1 || day > 30) return res.status(400).json({ error: 'Invalid journey day.' });
+  if (!Number.isInteger(day) || day < 1 || day > 30) return res.status(400).json({ error: 'Invalid journey level.' });
 
   const { data: progress, error: progressError } = await supabaseAdmin
     .from('operator_progress')
@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (progressError) return res.status(500).json({ error: progressError.message });
   if (!areCoursesUnlocked(normalizeProgressRecord(progress))) {
-    return res.status(403).json({ error: 'Complete Step 10 before reopening journey days.' });
+    return res.status(403).json({ error: 'Complete Step 10 before reopening journey levels.' });
   }
 
   const { data: existing, error: findError } = await supabaseAdmin
@@ -35,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (isMissingSupabaseTableError(findError)) return res.status(500).json({ error: 'Database schema is not up to date. Apply the full journey workflow migration.' });
     return res.status(500).json({ error: findError.message });
   }
-  if (!existing) return res.status(404).json({ error: 'No submission found for this day.' });
+  if (!existing) return res.status(404).json({ error: 'No submission found for this level.' });
 
   const { data, error } = await supabaseAdmin
     .from('operator_journey_day_submissions')

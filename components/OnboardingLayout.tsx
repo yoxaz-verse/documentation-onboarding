@@ -166,13 +166,13 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
   const trainingLockSummary = coursesUnlocked ? 'Training library unlocked' : nextMilestone ? `Complete Step ${nextMilestone.number} to keep unlocking access` : 'Finish guided onboarding to unlock training';
   const nextActionHref = nextMilestone?.route || (coursesUnlocked ? '/journey' : '/');
   const nextActionTitle = nextMilestone ? `Step ${nextMilestone.number}: ${nextMilestone.shortLabel}` : coursesUnlocked ? 'Open operator journey' : 'Review workspace';
-  const nextActionMeta = nextMilestone ? nextMilestone.summary : coursesUnlocked ? 'Continue the 30-day path' : onboardingSummary;
+  const nextActionMeta = nextMilestone ? nextMilestone.summary : coursesUnlocked ? 'Continue the 30-level path' : onboardingSummary;
   const mobileStepHref = activeStep?.route || nextMilestone?.route || MILESTONES[MILESTONES.length - 1]?.route || '/step10';
   const mobileStepLabel = activeStep ? `Step ${activeStep.number}` : 'Steps';
   const compactNavItems = [
     { key: 'home', label: 'Home', href: '/', active: router.pathname === '/', meta: 'Overview' },
-    { key: 'next', label: nextMilestone ? `Step ${nextMilestone.number}` : 'Journey', href: nextActionHref, active: Boolean(activeStep), meta: nextMilestone ? nextMilestone.shortLabel : coursesUnlocked ? 'Daily path' : 'Workspace' },
-    { key: 'journey', label: 'Journey', href: '/journey', active: inJourney, meta: coursesUnlocked ? '30 days' : 'Locked' },
+    { key: 'next', label: nextMilestone ? `Step ${nextMilestone.number}` : 'Journey', href: nextActionHref, active: Boolean(activeStep), meta: nextMilestone ? nextMilestone.shortLabel : coursesUnlocked ? 'Level path' : 'Workspace' },
+    { key: 'journey', label: 'Journey', href: '/journey', active: inJourney, meta: coursesUnlocked ? '30 levels' : 'Locked' },
     { key: 'inquiries', label: 'Inquiries', href: coursesUnlocked ? '/inquiries' : '/step10', active: inInquiries, meta: coursesUnlocked ? 'Live orders' : 'Locked' },
     { key: 'courses', label: 'Courses', href: '/courses', active: inClassroom, meta: coursesUnlocked ? 'Library' : 'Locked' },
     { key: 'profile', label: 'Profile', href: '/profile', active: inProfile, meta: 'Account' },
@@ -191,7 +191,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
     : [
         { key: 'home', label: 'Home', href: '/', active: router.pathname === '/', meta: 'Workspace', icon: 'home' },
         { key: 'steps', label: mobileStepLabel, href: mobileStepHref, active: Boolean(activeStep), meta: activeStep ? activeStep.shortLabel : nextMilestone ? 'Continue' : 'Complete', icon: 'steps' },
-        { key: 'journey', label: 'Journey', href: '/journey', active: inJourney, meta: coursesUnlocked ? 'Day path' : 'Locked', icon: 'journey' },
+        { key: 'journey', label: 'Journey', href: '/journey', active: inJourney, meta: coursesUnlocked ? 'Level path' : 'Locked', icon: 'journey' },
         { key: 'inquiries', label: 'Inquiries', href: coursesUnlocked ? '/inquiries' : '/step10', active: inInquiries, meta: coursesUnlocked ? 'Live' : 'Locked', icon: 'inquiries' },
         { key: 'courses', label: 'Courses', href: '/courses', active: inClassroom, meta: coursesUnlocked ? 'Library' : 'Locked', icon: 'courses' },
         { key: 'profile', label: 'Profile', href: '/profile', active: inProfile, meta: 'Account', icon: 'profile' },
@@ -275,11 +275,12 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
               <Link href="/" className={styles.sidebarBrand} aria-label="OBAOL Operator Workspace home">
                 {sidebarCollapsed ? (
                   <span className={styles.brandMark}>
-                    <img src="/favicon.svg" alt="OBAOL" className={styles.brandMarkImg} />
+                    <img src="/obaol-icon.png" alt="OBAOL" className={styles.brandMarkImg} />
                   </span>
                 ) : (
                   <div className={styles.brandLogoBlock}>
-                    <img src="/obaol-logo.svg" alt="OBAOL" className={styles.brandLogoSvg} />
+                    <img src="/obaol-logo-light.png" alt="OBAOL" className={`${styles.brandLogoImg} ${styles.logoLight}`} />
+                    <img src="/obaol-logo-dark.png" alt="OBAOL" className={`${styles.brandLogoImg} ${styles.logoDark}`} />
                     <span className={styles.brandSubline}>Operator workspace</span>
                   </div>
                 )}
@@ -311,7 +312,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                   <span className={styles.navDot} aria-hidden="true" />
                   <span className={styles.navTitle}>Preparing journey</span>
                   <span className={styles.navStateRow}>
-                    <span className={styles.navState}>Preparing daily path</span>
+                    <span className={styles.navState}>Preparing level path</span>
                   </span>
                 </div>
                 <p className={styles.navGroupTitle}>Onboarding</p>
@@ -409,16 +410,16 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                 {coursesUnlocked ? (
                   <Link href="/journey" className={`${styles.navItem} ${inJourney ? styles.navActive : ''}`}>
                     <span className={styles.navDot} aria-hidden="true" />
-                    <span className={styles.navTitle}>30-day journey</span>
+                    <span className={styles.navTitle}>30-level journey</span>
                     <span className={styles.navStateRow}>
-                      <span className={styles.navState}>Daily learning and submission</span>
+                      <span className={styles.navState}>Guided learning and submission</span>
                       {inJourney ? <span className={styles.navChip}>Now</span> : null}
                     </span>
                   </Link>
                 ) : (
                   <span className={`${styles.navItem} ${styles.navDisabled}`} aria-disabled="true">
                     <span className={styles.navDot} aria-hidden="true" />
-                    <span className={styles.navTitle}>30-day journey</span>
+                    <span className={styles.navTitle}>30-level journey</span>
                     <span className={styles.navStateRow}>
                       <span className={styles.navState}>Unlock after onboarding</span>
                     </span>

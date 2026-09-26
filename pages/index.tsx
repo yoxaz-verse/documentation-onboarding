@@ -132,10 +132,10 @@ function HomeContent({ user, onSessionExpired }: HomeContentProps) {
   const nextActionTitle = nextMilestone ? `Step ${nextMilestone.number}: ${nextMilestone.label}` : 'Operator journey unlocked';
   const nextActionText = nextMilestone
     ? `Complete ${nextMilestone.label} next so the onboarding path keeps moving and the training library unlocks in order.`
-    : 'Your required onboarding is complete, so you can begin Day 1, track daily milestones, and keep courses tied to real operator actions.';
+    : 'Your required onboarding is complete, so you can begin Level 1, track journey milestones, and keep courses tied to real operator actions.';
   const nextActionReason = nextMilestone
     ? 'This page stays focused on the one step you need right now.'
-    : 'Courses remain available, and the journey now gives them a daily operating path.';
+    : 'Courses remain available, and the journey now gives them a guided operating path.';
 
   return (
     <OnboardingLayout

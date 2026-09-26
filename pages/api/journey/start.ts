@@ -55,7 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const completedCheckIds = (checkRows || []).map((row) => row.check_id);
   if (!areJourneyChecksComplete(completedCheckIds)) {
-    return res.status(400).json({ error: 'Complete every preflight check before starting Day 1.' });
+    return res.status(400).json({ error: 'Complete every preflight check before starting Level 1.' });
   }
 
   if (existingState?.started_at) {
