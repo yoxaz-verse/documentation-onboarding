@@ -2032,8 +2032,9 @@
 
 .classroomLayout {
   display: grid;
-  grid-template-columns: minmax(15rem, 17rem) minmax(0, 1.5fr);
+  grid-template-columns: minmax(15rem, 17.5rem) minmax(0, 1fr);
   gap: 1rem;
+  align-items: start;
 }
 
 .desktopOnly {}
@@ -2042,14 +2043,20 @@
   display: none;
 }
 
-.lessonRail,
+.lessonRail {
+  padding: 1rem;
+  position: sticky;
+  top: 0.5rem;
+  z-index: 5;
+}
+
 .lessonStage {
   padding: 1rem;
 }
 
 .classroomSummaryStrip {
   display: grid;
-  grid-template-columns: minmax(0, 1.3fr) repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.75rem;
 }
 
@@ -2058,12 +2065,9 @@
   border-radius: 1.1rem;
   background: linear-gradient(165deg, var(--surface-grad-start), var(--surface-grad-end));
   box-shadow: var(--elev-shadow), var(--inset-highlight);
-}
-
-.summaryStatCard {
   padding: 0.9rem 0.95rem;
   display: grid;
-  gap: 0.62rem;
+  gap: 0.5rem;
 }
 
 .inquiriesHero {

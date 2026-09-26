@@ -147,7 +147,7 @@ function ClassroomDetailContent() {
 
   const renderSummaryCards = () => (
     <>
-      <article className={`${styles.summaryStatCard} ${styles.summaryStatCardFeature}`}>
+      <article className={styles.summaryStatCard}>
         <div className={styles.summaryStatHeader}>
           <div>
             <p className={styles.kpiLabel}>Classroom progress</p>
@@ -155,12 +155,7 @@ function ClassroomDetailContent() {
           </div>
           <span className={styles.pointsBadge}>{percentComplete}%</span>
         </div>
-        <p className={styles.sectionHint}>Move through the lessons in order and your saved progress will stay with you.</p>
-        {nextLesson ? (
-          <button type="button" className={styles.primaryButton} onClick={() => setSelectedSubModuleId(nextLesson.id)}>
-            Resume current lesson
-          </button>
-        ) : null}
+        <p className={styles.sectionHint}>Progress is recorded automatically as each lesson quiz is passed.</p>
       </article>
 
       <article className={styles.summaryStatCard}>
@@ -171,17 +166,17 @@ function ClassroomDetailContent() {
           </div>
           <span className={styles.pointsBadge}>{courseProgress?.totalPoints || 0} pts</span>
         </div>
-        <p className={styles.sectionHint}>Your standing reflects lesson completion and course points inside the operator workspace.</p>
+        <p className={styles.sectionHint}>Your standing reflects overall course completion and workspace points.</p>
       </article>
 
       <article className={styles.summaryStatCard}>
         <div className={styles.summaryStatHeader}>
           <div>
             <p className={styles.kpiLabel}>Lessons passed</p>
-            <p className={styles.kpiValue}>{completedLessons}</p>
+            <p className={styles.kpiValue}>{completedLessons} / {totalLessons}</p>
           </div>
         </div>
-        <p className={styles.sectionHint}>Complete each unlocked lesson to move the course forward and open the next step.</p>
+        <p className={styles.sectionHint}>Complete each unlocked lesson to move the course forward.</p>
       </article>
 
       <article className={styles.summaryStatCard}>
@@ -226,6 +221,23 @@ function ClassroomDetailContent() {
           const isPassed = sub.status === 'passed';
           const isCurrent = sub.status === 'in_progress';
 
+          let badgeLabel = 'READY';
+          let statusStyle = styles.lessonStatus;
+
+          if (isPassed) {
+            badgeLabel = isSelected ? '✓ PASSED · VIEWING' : '✓ PASSED';
+            statusStyle = `${styles.lessonStatus} ${styles.lessonStatusPassed}`;
+          } else if (isCurrent) {
+            badgeLabel = isSelected ? '⚡ ACTIVE LESSON' : '⚡ CURRENT';
+            statusStyle = `${styles.lessonStatus} ${styles.lessonStatusCurrent}`;
+          } else if (isLocked) {
+            badgeLabel = '🔒 LOCKED';
+            statusStyle = `${styles.lessonStatus} ${styles.lessonStatusLocked}`;
+          } else if (isSelected) {
+            badgeLabel = 'NOW VIEWING';
+            statusStyle = `${styles.lessonStatus} ${styles.lessonStatusCurrent}`;
+          }
+
           return (
             <button
               key={sub.id}
@@ -238,16 +250,7 @@ function ClassroomDetailContent() {
             >
               <div className={styles.lessonItemRow}>
                 <span className={styles.lessonOrder}>Lesson {sub.order}</span>
-                <div className={styles.lessonBadgesGroup}>
-                  {isSelected ? <span className={styles.lessonActivePill}>NOW VIEWING</span> : null}
-                  <span
-                    className={`${styles.lessonStatus} ${isPassed ? styles.lessonStatusPassed : ''} ${
-                      isCurrent ? styles.lessonStatusCurrent : ''
-                    } ${isLocked ? styles.lessonStatusLocked : ''}`}
-                  >
-                    {isPassed ? '✓ Passed' : isCurrent ? '⚡ Current' : '🔒 Locked'}
-                  </span>
-                </div>
+                <span className={statusStyle}>{badgeLabel}</span>
               </div>
               <span className={styles.lessonTitle}>{sub.title}</span>
               {isCurrent && !isSelected ? (
