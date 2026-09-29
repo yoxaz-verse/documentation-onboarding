@@ -13,6 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const action = String(req.body?.action || '').trim();
   const reviewNote = String(req.body?.reviewNote || '').trim();
   const readinessStatus = String(req.body?.readinessStatus || '').trim();
+  const platformVerificationConfirmed = req.body?.platformVerificationConfirmed === true;
 
   if (!id) return res.status(400).json({ error: 'Missing submission id.' });
   if (!['approve', 'needs_correction'].includes(action)) return res.status(400).json({ error: 'Invalid review action.' });
@@ -29,12 +30,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: findError.message });
   }
   if (!existing) return res.status(404).json({ error: 'Submission not found.' });
+  if (action === 'approve' && existing.day_number === 11 && !platformVerificationConfirmed) {
+    return res.status(400).json({ error: 'Verify five supplier associates and associate companies on the main platform before approving Level 11.' });
+  }
 
   const now = new Date().toISOString();
   const status = action === 'approve' ? 'completed' : 'needs_correction';
   const computedMetrics = {
     ...(existing.computed_metrics || {}),
     ...(readinessStatus ? { readinessStatus } : {}),
+    ...(action === 'approve' && existing.day_number === 11 ? { suppliersAdded: 5, platformVerificationConfirmed: true } : {}),
   };
 
   const { data, error } = await supabaseAdmin

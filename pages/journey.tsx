@@ -4,10 +4,10 @@ import AuthGate from '../components/AuthGate';
 import OnboardingLayout from '../components/OnboardingLayout';
 import SupportContactList from '../components/SupportContactList';
 import { LoadingButtonContent, SkeletonBlock, Spinner } from '../components/LoadingState';
-import { JOURNEY_PAGE_COPY, JOURNEY_TOTAL_DAYS, type JourneyDayTemplate, type JourneyFormField, type JourneyRepeatGroup } from '../config/operatorJourney';
+import { JOURNEY_PAGE_COPY, JOURNEY_TOTAL_DAYS, selectClusterInquiryPrompts, selectPaymentPairScenarios, type JourneyDayTemplate, type JourneyFormField, type JourneyRepeatGroup, type PaymentPairScenario } from '../config/operatorJourney';
 import { isUnauthorizedError } from '../lib/http';
 import { shuffledCopy } from '../lib/shuffle';
-import type { CourseProgressSummary, JourneyResponse, JourneySummary, ProgressRecord } from '../lib/types';
+import type { CourseProgressSummary, JourneyLeaderboardResponse, JourneyResponse, JourneySummary, ProgressRecord } from '../lib/types';
 import styles from './onboarding.module.css';
 
 type JourneyPageState =
@@ -49,14 +49,26 @@ function emptyEntry(group: JourneyRepeatGroup) {
   }, {});
 }
 
-function normalizeAnswers(template: JourneyDayTemplate, submissionAnswers?: Record<string, unknown> | null): Answers {
+function normalizeAnswers(
+  template: JourneyDayTemplate,
+  submissionAnswers?: Record<string, unknown> | null,
+  clusterInquiryPrompts: string[] = [],
+  paymentPairScenarios: PaymentPairScenario[] = []
+): Answers {
   const answers: Answers = { ...(submissionAnswers || {}) };
   template.formFields.forEach((field) => {
     if (!(field.id in answers)) answers[field.id] = field.type === 'checkbox' ? false : '';
   });
   template.repeatGroups.forEach((group) => {
     if (!Array.isArray(answers[group.id])) {
-      answers[group.id] = Array.from({ length: group.minEntries }, () => emptyEntry(group));
+      answers[group.id] = Array.from({ length: group.minEntries }, (_, index) => ({
+        ...emptyEntry(group),
+        ...(group.id === 'clusterInquiries' && clusterInquiryPrompts[index] ? { inquiryText: clusterInquiryPrompts[index] } : {}),
+        ...(group.id === 'paymentScenarios' && paymentPairScenarios[index] ? {
+          buyerPreference: paymentPairScenarios[index].buyerPreference,
+          supplierPreference: paymentPairScenarios[index].supplierPreference,
+        } : {}),
+      }));
     }
   });
   if (template.scenarioQuestions?.length && (!answers.scenarioAnswers || typeof answers.scenarioAnswers !== 'object')) {
@@ -156,8 +168,9 @@ function validateAnswers(template: JourneyDayTemplate, answers: Answers): FormEr
 }
 
 function getNextActionableDay(journey: JourneySummary) {
-  const firstIncomplete = journey.dayStatuses.find((item) => item.status !== 'completed');
-  return firstIncomplete?.day || journey.dayTemplates[journey.dayTemplates.length - 1]?.day || 1;
+  if (journey.currentLevel) return journey.currentLevel;
+  if (!journey.startedAt) return journey.dayTemplates[0]?.day || 1;
+  return journey.dayTemplates[journey.dayTemplates.length - 1]?.day || 1;
 }
 
 function isDayAccessible(journey: JourneySummary, day: number) {
@@ -188,12 +201,12 @@ function FieldInput({
   disabled?: boolean;
 }) {
   if (field.type === 'textarea') {
-    return <textarea data-field-key={inputKey} className={invalid ? styles.journeyInputInvalid : ''} value={String(value || '')} onChange={(event) => onChange(event.target.value)} placeholder={field.placeholder} rows={4} disabled={disabled} />;
+    return <textarea data-field-key={inputKey} className={invalid ? styles.journeyInputInvalid : ''} value={String(value || '')} onChange={(event) => onChange(event.target.value)} placeholder={field.placeholder} rows={4} disabled={disabled} readOnly={field.readOnly} aria-readonly={field.readOnly || undefined} />;
   }
 
   if (field.type === 'select') {
     return (
-      <select data-field-key={inputKey} className={invalid ? styles.journeyInputInvalid : ''} value={String(value || '')} onChange={(event) => onChange(event.target.value)} disabled={disabled}>
+      <select data-field-key={inputKey} className={invalid ? styles.journeyInputInvalid : ''} value={String(value || '')} onChange={(event) => onChange(event.target.value)} disabled={disabled || field.readOnly}>
         <option value="">Select</option>
         {(field.options || []).map((option) => (
           <option key={option} value={option}>{option}</option>
@@ -205,7 +218,7 @@ function FieldInput({
   if (field.type === 'checkbox') {
     return (
       <label className={`${styles.journeyBoolean} ${invalid ? styles.journeyInputInvalid : ''}`} aria-disabled={disabled}>
-        <input data-field-key={inputKey} type="checkbox" checked={value === true} onChange={(event) => onChange(event.target.checked)} disabled={disabled} />
+        <input data-field-key={inputKey} type="checkbox" checked={value === true} onChange={(event) => onChange(event.target.checked)} disabled={disabled || field.readOnly} />
         <span>Confirmed</span>
       </label>
     );
@@ -222,6 +235,8 @@ function FieldInput({
       onChange={(event) => onChange(field.type === 'number' ? event.target.value : event.target.value)}
       placeholder={field.placeholder}
       disabled={disabled}
+      readOnly={field.readOnly}
+      aria-readonly={field.readOnly || undefined}
     />
   );
 }
@@ -319,6 +334,7 @@ function JourneyLoadingState() {
 
 function JourneyContent() {
   const [state, setState] = useState<JourneyPageState>({ status: 'loading' });
+  const [journeyLeaderboard, setJourneyLeaderboard] = useState<JourneyLeaderboardResponse | null>(null);
   const [savingId, setSavingId] = useState('');
   const [savingCheckIds, setSavingCheckIds] = useState<Set<string>>(() => new Set());
   const [message, setMessage] = useState('');
@@ -330,6 +346,18 @@ function JourneyContent() {
   const [scenarioOptionOrder, setScenarioOptionOrder] = useState<Record<string, string[]>>({});
   const journeyWorkspaceRef = useRef<HTMLElement | null>(null);
   const scrollToWorkspaceAfterLoadRef = useRef(false);
+  const clusterInquiryPromptsRef = useRef<string[] | null>(null);
+  const paymentPairScenariosRef = useRef<PaymentPairScenario[] | null>(null);
+
+  const loadJourneyLeaderboard = async () => {
+    try {
+      const response = await fetch('/api/journey/leaderboard', { credentials: 'include', cache: 'no-store' });
+      if (!response.ok) return;
+      setJourneyLeaderboard(await response.json());
+    } catch {
+      // Rankings are motivational context; journey work must remain available if they cannot load.
+    }
+  };
 
   const load = async ({ selectNextActionable = false }: { selectNextActionable?: boolean } = {}) => {
     try {
@@ -353,6 +381,7 @@ function JourneyContent() {
       if (!payload.journey) throw new Error('Failed to load operator journey.');
 
       setState({ status: 'ready', progress: payload.progress, courseProgress: payload.courseProgress, journey: payload.journey });
+      void loadJourneyLeaderboard();
       setSelectedDay((current) => {
         if (selectNextActionable) return getNextActionableDay(payload.journey!);
         return current && payload.journey!.dayTemplates.some((template) => template.day === current)
@@ -459,7 +488,23 @@ function JourneyContent() {
 
   useEffect(() => {
     if (selectedTemplate) {
-      const normalized = normalizeAnswers(selectedTemplate, selectedStatus?.submission?.answers || null);
+      let clusterInquiryPrompts: string[] = [];
+      let paymentPairScenarios: PaymentPairScenario[] = [];
+      if (selectedTemplate.day === 9 && !selectedStatus?.submission) {
+        if (!paymentPairScenariosRef.current) paymentPairScenariosRef.current = selectPaymentPairScenarios();
+        paymentPairScenarios = paymentPairScenariosRef.current || [];
+      }
+      if (selectedTemplate.day === 10 && !selectedStatus?.submission) {
+        if (!clusterInquiryPromptsRef.current) {
+          const productCircleSubmission = state.status === 'ready'
+            ? state.journey.submissions.find((submission) => submission.day_number === 5 && submission.status === 'completed')
+            : null;
+          const primaryProductCircle = String(productCircleSubmission?.answers?.primaryProductCircle || '');
+          clusterInquiryPromptsRef.current = selectClusterInquiryPrompts(primaryProductCircle);
+        }
+        clusterInquiryPrompts = clusterInquiryPromptsRef.current || [];
+      }
+      const normalized = normalizeAnswers(selectedTemplate, selectedStatus?.submission?.answers || null, clusterInquiryPrompts, paymentPairScenarios);
       setAnswers(normalized);
       setScenarioGrade(selectedStatus?.submission ? gradeScenarioAnswers(selectedTemplate, normalized) : null);
       setScenarioOptionOrder((current) => {
@@ -630,6 +675,7 @@ function JourneyContent() {
   const checksComplete = journey.completedCheckCount === journey.totalCheckCount;
   const currentDay = journey.currentDay;
   const visibleDay = clampTimelineDay(currentDay);
+  const currentLevelLabel = journey.currentLevel ? `Level ${journey.currentLevel}` : 'Journey complete';
   const completionPercent = Math.round((journey.completedMilestoneCount / journey.totalMilestoneCount) * 100);
   const dayPercent = Math.round((Math.min(visibleDay, JOURNEY_TOTAL_DAYS) / JOURNEY_TOTAL_DAYS) * 100);
   const dueCount = journey.dayStatuses.filter((item) => ['catch_up', 'needs_correction', 'pending'].includes(item.status) && item.day <= visibleDay).length;
@@ -672,7 +718,7 @@ function JourneyContent() {
         </div>
       </div>
       <div className={styles.journeyAsideStack}>
-        <div className={styles.journeyAsideItem}><span>Operator level</span><strong>{currentDay ? `Level ${currentDay}` : 'Not started'}</strong></div>
+        <div className={styles.journeyAsideItem}><span>Operator level</span><strong>{currentDay ? currentLevelLabel : 'Not started'}</strong></div>
         <div className={styles.journeyAsideItem}><span>Next action</span><strong>{nextActionLabel}</strong></div>
         <div className={styles.journeyAsideItem}><span>Completed levels</span><strong>{journey.completedMilestoneCount}/{journey.totalMilestoneCount}</strong></div>
         <div className={styles.journeyAsideItem}><span>Review/catch-up</span><strong>{dueCount}</strong></div>
@@ -688,7 +734,7 @@ function JourneyContent() {
         <div className={styles.homeHeroHeader}>
           <div>
             <p className={styles.homeHeroEyebrow}>Operator execution path</p>
-            <h2 className={styles.homeHeroTitle}>{currentDay ? `Level ${currentDay}: build market momentum` : 'Start the 30-level execution path'}</h2>
+            <h2 className={styles.homeHeroTitle}>{currentDay ? `Day ${visibleDay}: build market momentum` : 'Start the 30-level execution path'}</h2>
           </div>
           <span className={styles.homeStatusPill}>{currentDay ? `${completionPercent}% complete` : `${journey.completedCheckCount}/${journey.totalCheckCount} checks`}</span>
         </div>
@@ -732,11 +778,48 @@ function JourneyContent() {
       ) : (
         <>
           <section className={styles.journeyStatusStrip}>
-            <article className={styles.kpiCard}><p className={styles.kpiLabel}>Current operator level</p><p className={styles.kpiValue}>Level {currentDay}</p></article>
+            <article className={styles.kpiCard}><p className={styles.kpiLabel}>Current operator level</p><p className={styles.kpiValue}>{currentLevelLabel}</p></article>
             <article className={styles.kpiCard}><p className={styles.kpiLabel}>Next action</p><p className={styles.kpiValue}>{nextActionLabel}</p></article>
             <article className={styles.kpiCard}><p className={styles.kpiLabel}>Milestones done</p><p className={styles.kpiValue}>{journey.completedMilestoneCount}/{journey.totalMilestoneCount}</p></article>
             <article className={styles.kpiCard}><p className={styles.kpiLabel}>30-level path</p><p className={styles.kpiValue}>{dayPercent}% elapsed</p></article>
           </section>
+
+          {journeyLeaderboard?.summary ? (
+            <section className={styles.journeyLeaderboardPanel} aria-label="Journey leaderboard">
+              <div className={styles.journeyLeaderboardSummary}>
+                <div>
+                  <p className={styles.homeHeroEyebrow}>Day {journeyLeaderboard.summary.operatingDay} cohort</p>
+                  <h2 className={styles.courseCardTitle}>
+                    {journeyLeaderboard.summary.cohortSize === 1
+                      ? `You are the first Day ${journeyLeaderboard.summary.operatingDay} operator`
+                      : `You are ahead of ${journeyLeaderboard.summary.aheadOf} of ${journeyLeaderboard.summary.cohortSize} operators`}
+                  </h2>
+                  <p className={styles.sectionHint}>
+                    Compared with operators on the same journey day. You are at {currentLevelLabel} with {journey.completedMilestoneCount} levels completed.
+                  </p>
+                </div>
+                <div className={styles.journeyLeaderboardScore}>
+                  <strong>#{journeyLeaderboard.summary.overallRank}</strong>
+                  <span>of {journeyLeaderboard.summary.totalParticipants} overall</span>
+                  <small>Top {Math.max(1, 100 - journeyLeaderboard.summary.percentile)}%</small>
+                </div>
+              </div>
+              {journeyLeaderboard.entries.length ? (
+                <div className={styles.journeyLeaderboardList}>
+                  {journeyLeaderboard.entries.slice(0, 5).map((entry) => (
+                    <article key={entry.id} className={`${styles.journeyLeaderboardItem} ${entry.isCurrentUser ? styles.journeyLeaderboardItemCurrent : ''}`}>
+                      <span className={styles.journeyLeaderboardRank}>#{entry.rank}</span>
+                      <div>
+                        <strong>{entry.displayName}</strong>
+                        <small>Day {entry.operatingDay} · {entry.currentLevel ? `Level ${entry.currentLevel}` : 'Journey complete'}</small>
+                      </div>
+                      <b>{entry.completedLevels}/30</b>
+                    </article>
+                  ))}
+                </div>
+              ) : null}
+            </section>
+          ) : null}
 
           <details className={styles.journeyProgressDetails}>
             <summary>
@@ -922,7 +1005,7 @@ function JourneyContent() {
                           <h3 className={styles.journeyMilestoneTitle}>{group.label}</h3>
                           <p className={styles.sectionHint}>Minimum {group.minEntries} entries required.</p>
                         </div>
-                        <button type="button" className={styles.secondaryButton} disabled={selectedIsReadOnly} onClick={() => addGroupEntry(group)}>Add entry</button>
+                        {!group.fixedEntries ? <button type="button" className={styles.secondaryButton} disabled={selectedIsReadOnly} onClick={() => addGroupEntry(group)}>Add entry</button> : null}
                       </div>
                       {entries.map((entry, index) => (
                         <article key={`${group.id}-${index}`} className={styles.journeyRepeatEntry}>
@@ -971,7 +1054,9 @@ function JourneyContent() {
                         ? 'Waiting for review. This submission is read-only until an admin responds.'
                         : selectedIsCompleted
                           ? 'Completed. Reopen this level only if you need to make a correction.'
-                          : 'Fill all required fields to confirm this level.'}
+                          : selectedTemplate.day === 11
+                            ? 'After adding five suppliers on the main platform, request verification here.'
+                            : 'Fill all required fields to confirm this level.'}
                     </p>
 
                     <div className={styles.journeySubmitActions}>

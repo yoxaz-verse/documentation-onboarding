@@ -10,16 +10,23 @@ import styles from '../admin.module.css';
 function formatDate(value: string | null) {
   if (!value) return 'N/A';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'N/A';
-  return date.toLocaleString();
+  return Number.isNaN(date.getTime()) ? 'N/A' : date.toLocaleString();
 }
 
-function toTitleCase(value: string) {
-  return value
-    .split(/[_\s-]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
+function titleCase(value: string) {
+  return value.split(/[_\s-]+/).filter(Boolean).map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+}
+
+function displayValue(value: unknown): string {
+  if (value === null || value === undefined || value === '') return 'Not provided';
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+  if (Array.isArray(value)) return value.map(displayValue).join(', ');
+  if (typeof value === 'object') return JSON.stringify(value, null, 2);
+  return String(value);
+}
+
+function badgeClass(status: string) {
+  return ['complete', 'completed', 'passed'].includes(status) ? styles.badgeDone : styles.badgePending;
 }
 
 function DetailContent() {
@@ -30,288 +37,76 @@ function DetailContent() {
 
   useEffect(() => {
     if (!email || !email.includes('@')) return;
-
     const load = async () => {
-      const response = await fetch(`/api/admin/operators/${encodeURIComponent(email)}`, {
-        credentials: 'include',
-        cache: 'no-store',
-      });
+      setError('');
+      const response = await fetch(`/api/admin/operators/${encodeURIComponent(email)}`, { credentials: 'include', cache: 'no-store' });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        setError(payload?.error || 'Failed to load operator detail.');
-        return;
-      }
+      if (!response.ok) return setError(payload?.error || 'Failed to load operator detail.');
       setDetail(payload.detail || null);
     };
-
     load();
   }, [email]);
 
-  const stepStats = useMemo(() => {
-    if (!detail?.progress) {
-      return [
-        { label: 'Current step', value: 'Step 1' },
-        { label: 'Completed milestones', value: '0/11' },
-        { label: 'Latest activity', value: 'N/A' },
-        { label: 'Submission', value: 'Missing' },
-      ];
-    }
-
-    return [
-      { label: 'Current step', value: `Step ${detail.progress.currentStep}` },
-      { label: 'Completed milestones', value: `${detail.progress.completedMilestones}/11` },
-      { label: 'Operator journey', value: detail.journey.startedAt ? `Day ${detail.journey.currentDay || 1}` : 'Not started' },
-      { label: 'Latest activity', value: formatDate(detail.summary.latestActivityAt) },
-      { label: 'Submission', value: toTitleCase(detail.submission?.status || 'missing') },
-    ];
-  }, [detail]);
+  const stats = useMemo(() => detail ? [
+    { label: 'Onboarding', value: `${detail.progress?.completedMilestones || 0}/${detail.summary.totalOnboardingSteps}` },
+    { label: 'Courses', value: `${detail.summary.completedCourses}/${detail.summary.totalCourses}` },
+    { label: 'Lessons', value: `${detail.summary.completedLessons}/${detail.summary.totalLessons}` },
+    { label: 'Journey days', value: `${detail.summary.completedJourneyDays}/${detail.summary.totalJourneyDays}` },
+    { label: 'Pending reviews', value: String(detail.summary.pendingJourneyReviews) },
+    { label: 'Latest activity', value: formatDate(detail.summary.latestActivityAt) },
+  ] : [], [detail]);
 
   return (
     <main className={styles.shell}>
-      <div className={styles.bgOrbA} aria-hidden="true" />
-      <div className={styles.bgOrbB} aria-hidden="true" />
+      <div className={styles.bgOrbA} aria-hidden="true" /><div className={styles.bgOrbB} aria-hidden="true" />
       <div className={styles.container}>
         <header className={styles.header}>
-          <div className={styles.headingBlock}>
-            <p className={styles.kicker}>Operator Detail</p>
-            <h1 className={styles.title}>{detail?.summary.displayName || 'Operator Detail'}</h1>
-            <p className={styles.subtitle}>{email || 'Operator'} · step-by-step onboarding visibility</p>
-          </div>
-          <div className={styles.actions}>
-            <Link className={styles.linkButton} href="/admin">Back to dashboard</Link>
-            <ThemeToggle size="sm" variant="surface" />
-          </div>
+          <div className={styles.headingBlock}><p className={styles.kicker}>Operator activity record</p><h1 className={styles.title}>{detail?.summary.displayName || 'Operator Detail'}</h1><p className={styles.subtitle}>{email || 'Operator'} · onboarding, learning, submissions, and reviews</p></div>
+          <div className={styles.actions}><Link className={styles.linkButton} href="/admin">Back to dashboard</Link><ThemeToggle size="sm" variant="surface" /></div>
         </header>
-
         {error ? <article className={styles.card}>{error}</article> : null}
-        {!detail && !error ? <LoadingState title="Loading operator detail" message="Preparing onboarding, course, and journey activity…" preset="metrics" /> : null}
+        {!detail && !error ? <LoadingState title="Loading operator activity" message="Preparing onboarding, courses, attempts, and journey submissions…" preset="metrics" /> : null}
 
-        {detail ? (
-          <>
-            <section className={styles.detailHero}>
-              <article className={styles.card}>
-                <div className={styles.detailHeroTop}>
-                  <div>
-                    <p className={styles.cardLabel}>Operator summary</p>
-                    <h2 className={styles.detailHeroTitle}>{detail.summary.displayName}</h2>
-                    <p className={styles.detailHeroText}>{detail.operator.email}</p>
-                  </div>
-                  <div className={styles.badgeRow}>
-                    <span className={detail.summary.progressState === 'completed' ? styles.badgeDone : styles.badgePending}>
-                      {detail.summary.progressState === 'completed' ? 'Onboarding complete' : detail.summary.progressState === 'in_progress' ? 'In progress' : 'Not started'}
-                    </span>
-                    <span className={detail.summary.submissionState === 'completed' ? styles.badgeDone : styles.badgePending}>
-                      {detail.summary.submissionState === 'completed' ? 'Submission complete' : detail.summary.submissionState === 'pending' ? 'Submission pending' : 'Submission missing'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className={styles.detailSummaryGrid}>
-                  {stepStats.map((item) => (
-                    <div key={item.label} className={styles.detailSummaryCard}>
-                      <p className={styles.cardLabel}>{item.label}</p>
-                      <p className={styles.detailSummaryValue}>{item.value}</p>
-                    </div>
-                  ))}
-                </div>
-              </article>
-
-              <article className={styles.card}>
-                <div className={styles.sectionHeader}>
-                  <h2 className={styles.funnelTitle}>Operator record</h2>
-                  <p className={styles.sectionMeta}>Base account fields</p>
-                </div>
-                <div className={styles.fieldGrid}>
-                  <div className={styles.fieldPair}>
-                    <span className={styles.fieldLabel}>Name</span>
-                    <span className={styles.fieldValue}>{detail.record.name || 'N/A'}</span>
-                  </div>
-                  <div className={styles.fieldPair}>
-                    <span className={styles.fieldLabel}>Phone</span>
-                    <span className={styles.fieldValue}>{detail.record.phone || 'N/A'}</span>
-                  </div>
-                  <div className={styles.fieldPair}>
-                    <span className={styles.fieldLabel}>Role</span>
-                    <span className={styles.fieldValue}>{detail.record.role || 'N/A'}</span>
-                  </div>
-                  <div className={styles.fieldPair}>
-                    <span className={styles.fieldLabel}>Location</span>
-                    <span className={styles.fieldValue}>{detail.record.location || 'N/A'}</span>
-                  </div>
-                  <div className={styles.fieldPair}>
-                    <span className={styles.fieldLabel}>Preferred language</span>
-                    <span className={styles.fieldValue}>{detail.record.preferredLanguage || 'N/A'}</span>
-                  </div>
-                  <div className={styles.fieldPair}>
-                    <span className={styles.fieldLabel}>Last updated</span>
-                    <span className={styles.fieldValue}>{formatDate(detail.record.updatedAt)}</span>
-                  </div>
-                </div>
-              </article>
-            </section>
-
-            <section className={styles.timelineSection}>
-              <div className={styles.sectionHeader}>
-                <h2 className={styles.funnelTitle}>Onboarding steps</h2>
-                <p className={styles.sectionMeta}>What has been captured at each milestone</p>
-              </div>
-              <div className={styles.timelineList}>
-                {detail.stepSections.map((section) => (
-                  <article key={section.step} className={styles.timelineCard}>
-                    <div className={styles.timelineMarker}>
-                      <span className={styles.timelineStepNumber}>{section.step}</span>
-                    </div>
-                    <div className={styles.timelineBody}>
-                      <div className={styles.timelineHeader}>
-                        <div>
-                          <p className={styles.cardLabel}>Step {section.step}</p>
-                          <h3 className={styles.timelineTitle}>{section.label}</h3>
-                          <p className={styles.timelineSummary}>{section.summary}</p>
-                        </div>
-                        <span className={section.status === 'complete' ? styles.badgeDone : styles.badgePending}>
-                          {section.statusLabel}
-                        </span>
-                      </div>
-                      <p className={styles.timelineNote}>{section.note}</p>
-                      {section.fields.length ? (
-                        <div className={styles.fieldGrid}>
-                          {section.fields.map((field) => (
-                            <div key={`${section.step}-${field.label}`} className={styles.fieldPair}>
-                              <span className={styles.fieldLabel}>{field.label}</span>
-                              <span className={field.tone === 'muted' ? styles.fieldValueMuted : styles.fieldValue}>{field.value}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className={styles.meta}>No additional stored fields for this step.</p>
-                      )}
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </section>
-
-            <section className={styles.detailGrid}>
-              <article className={styles.card}>
-                <div className={styles.sectionHeader}>
-                  <h2 className={styles.funnelTitle}>Final submission</h2>
-                  <p className={styles.sectionMeta}>Completion handoff</p>
-                </div>
-                {detail.submission ? (
-                  <div className={styles.fieldGrid}>
-                    <div className={styles.fieldPair}>
-                      <span className={styles.fieldLabel}>Status</span>
-                      <span className={styles.fieldValue}>{toTitleCase(detail.submission.status)}</span>
-                    </div>
-                    <div className={styles.fieldPair}>
-                      <span className={styles.fieldLabel}>Completion code</span>
-                      <span className={styles.fieldValue}>{detail.submission.completionCode || 'N/A'}</span>
-                    </div>
-                    <div className={styles.fieldPair}>
-                      <span className={styles.fieldLabel}>Submitted at</span>
-                      <span className={styles.fieldValue}>{formatDate(detail.submission.submittedAt)}</span>
-                    </div>
-                  </div>
-                ) : (
-                  <p className={styles.meta}>No final submission record yet.</p>
-                )}
-              </article>
-
-              <article className={styles.card}>
-                <div className={styles.sectionHeader}>
-                  <h2 className={styles.funnelTitle}>Progress record</h2>
-                  <p className={styles.sectionMeta}>Milestone sequence</p>
-                </div>
-                {detail.progress ? (
-                  <div className={styles.milestoneStack}>
-                    {detail.progress.milestones.map((milestone) => (
-                      <div key={milestone.step} className={styles.milestoneRow}>
-                        <span className={styles.fieldValue}>Step {milestone.step}</span>
-                        <span className={styles.meta}>{milestone.label}</span>
-                        <span className={milestone.completed ? styles.badgeDone : styles.badgePending}>
-                          {milestone.completed ? 'Done' : detail.progress.currentStep === milestone.step ? 'Current' : 'Pending'}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className={styles.meta}>No progress record.</p>
-                )}
-              </article>
-
-              <article className={styles.card}>
-                <div className={styles.sectionHeader}>
-                  <h2 className={styles.funnelTitle}>Operator journey</h2>
-                  <p className={styles.sectionMeta}>30-day milestone path</p>
-                </div>
-                <div className={styles.fieldGrid}>
-                  <div className={styles.fieldPair}>
-                    <span className={styles.fieldLabel}>Status</span>
-                    <span className={styles.fieldValue}>{detail.journey.startedAt ? `Started · Day ${detail.journey.currentDay || 1}` : 'Not started'}</span>
-                  </div>
-                  <div className={styles.fieldPair}>
-                    <span className={styles.fieldLabel}>Preflight checks</span>
-                    <span className={styles.fieldValue}>{detail.journey.completedChecks}/{detail.journey.totalChecks}</span>
-                  </div>
-                  <div className={styles.fieldPair}>
-                    <span className={styles.fieldLabel}>Journey milestones</span>
-                    <span className={styles.fieldValue}>{detail.journey.completedMilestones}/{detail.journey.totalMilestones}</span>
-                  </div>
-                  <div className={styles.fieldPair}>
-                    <span className={styles.fieldLabel}>Latest journey activity</span>
-                    <span className={styles.fieldValue}>{formatDate(detail.journey.latestActivityAt)}</span>
-                  </div>
-                </div>
-              </article>
-            </section>
-
-            <article className={styles.tableSection}>
-              <div className={styles.sectionHeader}>
-                <h2 className={styles.funnelTitle}>Quiz summary</h2>
-                <p className={styles.sectionMeta}>Course readiness snapshot</p>
-              </div>
-              {detail.quizSummary.length ? (
-                <div className={styles.tableWrap}>
-                  <table className={styles.table}>
-                    <thead>
-                      <tr>
-                        <th>Module</th>
-                        <th>Best Score</th>
-                        <th>Attempts</th>
-                        <th>Status</th>
-                        <th>Last Attempt</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {detail.quizSummary.map((quiz) => (
-                        <tr key={quiz.moduleId}>
-                          <td>
-                            <div className={styles.operatorName}>{quiz.moduleId}</div>
-                          </td>
-                          <td>{quiz.bestScore}</td>
-                          <td>{quiz.attempts}</td>
-                          <td>
-                            <span className={quiz.everPassed ? styles.badgeDone : styles.badgePending}>
-                              {quiz.everPassed ? 'Passed' : 'Not passed'}
-                            </span>
-                          </td>
-                          <td>{formatDate(quiz.lastAttemptAt)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p className={styles.meta}>No quiz attempts found for this operator.</p>
-              )}
+        {detail ? <>
+          <nav className={styles.detailNav} aria-label="Operator detail sections"><a href="#overview">Overview</a><a href="#onboarding">Onboarding</a><a href="#courses">Courses</a><a href="#journey">30-day journey</a></nav>
+          <section id="overview" className={styles.detailHero}>
+            <article className={styles.card}>
+              <div className={styles.detailHeroTop}><div><p className={styles.cardLabel}>Operator summary</p><h2 className={styles.detailHeroTitle}>{detail.summary.displayName}</h2><p className={styles.detailHeroText}>{detail.operator.email}</p></div><div className={styles.badgeRow}><span className={badgeClass(detail.summary.progressState)}>{titleCase(detail.summary.progressState)}</span><span className={badgeClass(detail.summary.submissionState)}>Submission {titleCase(detail.summary.submissionState)}</span></div></div>
+              <div className={styles.detailSummaryGrid}>{stats.map((item) => <div key={item.label} className={styles.detailSummaryCard}><p className={styles.cardLabel}>{item.label}</p><p className={styles.detailSummaryValue}>{item.value}</p></div>)}</div>
             </article>
-          </>
-        ) : null}
+            <article className={styles.card}><div className={styles.sectionHeader}><h2 className={styles.funnelTitle}>Operator record</h2><p className={styles.sectionMeta}>Account and profile</p></div><div className={styles.fieldGrid}>{[['Name', detail.record.name], ['Phone', detail.record.phone], ['Role', detail.record.role], ['Location', detail.record.location], ['Preferred language', detail.record.preferredLanguage], ['Last updated', formatDate(detail.record.updatedAt)]].map(([label, value]) => <div key={label} className={styles.fieldPair}><span className={styles.fieldLabel}>{label}</span><span className={styles.fieldValue}>{value || 'N/A'}</span></div>)}</div></article>
+          </section>
+
+          <section id="onboarding" className={styles.timelineSection}>
+            <div className={styles.sectionHeader}><div><p className={styles.kicker}>Foundation</p><h2 className={styles.funnelTitle}>Onboarding steps</h2></div><p className={styles.sectionMeta}>{detail.progress?.completedMilestones || 0}/{detail.summary.totalOnboardingSteps} complete</p></div>
+            <div className={styles.accordionStack}>{detail.stepSections.map((section) => <details key={section.step} className={styles.activityDetails} open={section.status === 'current'}><summary><span className={styles.timelineStepNumber}>{section.step}</span><span className={styles.summaryText}><strong>{section.label}</strong><small>{section.summary}</small></span><span className={badgeClass(section.status)}>{section.statusLabel}</span></summary><div className={styles.detailsBody}><p className={styles.timelineNote}>{section.note}</p>{section.fields.length ? <div className={styles.fieldGrid}>{section.fields.map((field) => <div key={field.label} className={styles.fieldPair}><span className={styles.fieldLabel}>{field.label}</span><span className={styles.fieldValue}>{field.value}</span></div>)}</div> : <p className={styles.meta}>No additional stored inputs for this step.</p>}</div></details>)}</div>
+          </section>
+
+          <section id="courses" className={styles.timelineSection}>
+            <div className={styles.sectionHeader}><div><p className={styles.kicker}>Learning history</p><h2 className={styles.funnelTitle}>Courses and quiz attempts</h2></div><p className={styles.sectionMeta}>{detail.summary.completedLessons}/{detail.summary.totalLessons} lessons passed</p></div>
+            <div className={styles.courseStack}>{detail.courses.map((course) => <article key={course.id} className={styles.courseCard}>
+              <div className={styles.courseHeader}><div><p className={styles.cardLabel}>{course.divisionLabel}</p><h3>{course.title}</h3><p>{course.description}</p></div><div className={styles.courseProgress}><span className={badgeClass(course.status)}>{titleCase(course.status)}</span><strong>{course.percentComplete}%</strong><small>{course.completedLessons}/{course.totalLessons} lessons</small></div></div>
+              <div className={styles.accordionStack}>{course.lessons.map((lesson) => <details key={lesson.id} className={styles.activityDetails}><summary><span className={styles.timelineStepNumber}>{lesson.order}</span><span className={styles.summaryText}><strong>{lesson.title}</strong><small>{lesson.attempts.length} attempt{lesson.attempts.length === 1 ? '' : 's'} · pass score {lesson.passScore}/{lesson.totalQuestions}</small></span><span className={badgeClass(lesson.status)}>{titleCase(lesson.status)}</span></summary><div className={styles.detailsBody}>
+                <p className={styles.timelineNote}>{lesson.description}</p><div className={styles.inlineMeta}><span>Started: {formatDate(lesson.startedAt)}</span><span>Completed: {formatDate(lesson.completedAt)}</span><Link href={`/courses/${course.id}?lesson=${encodeURIComponent(lesson.id)}`}>Open course</Link></div>
+                {lesson.attempts.length ? <div className={styles.attemptStack}>{lesson.attempts.map((attempt) => <details key={attempt.attemptNumber} className={styles.attemptDetails}><summary><strong>Attempt {attempt.attemptNumber}</strong><span>{attempt.score}/{lesson.totalQuestions}</span><span className={badgeClass(attempt.passed ? 'passed' : 'not_passed')}>{attempt.passed ? 'Passed' : 'Not passed'}</span><time>{formatDate(attempt.createdAt)}</time></summary><div className={styles.answerStack}>{attempt.answers.map((answer) => <div key={answer.questionId} className={styles.answerCard}><div><strong>{answer.question}</strong><span className={answer.correct ? styles.answerCorrect : styles.answerIncorrect}>{answer.correct ? 'Correct' : 'Incorrect'}</span></div><p><b>Operator answer:</b> {answer.answer || 'No answer'}</p>{!answer.correct ? <p><b>Correct answer:</b> {answer.correctAnswer}</p> : null}</div>)}</div></details>)}</div> : <p className={styles.emptyState}>No quiz attempts for this lesson.</p>}
+              </div></details>)}</div>
+            </article>)}</div>
+          </section>
+
+          <section id="journey" className={styles.timelineSection}>
+            <div className={styles.sectionHeader}><div><p className={styles.kicker}>Execution record</p><h2 className={styles.funnelTitle}>30-day operator journey</h2></div><div className={styles.actions}><p className={styles.sectionMeta}>{detail.summary.completedJourneyDays}/{detail.summary.totalJourneyDays} complete</p><Link className={styles.linkButton} href="/admin/journey">Open review queue</Link></div></div>
+            <div className={styles.accordionStack}>{detail.journey.days.map((day) => <details key={day.templateId} className={styles.activityDetails} open={day.status === 'under_review' || day.status === 'needs_correction'}><summary><span className={styles.timelineStepNumber}>{day.day}</span><span className={styles.summaryText}><strong>{day.title}</strong><small>{titleCase(day.category)} · {day.submittedAt ? `Submitted ${formatDate(day.submittedAt)}` : 'No submission'}</small></span><span className={badgeClass(day.status)}>{titleCase(day.status)}</span></summary><div className={styles.detailsBody}>
+              <p className={styles.timelineNote}>{day.description}</p>{day.requiredOutput ? <div className={styles.requiredOutput}><span>Required output</span><p>{day.requiredOutput}</p></div> : null}
+              {day.fields.length ? <><h4 className={styles.subsectionTitle}>Submitted inputs</h4><div className={styles.submissionGrid}>{day.fields.map((field, index) => <div key={`${field.label}-${index}`} className={styles.fieldPair}><span className={styles.fieldLabel}>{field.label}</span><pre className={styles.fieldPre}>{displayValue(field.value)}</pre></div>)}</div></> : <p className={styles.emptyState}>No inputs submitted for this day.</p>}
+              {day.computedMetrics.length ? <><h4 className={styles.subsectionTitle}>Computed metrics</h4><div className={styles.fieldGrid}>{day.computedMetrics.map((metric) => <div key={metric.label} className={styles.fieldPair}><span className={styles.fieldLabel}>{metric.label}</span><span className={styles.fieldValue}>{displayValue(metric.value)}</span></div>)}</div></> : null}
+              {day.reviewNote || day.reviewedAt ? <div className={styles.reviewBox}><div><span>Reviewed</span><strong>{formatDate(day.reviewedAt)}{day.reviewedBy ? ` by ${day.reviewedBy}` : ''}</strong></div>{day.reviewNote ? <p>{day.reviewNote}</p> : null}</div> : null}
+              <div className={styles.inlineMeta}>{day.href ? <Link href={day.href}>{day.actionLabel || 'Open related page'}</Link> : null}{day.submissionId ? <Link href="/admin/journey">Review this submission</Link> : null}</div>
+            </div></details>)}</div>
+          </section>
+        </> : null}
       </div>
     </main>
   );
 }
 
-export default function AdminOperatorDetailPage() {
-  return <AdminGate>{() => <DetailContent />}</AdminGate>;
-}
+export default function AdminOperatorDetailPage() { return <AdminGate>{() => <DetailContent />}</AdminGate>; }

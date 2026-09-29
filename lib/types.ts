@@ -57,6 +57,33 @@ export type LeaderboardResponse = {
   leaderboard: LeaderboardEntry[];
 };
 
+export type JourneyLeaderboardSummary = {
+  operatingDay: number;
+  currentLevel: number | null;
+  completedLevels: number;
+  overallRank: number;
+  totalParticipants: number;
+  cohortRank: number;
+  cohortSize: number;
+  aheadOf: number;
+  percentile: number;
+};
+
+export type JourneyLeaderboardEntry = {
+  id: string;
+  displayName: string;
+  rank: number;
+  operatingDay: number;
+  currentLevel: number | null;
+  completedLevels: number;
+  isCurrentUser: boolean;
+};
+
+export type JourneyLeaderboardResponse = {
+  summary: JourneyLeaderboardSummary | null;
+  entries: JourneyLeaderboardEntry[];
+};
+
 export type OperatorProfile = {
   email: string;
   full_name: string;

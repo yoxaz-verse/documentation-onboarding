@@ -92,6 +92,14 @@ export type AdminOperatorDetail = {
     currentStepLabel: string;
     progressState: 'not_started' | 'in_progress' | 'completed';
     submissionState: 'missing' | 'pending' | 'completed';
+    totalOnboardingSteps: number;
+    totalCourses: number;
+    completedCourses: number;
+    totalLessons: number;
+    completedLessons: number;
+    totalJourneyDays: number;
+    completedJourneyDays: number;
+    pendingJourneyReviews: number;
   };
   profile: {
     fullName: string;
@@ -129,6 +137,24 @@ export type AdminOperatorDetail = {
     completedChecks: number;
     totalChecks: number;
     latestActivityAt: string | null;
+    days: Array<{
+      day: number;
+      templateId: string;
+      title: string;
+      description: string;
+      category: string;
+      requiredOutput: string;
+      href: string | null;
+      actionLabel: string | null;
+      status: 'upcoming' | 'today' | 'pending' | 'catch_up' | 'submitted' | 'under_review' | 'completed' | 'needs_correction';
+      fields: Array<{ label: string; value: unknown }>;
+      computedMetrics: Array<{ label: string; value: unknown }>;
+      submittedAt: string | null;
+      reviewedAt: string | null;
+      reviewedBy: string | null;
+      reviewNote: string | null;
+      submissionId: string | null;
+    }>;
   };
   stepSections: Array<{
     step: number;
@@ -157,5 +183,39 @@ export type AdminOperatorDetail = {
     attempts: number;
     everPassed: boolean;
     lastAttemptAt: string | null;
+  }>;
+  courses: Array<{
+    id: string;
+    title: string;
+    description: string;
+    divisionLabel: string;
+    status: 'not_started' | 'in_progress' | 'completed';
+    completedLessons: number;
+    totalLessons: number;
+    percentComplete: number;
+    lessons: Array<{
+      id: string;
+      title: string;
+      description: string;
+      order: number;
+      passScore: number;
+      totalQuestions: number;
+      status: 'not_started' | 'in_progress' | 'passed';
+      startedAt: string | null;
+      completedAt: string | null;
+      attempts: Array<{
+        attemptNumber: number;
+        score: number;
+        passed: boolean;
+        createdAt: string | null;
+        answers: Array<{
+          questionId: string;
+          question: string;
+          answer: string | null;
+          correctAnswer: string;
+          correct: boolean;
+        }>;
+      }>;
+    }>;
   }>;
 };

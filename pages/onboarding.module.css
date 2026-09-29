@@ -933,6 +933,102 @@
   font-size: clamp(1.06rem, 1.45vw, 1.36rem);
 }
 
+.journeyLeaderboardPanel {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--surface-border));
+  border-radius: 0.9rem;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, var(--surface-strong)), var(--surface-strong));
+  box-shadow: var(--inset-highlight);
+}
+
+.journeyLeaderboardSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+.journeyLeaderboardSummary .courseCardTitle {
+  margin: 0.35rem 0 0.45rem;
+}
+
+.journeyLeaderboardScore {
+  min-width: 9.5rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--surface-border));
+  border-radius: 0.75rem;
+  background: var(--surface-strong);
+  text-align: center;
+}
+
+.journeyLeaderboardScore strong,
+.journeyLeaderboardScore span,
+.journeyLeaderboardScore small {
+  display: block;
+}
+
+.journeyLeaderboardScore strong {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.journeyLeaderboardScore span,
+.journeyLeaderboardScore small {
+  margin-top: 0.3rem;
+  color: var(--ink-muted);
+}
+
+.journeyLeaderboardList {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.9rem;
+}
+
+.journeyLeaderboardItem {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.4rem 0.55rem;
+  padding: 0.7rem;
+  border: 1px solid var(--surface-border);
+  border-radius: 0.68rem;
+  background: var(--surface-strong);
+}
+
+.journeyLeaderboardItemCurrent {
+  border-color: color-mix(in srgb, var(--accent) 74%, var(--surface-border));
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.journeyLeaderboardRank {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.journeyLeaderboardItem div,
+.journeyLeaderboardItem strong,
+.journeyLeaderboardItem small {
+  display: block;
+  min-width: 0;
+}
+
+.journeyLeaderboardItem strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.journeyLeaderboardItem small {
+  margin-top: 0.2rem;
+  color: var(--ink-muted);
+}
+
+.journeyLeaderboardItem b {
+  grid-column: 2;
+  font-size: 0.78rem;
+}
+
 .journeyChecklist,
 .journeyStartPanel,
 .journeyTodayPanel,
@@ -1547,6 +1643,12 @@
   resize: vertical;
   min-height: 6.6rem;
   line-height: 1.5;
+}
+
+.journeyField textarea[readonly],
+.journeyField input[readonly] {
+  cursor: default;
+  background: color-mix(in srgb, var(--accent-soft) 22%, var(--control-surface-strong));
 }
 
 .journeyField input:focus-visible,
@@ -2575,6 +2677,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .journeyLeaderboardList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .journeyProgressDetails summary {
     min-height: 3rem;
   }
@@ -2625,6 +2731,15 @@
 }
 
 @media (max-width: 640px) {
+  .journeyLeaderboardSummary {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .journeyLeaderboardList {
+    grid-template-columns: 1fr;
+  }
+
   .homeCommandStats {
     grid-template-columns: 1fr;
   }

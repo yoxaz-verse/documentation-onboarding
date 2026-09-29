@@ -1,4 +1,5 @@
 import { INTERNATIONAL_TRADE_BASICS_LESSONS } from './internationalTradeBasics';
+import { SPICE_TRADE_SUPPLY_LESSONS } from './spiceTradeSupply';
 
 export type QuizQuestion = {
   id: string;
@@ -60,6 +61,7 @@ export type SubModuleStatus = CourseStatus;
 
 const beginnerOperatorCourseId = 'beginner-operator-foundations';
 const internationalTradeBasicsCourseId = 'international-trade-basics';
+const spiceTradeSupplyCourseId = 'spice-trade-supply-specialist';
 
 export const COURSES: Course[] = [
   {
@@ -400,6 +402,25 @@ export const COURSES: Course[] = [
       coverSubtitle: 'INCOTERMS · PAYMENTS · EXECUTION',
     },
     subModules: INTERNATIONAL_TRADE_BASICS_LESSONS,
+  },
+  {
+    id: spiceTradeSupplyCourseId,
+    order: 3,
+    division: 'operator-core',
+    divisionLabel: 'Operator Core',
+    title: 'Spice Trade & Supply Specialist',
+    description:
+      'Build specialist knowledge of Indian and international spice supply, quality, compliance, sourcing, and buyer-ready product evaluation.',
+    catalog: {
+      summary:
+        'Study global and Indian spice supply systems, then master the identity, origins, specifications, risks, handling, and sourcing workflow for 20 major spices.',
+      theme: 'calls',
+      badge: 'Advanced',
+      icon: 'spice',
+      coverTitle: 'Spice Trade & Supply Specialist',
+      coverSubtitle: 'INDIA · GLOBAL ORIGINS · QUALITY · SOURCING',
+    },
+    subModules: SPICE_TRADE_SUPPLY_LESSONS,
   },
 ];
 

@@ -67,6 +67,7 @@ function JourneyTemplateEditor() {
   const [error, setError] = useState('');
   const [reviewNotes, setReviewNotes] = useState<Record<string, string>>({});
   const [readinessStatuses, setReadinessStatuses] = useState<Record<string, string>>({});
+  const [platformVerifications, setPlatformVerifications] = useState<Record<string, boolean>>({});
 
   const loadTemplates = async () => {
     setLoading(true);
@@ -142,6 +143,7 @@ function JourneyTemplateEditor() {
           action,
           reviewNote: reviewNotes[submission.id] || '',
           readinessStatus: readinessStatuses[submission.id] || '',
+          platformVerificationConfirmed: platformVerifications[submission.id] === true,
         }),
       });
       const payload = await response.json().catch(() => ({}));
@@ -210,10 +212,26 @@ function JourneyTemplateEditor() {
                     <span>Submitted</span>
                     <input value={submission.submitted_at || ''} readOnly />
                   </div>
-                  <label className={`${styles.adminInputGroup} ${styles.adminInputWide}`}>
-                    <span>Answers</span>
-                    <textarea value={JSON.stringify(submission.answers || {}, null, 2)} readOnly rows={8} />
-                  </label>
+                  {submission.day_number !== 11 ? (
+                    <label className={`${styles.adminInputGroup} ${styles.adminInputWide}`}>
+                      <span>Answers</span>
+                      <textarea value={JSON.stringify(submission.answers || {}, null, 2)} readOnly rows={8} />
+                    </label>
+                  ) : null}
+                  {submission.day_number === 11 ? (
+                    <div className={`${styles.reviewBox} ${styles.adminInputWide}`}>
+                      <span>External platform verification required</span>
+                      <p>Verify five supplier associates and their associate companies on the main OBAOL platform for this operator.</p>
+                      <label className={styles.journeyEditorToggle}>
+                        <input
+                          type="checkbox"
+                          checked={platformVerifications[submission.id] === true}
+                          onChange={(event) => setPlatformVerifications((current) => ({ ...current, [submission.id]: event.target.checked }))}
+                        />
+                        Verified five suppliers on the platform
+                      </label>
+                    </div>
+                  ) : null}
                   {submission.day_number === 30 ? (
                     <label className={styles.adminInputGroup}>
                       <span>Final readiness status</span>
@@ -228,7 +246,7 @@ function JourneyTemplateEditor() {
                     <textarea value={reviewNotes[submission.id] || ''} onChange={(event) => setReviewNotes((current) => ({ ...current, [submission.id]: event.target.value }))} rows={3} placeholder="Required when requesting correction" />
                   </label>
                   <div className={styles.actions}>
-                    <button className={styles.actionButton} type="button" disabled={saving} onClick={() => reviewSubmission(submission, 'approve')}>Approve</button>
+                    <button className={styles.actionButton} type="button" disabled={saving || (submission.day_number === 11 && platformVerifications[submission.id] !== true)} onClick={() => reviewSubmission(submission, 'approve')}>Approve</button>
                     <button className={styles.linkButton} type="button" disabled={saving} onClick={() => reviewSubmission(submission, 'needs_correction')}>Needs correction</button>
                   </div>
                 </div>

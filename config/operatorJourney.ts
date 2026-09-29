@@ -31,6 +31,7 @@ export type JourneyFormField = {
   min?: number;
   max?: number;
   placeholder?: string;
+  readOnly?: boolean;
 };
 
 export type JourneyRepeatGroup = {
@@ -38,6 +39,7 @@ export type JourneyRepeatGroup = {
   label: string;
   minEntries: number;
   fields: JourneyFormField[];
+  fixedEntries?: boolean;
 };
 
 export type JourneyKeywordRule = {
@@ -173,6 +175,98 @@ const productCircleOptions = [
   'Processed Food and Powder Circle',
   'Other',
 ];
+
+export type PaymentPairScenario = {
+  id: string;
+  structure: 'advance' | 'documentary' | 'credit' | 'guarantee' | 'mixed';
+  buyerPreference: string;
+  supplierPreference: string;
+};
+
+export const PAYMENT_PAIR_SCENARIOS: PaymentPairScenario[] = [
+  { id: 'advance-1', structure: 'advance', buyerPreference: '20% advance by TT and 80% after receiving scanned shipping documents.', supplierPreference: '30% advance by TT and 70% before dispatch from the factory.' },
+  { id: 'advance-2', structure: 'advance', buyerPreference: '10% advance and the balance within 15 days after delivery and inspection.', supplierPreference: '100% payment in advance before production begins.' },
+  { id: 'advance-3', structure: 'advance', buyerPreference: '50% advance with the balance paid against the bill of lading copy.', supplierPreference: '50% advance with the balance paid against the bill of lading copy.' },
+  { id: 'documentary-1', structure: 'documentary', buyerPreference: 'Irrevocable LC at sight, issued by the buyer’s bank, with standard shipping documents.', supplierPreference: 'Confirmed irrevocable LC at sight from a first-class bank, with confirmation charges for the buyer.' },
+  { id: 'documentary-2', structure: 'documentary', buyerPreference: 'Documents against acceptance at 60 days through the banking channel.', supplierPreference: 'Documents against payment at sight before the bank releases the documents.' },
+  { id: 'documentary-3', structure: 'documentary', buyerPreference: 'Documents against payment at sight with invoice, packing list, certificate of origin, and bill of lading.', supplierPreference: 'Documents against payment at sight through the seller’s nominated bank.' },
+  { id: 'credit-1', structure: 'credit', buyerPreference: 'Open-account payment 45 days after delivery to support working capital.', supplierPreference: 'Full payment by TT before loading because this is the first transaction.' },
+  { id: 'credit-2', structure: 'credit', buyerPreference: 'Open-account payment 30 days from the bill of lading date.', supplierPreference: 'Open-account payment 30 days from the bill of lading date, subject to an approved credit limit.' },
+  { id: 'credit-3', structure: 'credit', buyerPreference: 'Payment 60 days after invoice under the buyer’s normal procurement policy.', supplierPreference: '20% advance and 80% within seven days of delivery, backed by credit insurance approval.' },
+  { id: 'guarantee-1', structure: 'guarantee', buyerPreference: 'Payment 30 days after delivery, secured by an unconditional bank guarantee.', supplierPreference: '30-day credit is acceptable only against a bank guarantee from an approved bank.' },
+  { id: 'guarantee-2', structure: 'guarantee', buyerPreference: 'Payment under an SBLC that may be drawn only if the buyer does not pay within 45 days.', supplierPreference: 'Confirmed LC at sight; the seller does not accept an SBLC-backed credit period.' },
+  { id: 'guarantee-3', structure: 'guarantee', buyerPreference: '10% advance with the balance payable 30 days after shipment under an SBLC.', supplierPreference: '20% advance with the balance payable 15 days after shipment under an SBLC from an acceptable bank.' },
+  { id: 'mixed-1', structure: 'mixed', buyerPreference: '30% advance by TT and 70% by irrevocable LC at sight.', supplierPreference: '30% advance by TT and 70% by irrevocable LC at sight before document release.' },
+  { id: 'mixed-2', structure: 'mixed', buyerPreference: 'No advance; 100% by TT after the buyer receives and approves scanned documents.', supplierPreference: '25% advance and 75% by TT before original documents are released.' },
+  { id: 'mixed-3', structure: 'mixed', buyerPreference: '20% advance, 60% against shipment documents, and 20% after destination inspection.', supplierPreference: '20% advance and 80% against shipment documents with no retention after delivery.' },
+];
+
+export function selectPaymentPairScenarios(random: () => number = Math.random): PaymentPairScenario[] {
+  const structures: PaymentPairScenario['structure'][] = ['advance', 'documentary', 'credit', 'guarantee', 'mixed'];
+  const selected = structures.map((structure) => randomItem(PAYMENT_PAIR_SCENARIOS.filter((scenario) => scenario.structure === structure), random));
+  return selected.sort(() => random() - 0.5);
+}
+
+export type ClusterInquiryScenario = {
+  id: string;
+  productCircle: string;
+  inquiryText: string;
+};
+
+export const CLUSTER_INQUIRY_SCENARIOS: ClusterInquiryScenario[] = [
+  { id: 'spices-1', productCircle: 'Spices Circle', inquiryText: 'Buyer in Dubai needs 24 MT Alleppey green cardamom, 7–8 mm, in 25 kg bags, CIF Jebel Ali. Shipment required next month; payment by confirmed LC.' },
+  { id: 'spices-2', productCircle: 'Spices Circle', inquiryText: 'Please quote 10 MT steam-sterilized black pepper, 550 GL minimum, packed in 25 kg kraft bags, FOB Cochin. Buyer requires EU-compliant residue reports.' },
+  { id: 'spices-3', productCircle: 'Spices Circle', inquiryText: 'Restaurant distributor is looking for turmeric fingers for regular monthly purchase. They have not shared grade, curcumin percentage, quantity, packing, destination, or payment terms.' },
+  { id: 'pulses-1', productCircle: 'Pulses Circle', inquiryText: 'Importer requires 500 MT whole red lentils, crop 2026, machine cleaned, in 50 kg PP bags, CFR Chennai with shipment within 30 days.' },
+  { id: 'pulses-2', productCircle: 'Pulses Circle', inquiryText: 'Buyer needs 100 MT kabuli chickpeas, 9 mm, max 1% foreign matter, 25 kg packing, delivered to Mumbai. Payment preference is 20% advance and balance against documents.' },
+  { id: 'pulses-3', productCircle: 'Pulses Circle', inquiryText: 'Need best price for dal urgently. No variety, grade, quantity, delivery location, packing, timeline, or buyer identity has been provided.' },
+  { id: 'rice-1', productCircle: 'Rice Circle', inquiryText: 'Buyer in Muscat requests 10 containers of 1121 steam basmati rice, two-year aged, 5 kg private-label bags, CIF Sohar, with SGS inspection.' },
+  { id: 'rice-2', productCircle: 'Rice Circle', inquiryText: 'Domestic wholesaler requires 200 MT Sona Masoori rice, 25 kg bags, delivered Hyderabad over four weekly lots. Payment within seven days of delivery.' },
+  { id: 'rice-3', productCircle: 'Rice Circle', inquiryText: 'Customer asks for a rice quotation but has not confirmed variety, broken percentage, crop year, quantity, packing, destination, or delivery date.' },
+  { id: 'coconut-1', productCircle: 'Coconut and Coir Circle', inquiryText: 'Garden-products buyer in Rotterdam needs one 40-foot container of washed coco peat blocks, EC below 0.5, 5 kg blocks, CIF Rotterdam, with phytosanitary documents.' },
+  { id: 'coconut-2', productCircle: 'Coconut and Coir Circle', inquiryText: 'Buyer requires 50 MT RBD coconut oil in food-grade drums, FOB Tuticorin, with COA and origin certificate. Shipment is expected within three weeks.' },
+  { id: 'coconut-3', productCircle: 'Coconut and Coir Circle', inquiryText: 'Need coconut products for export. Product form, specification, quantity, packing, destination, certification, and target shipment date are not stated.' },
+  { id: 'oilseed-1', productCircle: 'Oilseed Circle', inquiryText: 'Crusher requires 1,000 MT non-GMO soybeans, 12% maximum moisture, bulk delivery to Indore, with monthly supply and payment against weighbridge receipt.' },
+  { id: 'oilseed-2', productCircle: 'Oilseed Circle', inquiryText: 'Export buyer seeks 100 MT natural sesame seeds, 99.95% purity, 25 kg bags, FOB Mundra, with aflatoxin and pesticide-residue reports.' },
+  { id: 'oilseed-3', productCircle: 'Oilseed Circle', inquiryText: 'Send lowest rate for seeds today. The buyer has not identified the seed, grade, quantity, packing, destination, payment term, or required documents.' },
+  { id: 'processed-1', productCircle: 'Processed Food and Powder Circle', inquiryText: 'Food manufacturer requires 20 MT spray-dried tomato powder, 80 mesh, moisture below 5%, in 20 kg food-grade bags, delivered Pune with COA.' },
+  { id: 'processed-2', productCircle: 'Processed Food and Powder Circle', inquiryText: 'Private-label buyer needs 30,000 jars of smooth peanut butter, 340 g retail packs, export cartons, CIF Singapore, with shelf-life and allergen documentation.' },
+  { id: 'processed-3', productCircle: 'Processed Food and Powder Circle', inquiryText: 'Buyer is asking for food powder at the best price. Product, composition, mesh size, quantity, packing, certification, and destination are missing.' },
+  { id: 'other-1', productCircle: 'Other', inquiryText: 'Buyer requires 25 MT food-grade citric acid monohydrate, 25 kg bags, CFR Colombo, with COA and shipment within 20 days.' },
+  { id: 'other-2', productCircle: 'Other', inquiryText: 'Hotel procurement team needs 5,000 cotton bath towels to an approved size and GSM, delivered Bengaluru in two lots. Samples are required before confirmation.' },
+  { id: 'other-3', productCircle: 'Other', inquiryText: 'Please quote your best export product immediately. No product, specification, quantity, destination, company details, or commercial terms are included.' },
+];
+
+export const CLUSTER_INQUIRY_INCOMPLETE_SCENARIOS = [
+  'Need a quotation for good-quality export spices. Please send your best price; quantity, grade, destination, packing, payment terms, and timeline are not mentioned.',
+  'A buyer says they need food products every month but has not identified the product, specification, quantity, delivery location, certification, or budget.',
+  'Urgent requirement received: “Need 2 containers.” The message does not identify the product, container size, quality, packing, destination, or buyer company.',
+];
+
+export const CLUSTER_INQUIRY_NON_SERIOUS_SCENARIOS = [
+  'Unknown contact asks for the absolute lowest price for 10,000 MT of any available product, refuses to share a company name, and wants a commission paid before introducing the buyer.',
+  'Social-media message says “send all products and cheapest rates” with no company details, requirement, quantity, destination, or willingness to answer clarification questions.',
+  'A contact promises an immediate very large order but demands paid samples and an upfront registration fee to an unrelated personal account before sharing specifications.',
+];
+
+function randomItem<T>(items: readonly T[], random: () => number): T {
+  return items[Math.floor(random() * items.length)];
+}
+
+export function selectClusterInquiryPrompts(primaryProductCircle: string | null | undefined, random: () => number = Math.random): string[] {
+  const knownCircle = productCircleOptions.includes(String(primaryProductCircle || '')) ? String(primaryProductCircle) : 'Other';
+  const inside = CLUSTER_INQUIRY_SCENARIOS.filter((scenario) => scenario.productCircle === knownCircle);
+  const outsideCircles = productCircleOptions.filter((circle) => circle !== knownCircle);
+  const selectedOutsideCircles = [...outsideCircles].sort(() => random() - 0.5).slice(0, 2);
+  const prompts = [
+    randomItem(inside, random).inquiryText,
+    ...selectedOutsideCircles.map((circle) => randomItem(CLUSTER_INQUIRY_SCENARIOS.filter((scenario) => scenario.productCircle === circle), random).inquiryText),
+    randomItem(CLUSTER_INQUIRY_INCOMPLETE_SCENARIOS, random),
+    randomItem(CLUSTER_INQUIRY_NON_SERIOUS_SCENARIOS, random),
+  ];
+
+  return prompts.sort(() => random() - 0.5);
+}
 
 const phaseByDay = (day: number) => {
   if (day <= 5) return 'Phase 1: Foundation and Focus';
@@ -465,31 +559,46 @@ const repeatedDaySeeds: DaySeed[] = [
   },
   {
     day: 9, id: 'day-9-payment-risk', title: 'Payment Terms and Risk', category: 'learning', dayType: 'Commercial Risk',
-    description: 'Understand payment terms, compatibility, and trade risk before serious buyer/supplier communication.',
+    description: 'Assess five randomized buyer and supplier payment-preference pairs for compatibility and trade risk.',
     purpose: 'Wrong payment commitments can break trades and damage trust.', learn: ['Advance, partial advance, balance before dispatch/loading/documents, credit, LC, TT, DP, DA, bank guarantee, SBLC'],
-    tasks: ['Study payment terms', 'Complete five scenarios', 'Identify risk and clarification needed'], requiredOutput: 'Payment compatibility task.',
+    tasks: ['Study payment terms', 'Assess five randomized payment pairs', 'Identify compatibility, risk, clarification, and next action'], requiredOutput: 'Five completed payment compatibility assessments.',
     buttonText: 'Complete Payment Risk Task', completionMessage: 'You now understand that payment terms must be recorded carefully before moving any trade opportunity forward.',
-    repeatGroups: [{ id: 'paymentScenarios', label: 'Payment scenarios', minEntries: 5, fields: [
-      baseField('buyerPreference', 'Buyer payment preference'), baseField('supplierPreference', 'Supplier payment preference'),
+    repeatGroups: [{ id: 'paymentScenarios', label: 'Random payment-pair test', minEntries: 5, fixedEntries: true, fields: [
+      { ...baseField('buyerPreference', 'Buyer payment preference'), readOnly: true }, { ...baseField('supplierPreference', 'Supplier payment preference'), readOnly: true },
       baseField('compatibility', 'Compatibility', 'select', true, ['Compatible', 'Not compatible', 'Needs negotiation']),
       baseField('riskLevel', 'Risk level', 'select', true, lowMediumHigh), noteField('clarificationNeeded', 'Clarification needed'), noteField('nextAction', 'Next action'),
     ] }],
   },
   {
     day: 10, id: 'day-10-cluster-search-rule', title: 'Inquiry Flexibility and Cluster Search Rule', category: 'learning', dayType: 'Operating Discipline',
-    description: 'Stay focused on product depth while using the OBAOL cluster database for wider inquiries.',
-    purpose: 'Primary work stays inside the selected product circle, but wider inquiries should be searched and recorded through cluster collaboration.', learn: ['Focused product circle work', 'Wider inquiry response through cluster search'],
-    tasks: ['Study cluster search rule', 'Classify five sample inquiries', 'Write next action for each'], requiredOutput: 'Five classified inquiries.',
+    description: 'Classify five randomized trade inquiries while deciding when wider OBAOL cluster support is required.',
+    purpose: 'Primary work stays inside the selected product circle, but wider inquiries should be searched and recorded through cluster collaboration.', learn: ['Focused product circle work', 'Wider inquiry response through cluster search', 'Identify missing commercial details before taking action'],
+    tasks: ['Study cluster search rule', 'Classify five randomized inquiries', 'Identify missing details and next action'], requiredOutput: 'Five classified randomized inquiries.',
     buttonText: 'Complete Cluster Search Rule', completionMessage: 'You now understand how to stay focused while still responding to wider opportunities through the OBAOL cluster system.',
-    repeatGroups: [{ id: 'clusterInquiries', label: 'Cluster inquiry classifications', minEntries: 5, fields: [
-      noteField('inquiryText', 'Inquiry text'), baseField('classification', 'Classification', 'select', true, ['Inside my product circle', 'Outside but searchable', 'Needs cluster support', 'Not enough details', 'Not serious']),
+    repeatGroups: [{ id: 'clusterInquiries', label: 'Random inquiry test', minEntries: 5, fixedEntries: true, fields: [
+      { ...noteField('inquiryText', 'Inquiry text'), readOnly: true }, baseField('classification', 'Classification', 'select', true, ['Inside my product circle', 'Outside but searchable', 'Needs cluster support', 'Not enough details', 'Not serious']),
       baseField('internalSearchRequired', 'Internal database search required', 'select', true, yesNo), noteField('missingDetails', 'Missing details'), noteField('nextAction', 'Next action'),
     ] }],
   },
 ];
 
 const dataBuildingSeeds: DaySeed[] = [
-  { day: 11, id: 'day-11-supplier-records', title: 'Supplier Database Entry Training', category: 'platform', dayType: 'Data Building', description: 'Enter five useful supplier records inside the selected product circle.', purpose: 'A supplier entry must become useful trade data, not just name and phone.', learn: ['Supplier name, company, contact, location, products, availability, capacity, packing, payment, delivery, certification, source, verification, notes'], tasks: ['Study supplier format', 'Add five supplier records', 'Mark verification status'], requiredOutput: 'Five supplier records.', buttonText: 'Submit Supplier Records', completionMessage: 'Supplier data has been added. Next, you will learn how to build buyer-side data.', repeatGroups: [{ id: 'suppliers', label: 'Supplier records', minEntries: 5, fields: [...contactFields, baseField('companyName', 'Company name'), baseField('productCircle', 'Product circle'), baseField('productsHandled', 'Products handled'), baseField('currentStock', 'Current stock', 'select', true, ['Yes', 'No', 'Unknown']), baseField('capacity', 'Capacity', 'text', false), baseField('packing', 'Packing', 'text', false), baseField('certifications', 'Certifications', 'text', false), baseField('paymentPreference', 'Payment preference', 'text', false), baseField('deliveryPreference', 'Delivery preference', 'text', false), baseField('source', 'Source'), baseField('lastVerifiedDate', 'Last verified date', 'date', false), baseField('verificationStatus', 'Verification status', 'select', true, ['Unverified', 'Partially verified', 'Verified'])] }], metricMaps: [{ metric: 'suppliersAdded', groupId: 'suppliers', mode: 'countGroupEntries' }] },
+  {
+    day: 11, id: 'day-11-supplier-records', title: 'Onboard Five Suppliers on the Platform', category: 'platform', dayType: 'Platform Execution',
+    description: 'Add five supplier associates and their associate companies on the main OBAOL platform, then return here for verification.',
+    purpose: 'Supplier onboarding must happen on the main platform so the records become usable operational data without being duplicated in the training workspace.',
+    learn: ['Add the supplier as an associate', 'Add and connect the associate company', 'Capture identity, contact, location, products, source, and verification information'],
+    tasks: [
+      { title: 'Go to the main OBAOL platform', instruction: 'Open the platform you use for normal operator work.' },
+      { title: 'Add five supplier associates', instruction: 'Create five supplier associates and add the associate company for each supplier.' },
+      { title: 'Complete the core supplier information', instruction: 'Ensure each record includes identity, contact, location, company, products, source, and verification information.' },
+      { title: 'Return and request verification', instruction: 'Come back to this level and submit the verification request. An onboarding admin will check the five records on the platform.' },
+    ],
+    requiredOutput: 'Five supplier associates and associate companies added on the main platform.',
+    buttonText: 'Request Supplier Verification',
+    completionMessage: 'Your supplier onboarding has been verified. Next, you will learn how to build buyer-side data.',
+    repeatGroups: [],
+  },
   { day: 12, id: 'day-12-buyer-records', title: 'Buyer Database Entry Training', category: 'platform', dayType: 'Data Building', description: 'Enter five buyer records that capture purchasing behavior.', purpose: 'Buyer data should capture purchase behavior, not just contact details.', learn: ['Products, quantity pattern, purchase frequency, target price, payment, delivery, certification, seriousness'], tasks: ['Study buyer format', 'Add five buyer records', 'Mark seriousness level'], requiredOutput: 'Five buyer records.', buttonText: 'Submit Buyer Records', completionMessage: 'Buyer data has been added. Next, you will learn how to enter product availability from suppliers.', repeatGroups: [{ id: 'buyers', label: 'Buyer records', minEntries: 5, fields: [...contactFields, baseField('role', 'Role', 'text', false), baseField('productRequired', 'Product required'), baseField('quantityPattern', 'Quantity pattern', 'text', false), baseField('purchaseFrequency', 'Purchase frequency', 'text', false), baseField('targetPrice', 'Target price if known', 'text', false), baseField('paymentPreference', 'Payment preference', 'text', false), baseField('deliveryPreference', 'Delivery preference', 'text', false), baseField('certificationRequired', 'Certification required', 'text', false), baseField('buyerType', 'Domestic/export buyer', 'text', false), baseField('source', 'Source'), baseField('lastContactDate', 'Last contact date', 'date', false), baseField('seriousness', 'Seriousness', 'select', true, ['Unknown', 'Low', 'Medium', 'High'])] }], metricMaps: [{ metric: 'buyersAdded', groupId: 'buyers', mode: 'countGroupEntries' }] },
   { day: 13, id: 'day-13-product-availability', title: 'Product Availability Entry', category: 'platform', dayType: 'Supply Data', description: 'Convert supplier information into three product availability records.', purpose: 'Supplier data and current product availability are different and must be separately recorded.', learn: ['Product, variety, grade, quantity, location, packing, price, terms, photos, documents, validity, supplier, confirmation date'], tasks: ['Collect availability information', 'Add three availability records', 'Mark stock status and validity'], requiredOutput: 'Three product availability records.', buttonText: 'Submit Product Availability', completionMessage: 'Product availability has been entered. This supply data can now support buyer inquiries and internal cluster matching.', repeatGroups: [{ id: 'availabilities', label: 'Product availabilities', minEntries: 3, fields: ['Supplier name', 'Product', 'Variety', 'Grade', 'Quantity', 'Location', 'Packing', 'Price', 'Price term', 'Payment term', 'Delivery term', 'Validity', 'Last confirmed date', 'Notes'].map((label) => baseField(label.toLowerCase().replace(/[^a-z0-9]+/g, '_'), label)).concat([baseField('photosAvailable', 'Photos available', 'select', true, yesNo), baseField('documentsAvailable', 'Documents available', 'select', true, yesNo), baseField('availabilityStatus', 'Availability status', 'select', true, ['Indicated', 'Confirmed', 'Needs verification'])]) }], metricMaps: [{ metric: 'availabilitiesLogged', groupId: 'availabilities', mode: 'countGroupEntries' }] },
   { day: 14, id: 'day-14-buyer-requirements', title: 'Buyer Requirement Entry', category: 'platform', dayType: 'Demand Data', description: 'Convert buyer conversations into three structured requirements.', purpose: 'A buyer saying send price is not enough; usable demand data must be collected.', learn: ['Product, specification, quantity, destination, target price, delivery, payment, packing, certification, timeline, decision maker, seriousness, missing details'], tasks: ['Review buyer records', 'Add three buyer requirements', 'Mark seriousness and missing details'], requiredOutput: 'Three buyer requirement records.', buttonText: 'Submit Buyer Requirements', completionMessage: 'Buyer requirements have been recorded. The system can now compare demand with available supplier data.', repeatGroups: [{ id: 'requirements', label: 'Buyer requirements', minEntries: 3, fields: ['Buyer name', 'Product', 'Specification', 'Quantity', 'Destination', 'Target price', 'Delivery term', 'Payment term', 'Packing', 'Certification requirement', 'Timeline', 'Missing details', 'Last confirmed date', 'Notes'].map((label) => baseField(label.toLowerCase().replace(/[^a-z0-9]+/g, '_'), label)).concat([baseField('decisionMakerConfirmed', 'Decision maker confirmed', 'select', true, yesNo), baseField('requirementStatus', 'Requirement status', 'select', true, ['Active', 'Future', 'Price checking', 'Incomplete'])]) }], metricMaps: [{ metric: 'buyerRequirementsLogged', groupId: 'requirements', mode: 'countGroupEntries' }] },

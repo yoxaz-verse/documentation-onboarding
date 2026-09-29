@@ -72,7 +72,10 @@ export type JourneyDayStatus = {
 
 export type JourneySummary = {
   startedAt: string | null;
+  /** Calendar day elapsed since the journey started. This is not the operator's level. */
   currentDay: number | null;
+  /** Earliest level that has not been completed, or null before start/after completion. */
+  currentLevel: number | null;
   totalDays: number;
   completedChecks: string[];
   completedMilestones: string[];
@@ -220,10 +223,14 @@ export function buildJourneySummary(
   const startedAt = state?.started_at || null;
   const currentDay = getJourneyCurrentDay(startedAt, now);
   const dayStatuses = buildJourneyDayStatuses(activeDayTemplates, submissions, currentDay);
+  const currentLevel = startedAt
+    ? dayStatuses.find((item) => item.status !== 'completed')?.day || null
+    : null;
 
   return {
     startedAt,
     currentDay,
+    currentLevel,
     totalDays: JOURNEY_TOTAL_DAYS,
     completedChecks: Array.from(completedChecks),
     completedMilestones: Array.from(completedMilestones),
