@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import AuthGate from '../../components/AuthGate';
 import OnboardingLayout from '../../components/OnboardingLayout';
 import LoadingState from '../../components/LoadingState';
+import CourseCoverArtwork from '../../components/CourseCoverArtwork';
 import styles from '../onboarding.module.css';
 import { getAllCourses } from '../../config/courses';
 import { isUnauthorizedError } from '../../lib/http';
@@ -171,11 +172,12 @@ function ClassroomCatalogContent() {
             <article key={course.id} className={styles.courseCard}>
               <div className={`${styles.courseCover} ${courseThemeClass(course.catalog.theme)}`}>
                 <div className={styles.courseCoverInner}>
-                  <div className={styles.courseIcon}>{course.catalog.icon}</div>
-                  <div>
+                  <div className={styles.courseCoverCopy}>
+                    <div className={styles.courseIcon}>{course.catalog.category}</div>
                     <p className={styles.courseCoverTitle}>{course.catalog.coverTitle}</p>
                     <p className={styles.courseCoverSubtitle}>{course.catalog.coverSubtitle}</p>
                   </div>
+                  <CourseCoverArtwork artwork={course.catalog.artwork} />
                 </div>
               </div>
 

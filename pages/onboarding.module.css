@@ -68,19 +68,19 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
+  gap: 0.5rem;
   margin-top: 0.9rem;
-  border: 1px solid color-mix(in srgb, var(--accent-strong) 72%, black 8%);
-  border-radius: 0.38rem;
-  min-height: 2.5rem;
-  padding: 0.58rem 0.95rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 70%, var(--accent-strong));
+  border-radius: 0.55rem;
+  min-height: 2.65rem;
+  padding: 0.6rem 1.15rem;
   color: var(--accent-ink);
   text-decoration: none;
-  background: var(--accent);
-  font-weight: 700;
-  letter-spacing: 0;
-  box-shadow: none;
-  transition: background-color 170ms ease, border-color 170ms ease;
+  background: linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 85%, black 15%) 100%);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 28%, transparent);
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
   white-space: normal;
   cursor: pointer;
 }
@@ -88,20 +88,29 @@
 .cta:hover,
 .primaryButton:hover:enabled {
   border-color: var(--accent-strong);
-  background: color-mix(in srgb, var(--accent) 86%, black 14%);
+  background: linear-gradient(135deg, var(--accent-strong) 0%, var(--accent) 100%);
+  transform: translateY(-1.5px);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.cta:active,
+.primaryButton:active:enabled {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .followUpButton {
   border-color: var(--surface-border-strong);
   background: var(--surface-strong);
   color: var(--ink-strong);
-  box-shadow: var(--inset-highlight);
+  box-shadow: var(--elev-shadow), var(--inset-highlight);
 }
 
 .followUpButton:hover:enabled {
   border-color: var(--control-border-hover);
   background: color-mix(in srgb, var(--surface-strong) 78%, var(--accent-soft));
-  box-shadow: var(--inset-highlight);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
 }
 
 .cta:focus-visible,
@@ -112,7 +121,7 @@
 .textArea:focus-visible,
 .wizardInput:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--control-focus) 30%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--control-focus) 35%, transparent);
 }
 
 .calloutHint {
@@ -592,6 +601,17 @@
   border-radius: 0.95rem;
   background: var(--surface-strong);
   box-shadow: var(--inset-highlight);
+  transition: border-color 220ms ease, box-shadow 220ms ease, transform 220ms ease;
+}
+
+.courseCard:hover {
+  border-color: color-mix(in srgb, var(--course-accent, var(--accent)) 42%, var(--surface-border));
+  box-shadow: 0 18px 40px -24px color-mix(in srgb, var(--course-accent, var(--accent)) 44%, transparent), var(--inset-highlight);
+  transform: translateY(-2px);
+}
+
+.courseCard:hover .courseCoverInner > :last-child {
+  transform: translateY(-4px) rotate(-0.6deg);
 }
 
 .courseCover,
@@ -601,24 +621,56 @@
   color: #eff4ff;
 }
 
-.courseCoverBuilds,
 .classroomHero.courseCoverBuilds {
   background: linear-gradient(135deg, #111111 0%, #4a3212 48%, #d0933a 100%);
 }
 
-.courseCoverCode,
 .classroomHero.courseCoverCode {
   background: linear-gradient(135deg, #050505 0%, #2b261f 50%, #b98230 100%);
 }
 
-.courseCoverProduct,
 .classroomHero.courseCoverProduct {
   background: linear-gradient(135deg, #24170a 0%, #7a5620 48%, #e4b463 100%);
 }
 
-.courseCoverCalls,
 .classroomHero.courseCoverCalls {
   background: linear-gradient(135deg, #3b250c 0%, #9b6b24 48%, #f1c777 100%);
+}
+
+.courseCoverBuilds {
+  --course-ink: #382614;
+  --course-paper: #fff8e8;
+  --course-accent: #e5a93c;
+  --course-accent-soft: #f4ca74;
+  --course-route: #b76b2d;
+  --course-leaf: #84a86b;
+  --course-spark: #f2bd4b;
+  --course-spice: #c95f36;
+  background: linear-gradient(135deg, #fff4d8 0%, #f4d8a2 52%, #e8ad54 100%);
+}
+
+.courseCoverProduct {
+  --course-ink: #183a45;
+  --course-paper: #fffaf0;
+  --course-accent: #e7a947;
+  --course-accent-soft: #83c5be;
+  --course-route: #277b87;
+  --course-leaf: #4f9c91;
+  --course-spark: #f4c66b;
+  --course-spice: #c95f36;
+  background: linear-gradient(135deg, #e8f4ed 0%, #c9e2d9 52%, #80bcb7 100%);
+}
+
+.courseCoverCalls {
+  --course-ink: #4b291d;
+  --course-paper: #fff6df;
+  --course-accent: #e2903c;
+  --course-accent-soft: #e8b85d;
+  --course-route: #a65f38;
+  --course-leaf: #78985c;
+  --course-spark: #efb94d;
+  --course-spice: #b84a31;
+  background: linear-gradient(135deg, #f7ead0 0%, #e8c77f 50%, #b97842 100%);
 }
 
 .courseCover::before,
@@ -632,24 +684,39 @@
     radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.09) 0, transparent 28%);
 }
 
+.courseCover::before {
+  background:
+    radial-gradient(circle at 13% 18%, rgba(255, 255, 255, 0.78) 0 2px, transparent 3px),
+    radial-gradient(circle at 86% 82%, rgba(73, 45, 20, 0.12) 0 2px, transparent 3px),
+    linear-gradient(115deg, rgba(255, 255, 255, 0.38), transparent 44%);
+  background-size: 31px 31px, 39px 39px, 100% 100%;
+}
+
 .courseCoverInner {
   position: relative;
   z-index: 1;
-  min-height: 12.5rem;
-  padding: 1.15rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 0.8rem;
+  min-height: 14.5rem;
+  padding: 1.15rem 1.2rem;
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(12rem, 1.08fr);
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.courseCoverCopy {
+  min-width: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .courseIcon {
-  align-self: flex-start;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--course-ink) 28%, transparent);
   border-radius: 999px;
   padding: 0.35rem 0.62rem;
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
+  background: color-mix(in srgb, var(--course-paper) 70%, transparent);
+  color: var(--course-ink);
   font-size: 0.76rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -657,18 +724,23 @@
 }
 
 .courseCoverTitle {
-  margin: 0;
-  color: #ffffff;
-  font-size: clamp(1.4rem, 2.5vw, 2rem);
-  font-weight: 800;
-  line-height: 1.02;
+  margin: 0.85rem 0 0;
+  color: var(--course-ink);
+  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-size: clamp(1.45rem, 2.25vw, 1.95rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
 }
 
 .courseCoverSubtitle {
   margin: 0.34rem 0 0;
-  color: rgba(255, 255, 255, 0.78);
-  font-size: 0.82rem;
-  letter-spacing: 0.11em;
+  color: color-mix(in srgb, var(--course-ink) 78%, transparent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.45;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 
@@ -1474,46 +1546,58 @@
 .journeyFormGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.58rem;
+  gap: 0.75rem;
 }
 
 .journeyInfoGrid article,
 .journeyListGrid article,
 .journeyInfoBlock {
-  border: 1px solid color-mix(in srgb, var(--surface-border) 78%, transparent);
-  border-radius: 0.62rem;
-  padding: 0.78rem;
-  background: color-mix(in srgb, var(--surface) 58%, transparent);
+  border: 1px solid var(--surface-border);
+  border-radius: 0.75rem;
+  padding: 0.95rem;
+  background: color-mix(in srgb, var(--surface-strong) 92%, var(--surface-alt));
+  box-shadow: var(--elev-shadow), var(--inset-highlight);
+  transition: border-color 180ms ease, transform 180ms ease;
+}
+
+.journeyInfoGrid article:hover,
+.journeyListGrid article:hover,
+.journeyInfoBlock:hover {
+  border-color: color-mix(in srgb, var(--surface-border-strong) 65%, var(--accent-soft));
+  transform: translateY(-1px);
 }
 
 .journeyInfoGrid h3,
 .journeyListGrid h3 {
-  margin: 0 0 0.36rem;
+  margin: 0 0 0.45rem;
   color: var(--ink-strong);
-  font-size: 0.82rem;
+  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
 }
 
 .journeyInfoGrid p,
 .journeyListGrid li {
   color: var(--ink);
-  font-size: 0.84rem;
-  line-height: 1.55;
+  font-size: 0.86rem;
+  line-height: 1.6;
 }
 
 .journeyInfoBlock ul {
   margin: 0;
-  padding-left: 1.1rem;
+  padding-left: 1.15rem;
 }
 
 .journeyInfoBlock li {
   color: var(--ink);
-  font-size: 0.84rem;
-  line-height: 1.55;
+  font-size: 0.86rem;
+  line-height: 1.6;
 }
 
 .journeyGuideList {
   display: grid;
-  gap: 0.62rem;
+  gap: 0.75rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1521,67 +1605,90 @@
 
 .journeyGuideStep {
   display: grid;
-  grid-template-columns: 2rem minmax(0, 1fr);
-  gap: 0.72rem;
-  padding: 0.82rem;
-  border: 1px solid color-mix(in srgb, var(--surface-border) 82%, transparent);
-  border-radius: 0.68rem;
-  background: color-mix(in srgb, var(--surface) 58%, transparent);
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  gap: 0.85rem;
+  padding: 0.95rem;
+  border: 1px solid var(--surface-border);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--surface-strong) 90%, var(--surface-alt));
+  box-shadow: var(--elev-shadow), var(--inset-highlight);
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.journeyGuideStep:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--surface-border));
+  background: color-mix(in srgb, var(--surface-strong) 85%, var(--accent-softer));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.16), var(--inset-highlight);
 }
 
 .journeyGuideNumber {
-  width: 2rem;
-  height: 2rem;
+  width: 2.25rem;
+  height: 2.25rem;
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: var(--accent-soft);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent-soft) 85%, var(--surface-solid)), color-mix(in srgb, var(--accent-secondary) 25%, var(--surface-solid)));
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--surface-border));
   color: var(--accent-strong);
-  font-size: 0.8rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.88rem;
   font-weight: 900;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 15%, transparent);
 }
 
 .journeyGuideBody {
   min-width: 0;
   display: grid;
-  gap: 0.35rem;
+  gap: 0.38rem;
 }
 
 .journeyGuideBody h3,
 .journeyRequiredOutput h3 {
   margin: 0;
   color: var(--ink-strong);
-  font-size: 0.88rem;
+  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 800;
 }
 
 .journeyGuideBody p,
 .journeyRequiredOutput p {
   margin: 0;
   color: var(--ink);
-  font-size: 0.84rem;
-  line-height: 1.55;
+  font-size: 0.86rem;
+  line-height: 1.6;
 }
 
 .journeyRequiredOutput {
-  border-color: color-mix(in srgb, var(--accent) 28%, var(--surface-border));
+  border-color: color-mix(in srgb, var(--accent) 42%, var(--surface-border));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent-softer) 90%, var(--surface-strong)), var(--surface-strong));
+  box-shadow: 0 4px 16px -4px color-mix(in srgb, var(--accent) 12%, transparent), var(--inset-highlight);
 }
 
 .journeyListGrid ul,
 .journeyListGrid ol {
   margin: 0;
-  padding-left: 1.1rem;
+  padding-left: 1.15rem;
 }
 
 .journeySecondaryLink {
   width: max-content;
-  color: var(--accent);
-  font-size: 0.82rem;
-  font-weight: 850;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--accent-strong);
+  font-size: 0.84rem;
+  font-weight: 800;
   text-decoration: none;
+  transition: all 160ms ease;
+  padding: 0.15rem 0;
 }
 
 .journeySecondaryLink:hover {
+  color: var(--accent);
   text-decoration: underline;
+  transform: translateX(2px);
 }
 
 .journeySecondaryLinkDisabled {
@@ -1592,12 +1699,13 @@
 
 .journeySecondaryLinkDisabled:hover {
   text-decoration: none;
+  transform: none;
 }
 
 .journeyField {
   min-width: 0;
   display: grid;
-  gap: 0.36rem;
+  gap: 0.4rem;
 }
 
 .journeyFieldWide {
@@ -1606,8 +1714,9 @@
 
 .journeyField span {
   color: var(--ink-muted);
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   font-weight: 800;
+  letter-spacing: 0.02em;
 }
 
 .journeyField input,
@@ -1615,13 +1724,20 @@
 .journeyField textarea {
   width: 100%;
   border: 1px solid var(--control-border);
-  border-radius: 0.62rem;
+  border-radius: 0.65rem;
   background: var(--control-surface-strong);
   color: var(--control-text);
   font: inherit;
-  font-size: 0.9rem;
-  padding: 0.62rem 0.72rem;
-  min-height: 2.75rem;
+  font-size: 0.92rem;
+  padding: 0.65rem 0.8rem;
+  min-height: 2.85rem;
+  transition: border-color 170ms ease, box-shadow 170ms ease, background-color 170ms ease;
+}
+
+.journeyField input:hover:not(:disabled),
+.journeyField select:hover:not(:disabled),
+.journeyField textarea:hover:not(:disabled) {
+  border-color: var(--control-border-hover);
 }
 
 .journeyField input:disabled,
@@ -1641,8 +1757,8 @@
 
 .journeyField textarea {
   resize: vertical;
-  min-height: 6.6rem;
-  line-height: 1.5;
+  min-height: 6.8rem;
+  line-height: 1.55;
 }
 
 .journeyField textarea[readonly],
@@ -1656,7 +1772,7 @@
 .journeyField textarea:focus-visible {
   outline: none;
   border-color: var(--control-focus);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--control-focus) 22%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--control-focus) 26%, transparent);
 }
 
 .journeyFieldInvalid span {
@@ -2635,6 +2751,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .courseCard,
+  .courseCard:hover,
+  .courseCard:hover .courseCoverInner > :last-child {
+    transform: none;
+    transition: none;
+  }
+
   .skeletonBlock,
   .loadingSpinner,
   .loadingProgressFill {
@@ -2731,6 +2854,24 @@
 }
 
 @media (max-width: 640px) {
+  .courseCoverInner {
+    min-height: 0;
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+    padding: 1.15rem 1.15rem 0.65rem;
+  }
+
+  .courseCoverInner > :last-child {
+    width: min(90%, 20rem);
+    justify-self: end;
+    margin-top: -0.35rem;
+  }
+
+  .courseCoverTitle {
+    max-width: 18ch;
+    font-size: clamp(1.55rem, 8vw, 2rem);
+  }
+
   .journeyLeaderboardSummary {
     align-items: stretch;
     flex-direction: column;

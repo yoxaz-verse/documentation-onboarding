@@ -10,11 +10,14 @@ export type QuizQuestion = {
 
 export type CourseDivision = 'operator-core' | 'operator-mastery';
 
+export type CourseArtwork = 'operator' | 'international-trade' | 'spice-trade';
+
 export type CourseCatalogMeta = {
   summary: string;
   theme: string;
   badge?: string;
-  icon: string;
+  category: string;
+  artwork: CourseArtwork;
   coverTitle: string;
   coverSubtitle: string;
 };
@@ -77,7 +80,8 @@ export const COURSES: Course[] = [
         'Start here to learn the operator model, platform workflows, and the practical steps needed to begin operating inside the OBAOL ecosystem.',
       theme: 'builds',
       badge: 'Beginner',
-      icon: 'ops',
+      category: 'Ops',
+      artwork: 'operator',
       coverTitle: 'Beginner Operator Foundations',
       coverSubtitle: 'OBAOL OPERATOR SYSTEM',
     },
@@ -397,7 +401,8 @@ export const COURSES: Course[] = [
         'Learn how an international transaction moves from quotation to delivery, how responsibilities are divided, and which commercial details must be confirmed before execution.',
       theme: 'product',
       badge: 'Beginner',
-      icon: 'trade',
+      category: 'Trade',
+      artwork: 'international-trade',
       coverTitle: 'International Trade Basics',
       coverSubtitle: 'INCOTERMS · PAYMENTS · EXECUTION',
     },
@@ -416,7 +421,8 @@ export const COURSES: Course[] = [
         'Study global and Indian spice supply systems, then master the identity, origins, specifications, risks, handling, and sourcing workflow for 20 major spices.',
       theme: 'calls',
       badge: 'Advanced',
-      icon: 'spice',
+      category: 'Spice',
+      artwork: 'spice-trade',
       coverTitle: 'Spice Trade & Supply Specialist',
       coverSubtitle: 'INDIA · GLOBAL ORIGINS · QUALITY · SOURCING',
     },
