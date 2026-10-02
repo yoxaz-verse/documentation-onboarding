@@ -260,6 +260,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       reviewNote: submissionRecord?.review_note || null,
       submissionId: submissionRecord?.id || null,
     };
+  }).sort((a, b) => {
+    const aNeedsReview = a.status === 'under_review' || a.status === 'submitted';
+    const bNeedsReview = b.status === 'under_review' || b.status === 'submitted';
+    if (aNeedsReview !== bNeedsReview) return aNeedsReview ? -1 : 1;
+
+    if (aNeedsReview && bNeedsReview) {
+      const aSubmittedAt = a.submittedAt ? new Date(a.submittedAt).getTime() : Number.POSITIVE_INFINITY;
+      const bSubmittedAt = b.submittedAt ? new Date(b.submittedAt).getTime() : Number.POSITIVE_INFINITY;
+      if (aSubmittedAt !== bSubmittedAt) return aSubmittedAt - bSubmittedAt;
+    }
+
+    return a.day - b.day;
   });
 
   const stepSections: AdminOperatorDetail['stepSections'] = MILESTONES.map((milestone) => {

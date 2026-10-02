@@ -60,7 +60,7 @@ export function buildAdminJourneySnapshot(source: AdminJourneySource): AdminJour
   const actionDay = activeTemplates.find((template) => !completedDays.has(template.day))?.day || null;
   const rawExpectedDay = source.startedAt ? getJourneyCurrentDay(source.startedAt, now) : null;
   const expectedDay = rawExpectedDay ? Math.min(Math.max(rawExpectedDay, 1), totalDays) : null;
-  const pendingReviewCount = source.submissions.filter((submission) => submission.status === 'under_review').length;
+  const pendingReviewCount = source.submissions.filter((submission) => submission.status === 'under_review' || submission.status === 'submitted').length;
   const needsCorrectionCount = source.submissions.filter((submission) => submission.status === 'needs_correction').length;
   const lastSubmissionAt = latest(source.submissions.map((submission) => submission.updated_at || submission.reviewed_at || submission.submitted_at || submission.created_at || null));
   const latestActivityAt = latest([

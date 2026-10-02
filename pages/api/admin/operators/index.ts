@@ -79,6 +79,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     acc[row.email].push(row as JourneySubmissionRecord);
     return acc;
   }, {});
+  const oldestPendingReviewByEmail = new Map<string, number>();
+  Object.entries(journeySubmissionsByEmail).forEach(([email, rows]) => {
+    const oldestPendingReview = rows
+      .filter((row) => row.status === 'under_review' || row.status === 'submitted')
+      .map((row) => new Date(row.submitted_at || row.created_at || row.updated_at || '').getTime())
+      .filter(Number.isFinite)
+      .sort((a, b) => a - b)[0];
+    if (oldestPendingReview !== undefined) oldestPendingReviewByEmail.set(email, oldestPendingReview);
+  });
 
   const getStepStatus = (completedMilestones: number, currentStep: number): AdminOnboardingStepStatus => {
     if (stepFilter > 0) {
@@ -153,6 +162,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .filter((row) => (submissionStatusFilter ? row.submissionStatus === submissionStatusFilter : true));
 
   filteredRows.sort((a, b) => {
+    const aHasPendingReview = a.journeyPendingReviewCount > 0;
+    const bHasPendingReview = b.journeyPendingReviewCount > 0;
+    if (aHasPendingReview !== bHasPendingReview) return aHasPendingReview ? -1 : 1;
+
+    if (aHasPendingReview && bHasPendingReview) {
+      const aOldestReview = oldestPendingReviewByEmail.get(a.email) ?? Number.POSITIVE_INFINITY;
+      const bOldestReview = oldestPendingReviewByEmail.get(b.email) ?? Number.POSITIVE_INFINITY;
+      if (aOldestReview !== bOldestReview) return aOldestReview - bOldestReview;
+    }
+
     const aTime = a.latestActivityAt ? new Date(a.latestActivityAt).getTime() : 0;
     const bTime = b.latestActivityAt ? new Date(b.latestActivityAt).getTime() : 0;
     if (bTime !== aTime) return bTime - aTime;
