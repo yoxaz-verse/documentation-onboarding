@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
-import type { MouseEvent } from 'react';
+import type { MouseEvent, SyntheticEvent } from 'react';
 import AdminGate from '../../../components/AdminGate';
 import LoadingState from '../../../components/LoadingState';
 import ThemeToggle from '../../../components/theme/ThemeToggle';
@@ -29,6 +29,8 @@ function displayValue(value: unknown): string {
 function badgeClass(status: string) {
   return ['complete', 'completed', 'passed'].includes(status) ? styles.badgeDone : styles.badgePending;
 }
+
+type DetailSection = 'onboarding' | 'courses' | 'journey';
 
 function DetailContent() {
   const router = useRouter();
@@ -73,6 +75,12 @@ function DetailContent() {
     }, 0);
   };
 
+  const handleSectionToggle = (event: SyntheticEvent<HTMLDetailsElement>, sectionId: DetailSection) => {
+    if (event.target !== event.currentTarget) return;
+    const isOpen = event.currentTarget.open;
+    setOpenSections((current) => current[sectionId] === isOpen ? current : { ...current, [sectionId]: isOpen });
+  };
+
   return (
     <main className={styles.shell}>
       <div className={styles.bgOrbA} aria-hidden="true" /><div className={styles.bgOrbB} aria-hidden="true" />
@@ -94,12 +102,12 @@ function DetailContent() {
             <article className={styles.card}><div className={styles.sectionHeader}><h2 className={styles.funnelTitle}>Operator record</h2><p className={styles.sectionMeta}>Account and profile</p></div><div className={styles.fieldGrid}>{[['Name', detail.record.name], ['Phone', detail.record.phone], ['Role', detail.record.role], ['Location', detail.record.location], ['Preferred language', detail.record.preferredLanguage], ['Last updated', formatDate(detail.record.updatedAt)]].map(([label, value]) => <div key={label} className={styles.fieldPair}><span className={styles.fieldLabel}>{label}</span><span className={styles.fieldValue}>{value || 'N/A'}</span></div>)}</div></article>
           </section>
 
-          <details id="onboarding" className={`${styles.timelineSection} ${styles.collapsibleSection}`} open={openSections.onboarding} onToggle={(event) => setOpenSections((current) => ({ ...current, onboarding: event.currentTarget.open }))}>
+          <details id="onboarding" className={`${styles.timelineSection} ${styles.collapsibleSection}`} open={openSections.onboarding} onToggle={(event) => handleSectionToggle(event, 'onboarding')}>
             <summary className={styles.collapsibleSummary}><div><p className={styles.kicker}>Foundation</p><h2 className={styles.funnelTitle}>Onboarding steps</h2></div><div className={styles.collapsibleMeta}><span className={styles.sectionMeta}>{detail.progress?.completedMilestones || 0}/{detail.summary.totalOnboardingSteps} complete</span><span className={styles.collapseChevron} aria-hidden="true">⌄</span></div></summary>
             <div className={styles.collapsibleBody}><div className={styles.accordionStack}>{detail.stepSections.map((section) => <details key={section.step} className={styles.activityDetails} open={section.status === 'current'}><summary><span className={styles.timelineStepNumber}>{section.step}</span><span className={styles.summaryText}><strong>{section.label}</strong><small>{section.summary}</small></span><span className={badgeClass(section.status)}>{section.statusLabel}</span></summary><div className={styles.detailsBody}><p className={styles.timelineNote}>{section.note}</p>{section.fields.length ? <div className={styles.fieldGrid}>{section.fields.map((field) => <div key={field.label} className={styles.fieldPair}><span className={styles.fieldLabel}>{field.label}</span><span className={styles.fieldValue}>{field.value}</span></div>)}</div> : <p className={styles.meta}>No additional stored inputs for this step.</p>}</div></details>)}</div></div>
           </details>
 
-          <details id="courses" className={`${styles.timelineSection} ${styles.collapsibleSection}`} open={openSections.courses} onToggle={(event) => setOpenSections((current) => ({ ...current, courses: event.currentTarget.open }))}>
+          <details id="courses" className={`${styles.timelineSection} ${styles.collapsibleSection}`} open={openSections.courses} onToggle={(event) => handleSectionToggle(event, 'courses')}>
             <summary className={styles.collapsibleSummary}><div><p className={styles.kicker}>Learning history</p><h2 className={styles.funnelTitle}>Courses and quiz attempts</h2></div><div className={styles.collapsibleMeta}><span className={styles.sectionMeta}>{detail.summary.completedLessons}/{detail.summary.totalLessons} lessons passed</span><span className={styles.collapseChevron} aria-hidden="true">⌄</span></div></summary>
             <div className={styles.collapsibleBody}><div className={styles.courseStack}>{detail.courses.map((course) => <article key={course.id} className={styles.courseCard}>
               <div className={styles.courseHeader}><div><p className={styles.cardLabel}>{course.divisionLabel}</p><h3>{course.title}</h3><p>{course.description}</p></div><div className={styles.courseProgress}><span className={badgeClass(course.status)}>{titleCase(course.status)}</span><strong>{course.percentComplete}%</strong><small>{course.completedLessons}/{course.totalLessons} lessons</small></div></div>
@@ -110,7 +118,7 @@ function DetailContent() {
             </article>)}</div></div>
           </details>
 
-          <details id="journey" className={`${styles.timelineSection} ${styles.collapsibleSection}`} open={openSections.journey} onToggle={(event) => setOpenSections((current) => ({ ...current, journey: event.currentTarget.open }))}>
+          <details id="journey" className={`${styles.timelineSection} ${styles.collapsibleSection}`} open={openSections.journey} onToggle={(event) => handleSectionToggle(event, 'journey')}>
             <summary className={styles.collapsibleSummary}><div><p className={styles.kicker}>Execution record</p><h2 className={styles.funnelTitle}>30-day challenge</h2></div><div className={styles.collapsibleMeta}><span className={styles.sectionMeta}>{detail.summary.completedJourneyDays}/{detail.summary.totalJourneyDays} complete</span><span className={styles.collapseChevron} aria-hidden="true">⌄</span></div></summary>
             <div className={styles.collapsibleBody}><div className={styles.sectionActions}><Link className={styles.linkButton} href="/admin/journey">Open review queue</Link></div><div className={styles.accordionStack}>{detail.journey.days.map((day) => <details key={day.templateId} className={styles.activityDetails} open={day.status === 'under_review' || day.status === 'submitted' || day.status === 'needs_correction'}><summary><span className={styles.timelineStepNumber}>{day.day}</span><span className={styles.summaryText}><strong>{day.title}</strong><small>{titleCase(day.category)} · {day.submittedAt ? `Submitted ${formatDate(day.submittedAt)}` : 'No submission'}</small></span><span className={badgeClass(day.status)}>{titleCase(day.status)}</span></summary><div className={styles.detailsBody}>
               <p className={styles.timelineNote}>{day.description}</p>{day.requiredOutput ? <div className={styles.requiredOutput}><span>Required output</span><p>{day.requiredOutput}</p></div> : null}
