@@ -2066,6 +2066,8 @@
 
 .journeySubmitActions .primaryButton {
   min-height: 2.8rem;
+  min-width: 11rem;
+  margin-top: 0;
 }
 
 .leaderboardPanel,

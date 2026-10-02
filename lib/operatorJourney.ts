@@ -172,8 +172,12 @@ function normalizeTemplateRow(row: Partial<JourneyTemplateRecord>): JourneyDayTe
     actionLabel,
     isActive: row.is_active !== false,
     reviewRequired: row.review_required ?? base.reviewRequired,
-    buttonText: String(row.button_text || base.buttonText || '').trim() || base.buttonText,
-    completionMessage: String(row.completion_message || base.completionMessage || '').trim() || base.completionMessage,
+    buttonText: String(row.button_text || base.buttonText || fallback?.buttonText || 'Submit Level').trim()
+      || fallback?.buttonText
+      || 'Submit Level',
+    completionMessage: String(row.completion_message || base.completionMessage || fallback?.completionMessage || '').trim()
+      || fallback?.completionMessage
+      || '',
     tasks,
     formFields: Array.isArray(base.formFields) ? base.formFields : [],
     repeatGroups: Array.isArray(base.repeatGroups) ? base.repeatGroups : [],
