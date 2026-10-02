@@ -51,7 +51,7 @@
 .calloutTitle {
   margin: 0;
   color: var(--ink-strong);
-  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-family: var(--font-display);
   font-size: 1.05rem;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -186,7 +186,7 @@
 .homeHeroTitle {
   margin: 0.45rem 0 0;
   color: var(--ink-strong);
-  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(1.42rem, 2.5vw, 2.05rem);
   line-height: 1.05;
   letter-spacing: 0;
@@ -426,7 +426,7 @@
 .wizardTitle {
   margin: 0.62rem 0 0.95rem;
   color: var(--ink-strong);
-  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-family: var(--font-display);
   font-size: 1.35rem;
   line-height: 1.2;
 }
@@ -726,7 +726,7 @@
 .courseCoverTitle {
   margin: 0.85rem 0 0;
   color: var(--course-ink);
-  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(1.45rem, 2.25vw, 1.95rem);
   font-weight: 900;
   line-height: 1.05;
@@ -762,7 +762,7 @@
 .sideTitleLike {
   margin: 0;
   color: var(--ink-strong);
-  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-family: var(--font-display);
   font-size: 1.02rem;
   line-height: 1.25;
 }
@@ -1216,7 +1216,7 @@
 .journeyMilestoneTitle {
   margin: 0;
   color: var(--ink-strong);
-  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-family: var(--font-display);
   font-size: 1rem;
   line-height: 1.28;
 }
@@ -1571,7 +1571,7 @@
 .journeyListGrid h3 {
   margin: 0 0 0.45rem;
   color: var(--ink-strong);
-  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-display);
   font-size: 0.88rem;
   font-weight: 800;
   letter-spacing: 0.02em;
@@ -1631,7 +1631,7 @@
   background: linear-gradient(135deg, color-mix(in srgb, var(--accent-soft) 85%, var(--surface-solid)), color-mix(in srgb, var(--accent-secondary) 25%, var(--surface-solid)));
   border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--surface-border));
   color: var(--accent-strong);
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-display);
   font-size: 0.88rem;
   font-weight: 900;
   box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 15%, transparent);
@@ -1647,7 +1647,7 @@
 .journeyRequiredOutput h3 {
   margin: 0;
   color: var(--ink-strong);
-  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-display);
   font-size: 0.92rem;
   font-weight: 800;
 }
@@ -2162,7 +2162,7 @@
 
 .classroomHeroTitle {
   margin: 0;
-  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-family: var(--font-display);
   color: #ffffff;
   font-size: clamp(1.5rem, 2.6vw, 2.15rem);
   line-height: 1.02;
@@ -3155,7 +3155,7 @@
 .railTitle {
   margin: 0.2rem 0 0;
   color: var(--ink-strong);
-  font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-family: var(--font-display);
   font-size: 1.15rem;
   font-weight: 800;
   line-height: 1.2;

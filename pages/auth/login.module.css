@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap');
-
 .page {
   --control-height: 3.2rem;
   --control-radius: 0.62rem;
@@ -13,7 +11,7 @@
   z-index: 1;
   overflow-x: hidden;
   overflow-y: auto;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background:
     radial-gradient(48rem 42rem at 4% 10%, color-mix(in srgb, var(--info-bg) 92%, transparent), transparent 74%),
     radial-gradient(34rem 34rem at 92% 82%, color-mix(in srgb, var(--accent-soft) 86%, transparent), transparent 72%),
@@ -109,7 +107,7 @@
 
 .heroTitle {
   margin: 0.82rem 0 0;
-  font-family: 'Sora', sans-serif;
+  font-family: var(--font-display);
   color: var(--ink-strong);
   font-size: clamp(2.2rem, 4.2vw, 3.8rem);
   line-height: 0.98;
@@ -159,7 +157,7 @@
   place-items: center;
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
   color: var(--accent-ink);
-  font-family: 'Sora', sans-serif;
+  font-family: var(--font-display);
   font-size: 0.8rem;
   font-weight: 800;
   box-shadow: 0 12px 24px color-mix(in srgb, var(--accent) 18%, transparent);
@@ -237,7 +235,7 @@
 
 .title {
   margin: 0.22rem 0 0;
-  font-family: 'Sora', sans-serif;
+  font-family: var(--font-display);
   font-size: 1.62rem;
   line-height: 1.1;
   letter-spacing: 0;
@@ -405,7 +403,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Sora', sans-serif;
+  font-family: var(--font-display);
   font-size: 1rem;
   font-weight: 800;
 }

@@ -268,6 +268,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
 
   return (
     <main className={styles.shell}>
+      <a href="#workspace-content" className="skipLink">Skip to main content</a>
       <div className={styles.container}>
         <section className={`${styles.layout} ${sidebarCollapsed ? styles.layoutCollapsed : ''}`}>
           <nav className={`${styles.nav} ${sidebarCollapsed ? styles.navCollapsed : ''}`} aria-label="Onboarding and courses">
@@ -329,7 +330,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
             ) : (
               <>
                 <span className={styles.navGroupTitle}>Today / next action</span>
-                <Link href={nextActionHref} className={`${styles.navItem} ${styles.navPriorityItem} ${activeStep || inJourney ? styles.navActive : ''}`}>
+                <Link prefetch={false} href={nextActionHref} className={`${styles.navItem} ${styles.navPriorityItem} ${activeStep || inJourney ? styles.navActive : ''}`}>
                   <span className={styles.navDot} aria-hidden="true" />
                   <span className={styles.navTitle}>{nextActionTitle}</span>
                   <span className={styles.navStateRow}>
@@ -376,7 +377,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                     }
 
                     return (
-                      <Link key={step.href} href={step.href} className={className} aria-current={isActive ? 'page' : undefined}>
+                      <Link prefetch={false} key={step.href} href={step.href} className={className} aria-current={isActive ? 'page' : undefined}>
                         <span className={styles.navDot} aria-hidden="true" />
                         <span className={styles.navTitle}>{step.label}</span>
                         <span className={styles.navStateRow}>
@@ -390,7 +391,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
 
                 <p className={styles.navGroupTitle}>Operator journey</p>
                 {coursesUnlocked ? (
-                  <Link href="/inquiries" className={`${styles.navItem} ${inInquiries ? styles.navActive : ''}`}>
+                  <Link prefetch={false} href="/inquiries" className={`${styles.navItem} ${inInquiries ? styles.navActive : ''}`}>
                     <span className={styles.navDot} aria-hidden="true" />
                     <span className={styles.navTitle}>Live inquiries</span>
                     <span className={styles.navStateRow}>
@@ -408,7 +409,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                   </span>
                 )}
                 {coursesUnlocked ? (
-                  <Link href="/journey" className={`${styles.navItem} ${inJourney ? styles.navActive : ''}`}>
+                  <Link prefetch={false} href="/journey" className={`${styles.navItem} ${inJourney ? styles.navActive : ''}`}>
                     <span className={styles.navDot} aria-hidden="true" />
                     <span className={styles.navTitle}>30-level journey</span>
                     <span className={styles.navStateRow}>
@@ -431,6 +432,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                   <div className={styles.navGroupParent}>
                     <div className={styles.navParentHeader}>
                       <Link
+                        prefetch={false}
                         href="/courses"
                         className={`${styles.navItem} ${styles.navParentLink} ${inClassroom ? styles.navActive : ''}`}
                         aria-current={router.pathname === '/courses' ? 'page' : undefined}
@@ -465,6 +467,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                           const isCourseActive = router.asPath === `/courses/${course.id}` || (router.pathname === '/courses/[courseId]' && router.query?.courseId === course.id);
                           return (
                             <Link
+                              prefetch={false}
                               key={course.id}
                               href={`/courses/${course.id}`}
                               className={`${styles.navItem} ${styles.navSubItem} ${styles.navCourseItem} ${course.status === 'passed' ? styles.navDone : ''} ${isCourseActive ? styles.navActive : ''}`}
@@ -495,7 +498,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                 )}
 
                 <p className={styles.navGroupTitle}>Profile</p>
-                <Link href="/profile" className={`${styles.navItem} ${inProfile ? styles.navActive : ''}`}>
+                <Link prefetch={false} href="/profile" className={`${styles.navItem} ${inProfile ? styles.navActive : ''}`}>
                   <span className={styles.navDot} aria-hidden="true" />
                   <span className={styles.navTitle}>Operator profile</span>
                   <span className={styles.navStateRow}>
@@ -503,7 +506,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
                     {inProfile ? <span className={styles.navChip}>Now</span> : null}
                   </span>
                 </Link>
-                <Link href="/support" className={`${styles.navItem} ${inSupport ? styles.navActive : ''}`}>
+                <Link prefetch={false} href="/support" className={`${styles.navItem} ${inSupport ? styles.navActive : ''}`}>
                   <span className={styles.navDot} aria-hidden="true" />
                   <span className={styles.navTitle}>Operator support</span>
                   <span className={styles.navStateRow}>
@@ -515,7 +518,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
             )}
           </nav>
 
-          <article className={styles.mainCard}>
+          <article id="workspace-content" className={styles.mainCard} tabIndex={-1}>
             <header className={styles.workspaceHeader}>
               <div className={styles.workspaceTitleBlock}>
                 <p className={styles.workspaceEyebrow}>Operator workspace</p>
@@ -536,7 +539,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
             </header>
             <nav className={styles.compactNav} aria-label="Compact workspace navigation">
               {compactNavItems.map((item) => (
-                <Link key={item.key} href={item.href} className={`${styles.compactNavItem} ${item.active ? styles.compactNavItemActive : ''}`} aria-current={item.active ? 'page' : undefined}>
+                <Link prefetch={false} key={item.key} href={item.href} className={`${styles.compactNavItem} ${item.active ? styles.compactNavItemActive : ''}`} aria-current={item.active ? 'page' : undefined}>
                   <span>{item.label}</span>
                   <small>{item.meta}</small>
                 </Link>
@@ -573,7 +576,7 @@ export default function OnboardingLayout({ title, subtitle, children, progress, 
 
       <nav className={styles.mobileBottomNav} aria-label="Mobile workspace navigation">
         {mobileTabs.map((tab) => (
-          <Link key={tab.key} href={tab.href} className={`${styles.mobileBottomNavItem} ${tab.active ? styles.mobileBottomNavItemActive : ''}`} aria-current={tab.active ? 'page' : undefined}>
+          <Link prefetch={false} key={tab.key} href={tab.href} className={`${styles.mobileBottomNavItem} ${tab.active ? styles.mobileBottomNavItemActive : ''}`} aria-current={tab.active ? 'page' : undefined}>
             <span className={styles.mobileBottomNavIcon}>
               <MobileTabIconGlyph icon={tab.icon} />
             </span>

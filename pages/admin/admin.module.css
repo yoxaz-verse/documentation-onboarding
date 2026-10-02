@@ -603,6 +603,65 @@
   margin-bottom: 1rem;
 }
 
+.collapsibleSection {
+  padding: 0;
+  overflow: hidden;
+  scroll-margin-top: 5rem;
+}
+
+.collapsibleSummary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  transition: background-color 180ms ease;
+}
+
+.collapsibleSummary::-webkit-details-marker { display: none; }
+.collapsibleSummary:hover { background: color-mix(in srgb, var(--surface-strong) 64%, transparent); }
+.collapsibleSummary:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--control-focus) 35%, transparent);
+  outline-offset: -3px;
+}
+
+.collapsibleSummary .funnelTitle { margin-bottom: 0; }
+
+.collapsibleMeta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.collapseChevron {
+  display: inline-grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 1px solid var(--surface-border);
+  border-radius: 999px;
+  color: var(--ink-strong);
+  font-size: 1.15rem;
+  line-height: 1;
+  transform: rotate(0deg);
+  transition: transform 180ms ease, background-color 180ms ease;
+}
+
+.collapsibleSection[open] > .collapsibleSummary {
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.collapsibleSection[open] > .collapsibleSummary .collapseChevron {
+  transform: rotate(180deg);
+  background: var(--surface-strong);
+}
+
+.collapsibleBody { padding: 1rem; }
+.sectionActions { display: flex; justify-content: flex-end; margin-bottom: 0.8rem; }
+
 .timelineList {
   display: grid;
   gap: 0.9rem;
@@ -1101,6 +1160,14 @@
   .sectionHeader {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .collapsibleSummary {
+    align-items: flex-start;
+  }
+
+  .collapsibleMeta {
+    flex: 0 0 auto;
   }
 
   .funnelRow {
