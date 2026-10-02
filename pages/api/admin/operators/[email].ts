@@ -109,9 +109,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .order('day_number', { ascending: true }),
     supabaseAdmin
       .from('quiz_attempts')
-      .select('module_id, score, passed, attempt_number, answers, created_at')
+      .select('module_id, score, passed, attempt_number, answers, submitted_at')
       .eq('email', email)
-      .order('created_at', { ascending: true }),
+      .order('submitted_at', { ascending: true }),
     supabaseAdmin
       .from('course_submodule_state')
       .select('submodule_id, status, started_at, completed_at, updated_at')
@@ -174,7 +174,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     submission?.updated_at,
     journeyState?.updated_at,
     journeyLatestActivityAt,
-    ...(attemptRows || []).map((row) => row.created_at),
+    ...(attemptRows || []).map((row) => row.submitted_at),
     ...(submoduleStateRows || []).map((row) => row.updated_at)
   );
 
@@ -198,13 +198,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         passScore: lesson.passScore,
         totalQuestions: lesson.questions.length,
         status,
-        startedAt: state?.started_at || attempts[0]?.created_at || null,
-        completedAt: state?.completed_at || [...attempts].reverse().find((attempt) => attempt.passed)?.created_at || null,
+        startedAt: state?.started_at || attempts[0]?.submitted_at || null,
+        completedAt: state?.completed_at || [...attempts].reverse().find((attempt) => attempt.passed)?.submitted_at || null,
         attempts: attempts.map((attempt) => ({
           attemptNumber: attempt.attempt_number,
           score: attempt.score,
           passed: attempt.passed,
-          createdAt: attempt.created_at || null,
+          createdAt: attempt.submitted_at || null,
           answers: lesson.questions.map((question) => {
             const answer = attempt.answers && typeof attempt.answers === 'object' ? String(attempt.answers[question.id] || '') || null : null;
             return {
