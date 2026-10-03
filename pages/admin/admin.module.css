@@ -489,6 +489,51 @@
   background: color-mix(in srgb, var(--accent-soft) 25%, transparent);
 }
 
+.table tbody .reviewRequiredRow {
+  background: color-mix(in srgb, #f2b53d 10%, transparent);
+  box-shadow: inset 3px 0 0 #f2b53d;
+}
+
+.table tbody .reviewRequiredRow:hover {
+  background: color-mix(in srgb, #f2b53d 16%, transparent);
+}
+
+.adminActionCell {
+  display: grid;
+  justify-items: start;
+  gap: 0.38rem;
+}
+
+.adminActionCell > span {
+  color: #d99112;
+  font-size: 0.72rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.reviewRequiredButton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.3rem;
+  border: 1px solid color-mix(in srgb, #f2b53d 72%, var(--surface-border));
+  border-radius: 0.7rem;
+  padding: 0.55rem 0.72rem;
+  background: color-mix(in srgb, #f2b53d 18%, var(--control-surface-strong));
+  color: var(--ink-strong);
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.reviewRequiredButton:hover,
+.reviewRequiredButton:focus-visible {
+  border-color: #f2b53d;
+  outline: none;
+  transform: translateY(-1px);
+}
+
 .operatorName {
   color: var(--ink-strong);
   font-weight: 700;
@@ -543,6 +588,76 @@
   grid-template-columns: minmax(0, 1.4fr) minmax(22rem, 1fr);
   gap: 0.8rem;
   margin-bottom: 1rem;
+}
+
+.adminReviewPanel {
+  scroll-margin-top: 5rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, #f2b53d 72%, var(--surface-border));
+  border-radius: 1rem;
+  background: linear-gradient(145deg, color-mix(in srgb, #f2b53d 13%, var(--surface-grad-start)), var(--surface-grad-end));
+  box-shadow: 0 0 0 1px color-mix(in srgb, #f2b53d 12%, transparent), var(--elev-shadow);
+}
+
+.adminReviewHeader,
+.adminReviewCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem;
+}
+
+.adminReviewHeader h2,
+.adminReviewCardHeader h3 {
+  margin: 0.25rem 0 0;
+  color: var(--ink-strong);
+}
+
+.adminReviewHeader > div > p:last-child,
+.adminReviewCardHeader p {
+  margin: 0.4rem 0 0;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+.adminReviewCount {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  background: #f2b53d;
+  color: #241a07;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.adminReviewList {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.adminReviewCard {
+  padding: 0.95rem;
+  border: 1px solid color-mix(in srgb, var(--surface-border) 82%, transparent);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+}
+
+.adminReviewCardHeader {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.reviewSuccess {
+  margin-bottom: 1rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid color-mix(in srgb, #25b978 58%, var(--surface-border));
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, #25b978 12%, var(--surface));
+  color: var(--ink-strong);
+  font-weight: 750;
 }
 
 .detailHeroTop {
@@ -1202,6 +1317,9 @@
 
   .courseHeader,
   .submissionGrid { grid-template-columns: 1fr; }
+  .adminReviewHeader { flex-direction: column; }
+  .adminReviewCardHeader { grid-template-columns: auto minmax(0, 1fr); }
+  .adminReviewCardHeader > :last-child { grid-column: 2; justify-self: start; }
   .courseProgress { justify-items: start; }
   .attemptDetails > summary { grid-template-columns: 1fr auto; }
   .attemptDetails time { grid-column: 1 / -1; }

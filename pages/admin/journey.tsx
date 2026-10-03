@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import AdminGate from '../../components/AdminGate';
+import JourneyReviewActions from '../../components/admin/JourneyReviewActions';
 import LoadingState, { LoadingButtonContent } from '../../components/LoadingState';
 import ThemeToggle from '../../components/theme/ThemeToggle';
 import { JOURNEY_TOTAL_DAYS, type JourneyDayTemplate, type JourneyMilestoneCategory, type JourneySubmissionStatus, type JourneyTask } from '../../config/operatorJourney';
@@ -65,9 +66,6 @@ function JourneyTemplateEditor() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [reviewNotes, setReviewNotes] = useState<Record<string, string>>({});
-  const [readinessStatuses, setReadinessStatuses] = useState<Record<string, string>>({});
-  const [platformVerifications, setPlatformVerifications] = useState<Record<string, boolean>>({});
 
   const loadTemplates = async () => {
     setLoading(true);
@@ -130,31 +128,11 @@ function JourneyTemplateEditor() {
     }
   };
 
-  const reviewSubmission = async (submission: Submission, action: 'approve' | 'needs_correction') => {
-    setSaving(true);
+  const handleReviewed = async (action: 'approve' | 'needs_correction') => {
     setMessage('');
     setError('');
-    try {
-      const response = await fetch(`/api/admin/journey/submissions/${submission.id}/review`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          action,
-          reviewNote: reviewNotes[submission.id] || '',
-          readinessStatus: readinessStatuses[submission.id] || '',
-          platformVerificationConfirmed: platformVerifications[submission.id] === true,
-        }),
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(payload?.error || 'Failed to review submission.');
-      setMessage(action === 'approve' ? 'Submission approved.' : 'Correction requested.');
-      await loadSubmissions();
-    } catch (reviewError) {
-      setError(reviewError instanceof Error ? reviewError.message : 'Failed to review submission.');
-    } finally {
-      setSaving(false);
-    }
+    setMessage(action === 'approve' ? 'Submission approved. The operator can continue.' : 'Correction requested.');
+    await loadSubmissions();
   };
 
   return (
@@ -218,37 +196,9 @@ function JourneyTemplateEditor() {
                       <textarea value={JSON.stringify(submission.answers || {}, null, 2)} readOnly rows={8} />
                     </label>
                   ) : null}
-                  {submission.day_number === 11 ? (
-                    <div className={`${styles.reviewBox} ${styles.adminInputWide}`}>
-                      <span>External platform verification required</span>
-                      <p>Verify five supplier associates and their associate companies on the main OBAOL platform for this operator.</p>
-                      <label className={styles.journeyEditorToggle}>
-                        <input
-                          type="checkbox"
-                          checked={platformVerifications[submission.id] === true}
-                          onChange={(event) => setPlatformVerifications((current) => ({ ...current, [submission.id]: event.target.checked }))}
-                        />
-                        Verified five suppliers on the platform
-                      </label>
-                    </div>
+                  {submission.status === 'under_review' || submission.status === 'submitted' ? (
+                    <JourneyReviewActions submissionId={submission.id} dayNumber={submission.day_number} onReviewed={handleReviewed} />
                   ) : null}
-                  {submission.day_number === 30 ? (
-                    <label className={styles.adminInputGroup}>
-                      <span>Final readiness status</span>
-                      <select value={readinessStatuses[submission.id] || ''} onChange={(event) => setReadinessStatuses((current) => ({ ...current, [submission.id]: event.target.value }))}>
-                        <option value="">Select</option>
-                        {['Execution-ready operator', 'Needs guided supervision', 'Supplier-side strong', 'Buyer-side strong', 'Product research strong', 'Data discipline strong', 'Quotation support strong', 'Follow-up strong', 'Cluster coordination strong', 'Needs more training', 'Not ready currently'].map((status) => <option key={status} value={status}>{status}</option>)}
-                      </select>
-                    </label>
-                  ) : null}
-                  <label className={`${styles.adminInputGroup} ${styles.adminInputWide}`}>
-                    <span>Review note</span>
-                    <textarea value={reviewNotes[submission.id] || ''} onChange={(event) => setReviewNotes((current) => ({ ...current, [submission.id]: event.target.value }))} rows={3} placeholder="Required when requesting correction" />
-                  </label>
-                  <div className={styles.actions}>
-                    <button className={styles.actionButton} type="button" disabled={saving || (submission.day_number === 11 && platformVerifications[submission.id] !== true)} onClick={() => reviewSubmission(submission, 'approve')}>Approve</button>
-                    <button className={styles.linkButton} type="button" disabled={saving} onClick={() => reviewSubmission(submission, 'needs_correction')}>Needs correction</button>
-                  </div>
                 </div>
               </article>
             )) : <p className={styles.emptyState}>No submissions match this filter.</p>}

@@ -316,12 +316,12 @@ function DashboardContent() {
                   <th>Journey Status</th>
                   <th>Submission</th>
                   <th>Last Activity</th>
-                  <th>Detail</th>
+                  <th>Admin action</th>
                 </tr>
               </thead>
               <tbody>
                 {operators.map((row) => (
-                  <tr key={row.email}>
+                  <tr key={row.email} className={row.journeyPendingReviewCount > 0 ? styles.reviewRequiredRow : undefined}>
                     <td>
                       <div className={styles.operatorName}>{row.profileName || row.name || 'Unnamed Operator'}</div>
                       <div className={styles.meta}>{row.email}</div>
@@ -366,7 +366,18 @@ function DashboardContent() {
                       <div className={styles.meta}>{row.hasCompletionCode ? 'Completion code issued' : 'No completion code'}</div>
                     </td>
                     <td>{formatDate(row.latestActivityAt)}</td>
-                    <td><Link className={styles.linkButton} href={`/admin/operators/${encodeURIComponent(row.email)}`}>Open</Link></td>
+                    <td>
+                      {row.journeyPendingReviewCount > 0 ? (
+                        <div className={styles.adminActionCell}>
+                          <span>Operator blocked</span>
+                          <Link className={styles.reviewRequiredButton} href={`/admin/operators/${encodeURIComponent(row.email)}#admin-review`}>
+                            Review required ({row.journeyPendingReviewCount})
+                          </Link>
+                        </div>
+                      ) : (
+                        <Link className={styles.linkButton} href={`/admin/operators/${encodeURIComponent(row.email)}`}>Open details</Link>
+                      )}
+                    </td>
                   </tr>
                 ))}
                 {!loading && operators.length === 0 ? (

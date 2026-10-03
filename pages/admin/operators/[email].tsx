@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { MouseEvent, SyntheticEvent } from 'react';
 import AdminGate from '../../../components/AdminGate';
+import JourneyReviewActions from '../../../components/admin/JourneyReviewActions';
 import LoadingState from '../../../components/LoadingState';
 import ThemeToggle from '../../../components/theme/ThemeToggle';
 import type { AdminOperatorDetail } from '../../../lib/adminTypes';
@@ -37,23 +38,23 @@ function DetailContent() {
   const email = String(router.query.email || '').trim().toLowerCase();
   const [detail, setDetail] = useState<AdminOperatorDetail | null>(null);
   const [error, setError] = useState('');
+  const [reviewMessage, setReviewMessage] = useState('');
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     onboarding: false,
     courses: false,
     journey: false,
   });
 
-  useEffect(() => {
+  const loadDetail = useCallback(async () => {
     if (!email || !email.includes('@')) return;
-    const load = async () => {
-      setError('');
-      const response = await fetch(`/api/admin/operators/${encodeURIComponent(email)}`, { credentials: 'include', cache: 'no-store' });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) return setError(payload?.error || 'Failed to load operator detail.');
-      setDetail(payload.detail || null);
-    };
-    load();
+    setError('');
+    const response = await fetch(`/api/admin/operators/${encodeURIComponent(email)}`, { credentials: 'include', cache: 'no-store' });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) return setError(payload?.error || 'Failed to load operator detail.');
+    setDetail(payload.detail || null);
   }, [email]);
+
+  useEffect(() => { loadDetail(); }, [loadDetail]);
 
   const stats = useMemo(() => detail ? [
     { label: 'Onboarding', value: `${detail.progress?.completedMilestones || 0}/${detail.summary.totalOnboardingSteps}` },
@@ -63,6 +64,16 @@ function DetailContent() {
     { label: 'Pending reviews', value: String(detail.summary.pendingJourneyReviews) },
     { label: 'Latest activity', value: formatDate(detail.summary.latestActivityAt) },
   ] : [], [detail]);
+
+  const pendingReviews = useMemo(
+    () => detail?.journey.days.filter((day) => day.status === 'under_review' || day.status === 'submitted') || [],
+    [detail]
+  );
+
+  useEffect(() => {
+    if (!pendingReviews.length || window.location.hash !== '#admin-review') return;
+    window.requestAnimationFrame(() => document.getElementById('admin-review')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  }, [pendingReviews.length]);
 
   const navigateToSection = (event: MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     event.preventDefault();
@@ -81,6 +92,11 @@ function DetailContent() {
     setOpenSections((current) => current[sectionId] === isOpen ? current : { ...current, [sectionId]: isOpen });
   };
 
+  const handleReviewed = async (action: 'approve' | 'needs_correction') => {
+    setReviewMessage(action === 'approve' ? 'Submission approved. The operator can continue.' : 'Correction requested from the operator.');
+    await loadDetail();
+  };
+
   return (
     <main className={styles.shell}>
       <div className={styles.bgOrbA} aria-hidden="true" /><div className={styles.bgOrbB} aria-hidden="true" />
@@ -94,6 +110,31 @@ function DetailContent() {
 
         {detail ? <>
           <nav className={styles.detailNav} aria-label="Operator detail sections"><a href="#overview" onClick={(event) => navigateToSection(event, 'overview')}>Overview</a><a href="#onboarding" onClick={(event) => navigateToSection(event, 'onboarding')}>Onboarding</a><a href="#courses" onClick={(event) => navigateToSection(event, 'courses')}>Courses</a><a href="#journey" onClick={(event) => navigateToSection(event, 'journey')}>30-day challenge</a></nav>
+          {reviewMessage ? <article className={styles.reviewSuccess} role="status">{reviewMessage}</article> : null}
+          {pendingReviews.length ? (
+            <section id="admin-review" className={styles.adminReviewPanel} aria-labelledby="admin-review-title">
+              <div className={styles.adminReviewHeader}>
+                <div><p className={styles.kicker}>Blocking workflow</p><h2 id="admin-review-title">Admin action required</h2><p>This operator cannot continue until {pendingReviews.length === 1 ? 'this submission is' : 'these submissions are'} approved or returned for correction.</p></div>
+                <span className={styles.adminReviewCount}>{pendingReviews.length} pending</span>
+              </div>
+              <div className={styles.adminReviewList}>
+                {pendingReviews.map((day) => (
+                  <article key={day.submissionId || day.templateId} className={styles.adminReviewCard}>
+                    <div className={styles.adminReviewCardHeader}>
+                      <span className={styles.timelineStepNumber}>{day.day}</span>
+                      <div><h3>{day.title}</h3><p>{titleCase(day.category)} · Submitted {formatDate(day.submittedAt)}</p></div>
+                      <span className={styles.badgePending}>{titleCase(day.status)}</span>
+                    </div>
+                    <p className={styles.timelineNote}>{day.description}</p>
+                    {day.requiredOutput ? <div className={styles.requiredOutput}><span>Required output</span><p>{day.requiredOutput}</p></div> : null}
+                    {day.fields.length ? <><h4 className={styles.subsectionTitle}>Submitted inputs</h4><div className={styles.submissionGrid}>{day.fields.map((field, index) => <div key={`${field.label}-${index}`} className={styles.fieldPair}><span className={styles.fieldLabel}>{field.label}</span><pre className={styles.fieldPre}>{displayValue(field.value)}</pre></div>)}</div></> : <p className={styles.emptyState}>No inputs were required for this level. Complete the external verification below.</p>}
+                    {day.computedMetrics.length ? <><h4 className={styles.subsectionTitle}>Computed metrics</h4><div className={styles.fieldGrid}>{day.computedMetrics.map((metric) => <div key={metric.label} className={styles.fieldPair}><span className={styles.fieldLabel}>{metric.label}</span><span className={styles.fieldValue}>{displayValue(metric.value)}</span></div>)}</div></> : null}
+                    {day.submissionId ? <JourneyReviewActions submissionId={day.submissionId} dayNumber={day.day} onReviewed={handleReviewed} /> : null}
+                  </article>
+                ))}
+              </div>
+            </section>
+          ) : null}
           <section id="overview" className={styles.detailHero}>
             <article className={styles.card}>
               <div className={styles.detailHeroTop}><div><p className={styles.cardLabel}>Operator summary</p><h2 className={styles.detailHeroTitle}>{detail.summary.displayName}</h2><p className={styles.detailHeroText}>{detail.operator.email}</p></div><div className={styles.badgeRow}><span className={badgeClass(detail.summary.progressState)}>{titleCase(detail.summary.progressState)}</span><span className={badgeClass(detail.summary.submissionState)}>Submission {titleCase(detail.summary.submissionState)}</span></div></div>
@@ -125,7 +166,7 @@ function DetailContent() {
               {day.fields.length ? <><h4 className={styles.subsectionTitle}>Submitted inputs</h4><div className={styles.submissionGrid}>{day.fields.map((field, index) => <div key={`${field.label}-${index}`} className={styles.fieldPair}><span className={styles.fieldLabel}>{field.label}</span><pre className={styles.fieldPre}>{displayValue(field.value)}</pre></div>)}</div></> : <p className={styles.emptyState}>No inputs submitted for this day.</p>}
               {day.computedMetrics.length ? <><h4 className={styles.subsectionTitle}>Computed metrics</h4><div className={styles.fieldGrid}>{day.computedMetrics.map((metric) => <div key={metric.label} className={styles.fieldPair}><span className={styles.fieldLabel}>{metric.label}</span><span className={styles.fieldValue}>{displayValue(metric.value)}</span></div>)}</div></> : null}
               {day.reviewNote || day.reviewedAt ? <div className={styles.reviewBox}><div><span>Reviewed</span><strong>{formatDate(day.reviewedAt)}{day.reviewedBy ? ` by ${day.reviewedBy}` : ''}</strong></div>{day.reviewNote ? <p>{day.reviewNote}</p> : null}</div> : null}
-              <div className={styles.inlineMeta}>{day.href ? <Link href={day.href}>{day.actionLabel || 'Open related page'}</Link> : null}{day.submissionId ? <Link href="/admin/journey">Review this submission</Link> : null}</div>
+              <div className={styles.inlineMeta}>{day.href ? <Link href={day.href}>{day.actionLabel || 'Open related page'}</Link> : null}{day.submissionId && (day.status === 'under_review' || day.status === 'submitted') ? <a href="#admin-review">Review in admin action panel</a> : null}</div>
             </div></details>)}</div></div>
           </details>
         </> : null}
