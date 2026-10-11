@@ -40,7 +40,7 @@ function SignedOutHome() {
 
         <h1 className={authStyles.heading}>Learn how to become a successful OBAOL operator</h1>
         <p className={authStyles.message}>
-          A guided program for invited operators: complete Getting Started, learn through operator-specific training courses, then apply your skills in the practical 30-level Operator Journey.
+          An open guided program for aspiring operators: complete Getting Started, learn through operator-specific training courses, then apply your skills in the practical 30-level Operator Journey.
         </p>
         <ol className={authStyles.programStages} aria-label="Operator program stages">
           <li><strong>1. Getting Started</strong><span>Understand the model and complete required setup.</span></li>
@@ -50,7 +50,7 @@ function SignedOutHome() {
         <Link href="/auth/login" className={styles.cta} onClick={() => trackFunnelEvent('getting_started_cta_clicked')}>
           Start Getting Started
         </Link>
-        <p className={authStyles.invitationHint}>Returning operator? Use the same button to continue. Have your invitation email ready.</p>
+        <p className={authStyles.invitationHint}>New or returning operator? Use any email address you can access to start or continue.</p>
       </section>
     </main>
   );

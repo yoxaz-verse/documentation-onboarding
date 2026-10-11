@@ -17,7 +17,8 @@ function getStatusTone(message: string): 'info' | 'success' | 'error' {
     normalized.includes('incorrect') ||
     normalized.includes('invalid') ||
     normalized.includes('exceeded') ||
-    normalized.includes('too many')
+    normalized.includes('too many') ||
+    normalized.includes('disabled')
   ) {
     return 'error';
   }
@@ -243,7 +244,7 @@ export default function LoginPage() {
             <span>Become a successful operator.</span>
           </h1>
           <p className={styles.heroSubtitle}>
-            This guided program prepares invited operators to understand OBAOL, complete required setup, build practical knowledge, and apply it in real operator work.
+            This open guided program prepares aspiring operators to understand OBAOL, complete required setup, build practical knowledge, and apply it in real operator work.
           </p>
           
           <div className={styles.timeline}>
@@ -315,14 +316,14 @@ export default function LoginPage() {
             Start or continue your operator training
           </h2>
           <p className={styles.subtitle}>
-            {otpRequested ? 'Enter the six-digit sign-in code sent to your invited email address.' : 'Use the email address that received your OBAOL invitation. We will send a six-digit sign-in code.'}
+            {otpRequested ? 'Enter the six-digit sign-in code sent to your email address.' : 'Enter your email address to start or continue. We will send a six-digit sign-in code.'}
           </p>
 
           {!otpRequested ? (
             <form onSubmit={requestOtp} className={styles.form} noValidate>
               <div className={styles.labelRow}>
                 <label className={styles.label} htmlFor="email">
-                  Invited Email Address
+                  Email Address
                 </label>
                 <span className={styles.hint}>Step 1 of 2</span>
               </div>
@@ -334,7 +335,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   className={styles.input}
-                placeholder="invited.name@company.com"
+                placeholder="name@example.com"
                   disabled={loading}
                   autoComplete="email"
                 />

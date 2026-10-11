@@ -30,6 +30,12 @@ function statusBadgeClass(status: AdminJourneyTrackStatus) {
   return styles.badgePending;
 }
 
+function accessStatusLabel(status: AdminOperatorRow['invitationStatus']) {
+  if (status === 'invited') return 'Pending verification';
+  if (status === 'active') return 'Active';
+  return 'Disabled';
+}
+
 const JOURNEY_STATUSES: AdminJourneyTrackStatus[] = ['not_started', 'ahead', 'on_track', 'behind', 'short_inactive', 'serious_inactive', 'under_review', 'needs_correction', 'completed'];
 const STEP_STATES: AdminOnboardingStepStatus[] = ['completed', 'current', 'not_completed'];
 
@@ -47,9 +53,8 @@ function DashboardContent() {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [funnelDays, setFunnelDays] = useState(30);
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteMessage, setInviteMessage] = useState('');
-  const [inviteSaving, setInviteSaving] = useState(false);
+  const [accessMessage, setAccessMessage] = useState('');
+  const [accessSaving, setAccessSaving] = useState(false);
   const [refreshVersion, setRefreshVersion] = useState(0);
 
   useEffect(() => {
@@ -89,27 +94,26 @@ function DashboardContent() {
     load();
   }, [page, query, stepFilter, stepStateFilter, journeyDayFilter, journeyStatusFilter, submissionStatusFilter, funnelDays, refreshVersion]);
 
-  const updateInvitation = async (email: string, status?: 'invited' | 'disabled') => {
-    setInviteSaving(true);
-    setInviteMessage('');
+  const updateAccess = async (email: string, status: 'active' | 'disabled') => {
+    setAccessSaving(true);
+    setAccessMessage('');
     try {
       const response = await fetch('/api/admin/operators/invitations', {
-        method: status ? 'PATCH' : 'POST',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(status ? { email, status } : { email }),
+        body: JSON.stringify({ email, status }),
       });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(payload.error || 'Failed to update invitation.');
-      setInviteMessage(status === 'disabled' ? 'Operator access disabled.' : status === 'invited' ? 'Invitation reactivated.' : 'Operator invited successfully.');
-      if (!status) setInviteEmail('');
-      setOperators((current) => current.map((row) => row.email === email ? { ...row, invitationStatus: status || 'invited' } : row));
+      if (!response.ok) throw new Error(payload.error || 'Failed to update operator access.');
+      setAccessMessage(status === 'disabled' ? 'Operator access disabled.' : 'Operator access reactivated.');
+      setOperators((current) => current.map((row) => row.email === email ? { ...row, invitationStatus: status } : row));
       setPage(1);
       setRefreshVersion((current) => current + 1);
     } catch (error) {
-      setInviteMessage(error instanceof Error ? error.message : 'Failed to update invitation.');
+      setAccessMessage(error instanceof Error ? error.message : 'Failed to update operator access.');
     } finally {
-      setInviteSaving(false);
+      setAccessSaving(false);
     }
   };
 
@@ -163,7 +167,7 @@ function DashboardContent() {
           <div className={styles.headingBlock}>
             <p className={styles.kicker}>Operations Overview</p>
             <h1 className={styles.title}>Admin Dashboard</h1>
-            <p className={styles.subtitle}>Monitor invitations, Getting Started progress, training readiness, and the practical journey in real time.</p>
+            <p className={styles.subtitle}>Monitor signups, access, Getting Started progress, training readiness, and the practical journey in real time.</p>
           </div>
           <div className={styles.actions}>
             <Link className={styles.linkButton} href="/admin/inquiries">Live Inquiries</Link>
@@ -200,17 +204,18 @@ function DashboardContent() {
             <p className={styles.cardLabel}>Needs Attention</p>
             <p className={styles.cardValue}>{attentionCount}</p>
           </article>
-        </section>
-
-        <section className={styles.funnel}>
-          <div className={styles.sectionHeader}>
-            <div><h2 className={styles.funnelTitle}>Invite an operator</h2><p className={styles.sectionMeta}>Only invited email addresses can receive a sign-in code</p></div>
-          </div>
-          <form className={styles.inviteForm} onSubmit={(event) => { event.preventDefault(); void updateInvitation(inviteEmail.trim().toLowerCase()); }}>
-            <input className={styles.search} type="email" required value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} placeholder="operator@company.com" aria-label="Operator email to invite" />
-            <button className={styles.actionButton} type="submit" disabled={inviteSaving}>{inviteSaving ? 'Saving…' : 'Invite operator'}</button>
-            {inviteMessage ? <span className={styles.meta} role="status">{inviteMessage}</span> : null}
-          </form>
+          <article className={styles.card}>
+            <p className={styles.cardLabel}>Pending Verification</p>
+            <p className={styles.cardValue}>{overview?.accessCounts.invited ?? 0}</p>
+          </article>
+          <article className={styles.card}>
+            <p className={styles.cardLabel}>Active Access</p>
+            <p className={styles.cardValue}>{overview?.accessCounts.active ?? 0}</p>
+          </article>
+          <article className={styles.card}>
+            <p className={styles.cardLabel}>Disabled Access</p>
+            <p className={styles.cardValue}>{overview?.accessCounts.disabled ?? 0}</p>
+          </article>
         </section>
 
         <section className={styles.funnel}>
@@ -366,7 +371,7 @@ function DashboardContent() {
               <thead>
                 <tr>
                   <th>Operator</th>
-                  <th>Invitation</th>
+                  <th>Access</th>
                   <th>Current Step</th>
                   <th>Completion</th>
                   <th>Journey</th>
@@ -384,8 +389,8 @@ function DashboardContent() {
                       <div className={styles.meta}>{row.email}</div>
                     </td>
                     <td>
-                      <span className={row.invitationStatus === 'disabled' ? styles.badgePending : styles.badgeDone}>{row.invitationStatus}</span>
-                      <div className={styles.meta}>{row.invitedAt ? `Invited ${formatDate(row.invitedAt)}` : 'Legacy invitation'}</div>
+                      <span className={row.invitationStatus === 'active' ? styles.badgeDone : styles.badgePending}>{accessStatusLabel(row.invitationStatus)}</span>
+                      <div className={styles.meta}>{row.invitedAt ? `Signup requested ${formatDate(row.invitedAt)}` : 'Signup date unavailable'}</div>
                     </td>
                     <td>
                       <div className={styles.operatorName}>Step {Math.min(row.currentStep, 11)}</div>
@@ -439,7 +444,7 @@ function DashboardContent() {
                       ) : (
                         <Link className={styles.linkButton} href={`/admin/operators/${encodeURIComponent(row.email)}`}>Open details</Link>
                       )}
-                      <button className={styles.linkButton} type="button" disabled={inviteSaving} onClick={() => void updateInvitation(row.email, row.invitationStatus === 'disabled' ? 'invited' : 'disabled')}>
+                      <button className={styles.linkButton} type="button" disabled={accessSaving} onClick={() => void updateAccess(row.email, row.invitationStatus === 'disabled' ? 'active' : 'disabled')}>
                         {row.invitationStatus === 'disabled' ? 'Reactivate' : 'Disable access'}
                       </button>
                       </div>
@@ -453,6 +458,7 @@ function DashboardContent() {
                 ) : null}
               </tbody>
             </table>
+            {accessMessage ? <p className={styles.meta} role="status">{accessMessage}</p> : null}
           </div>
           )}
         </section>

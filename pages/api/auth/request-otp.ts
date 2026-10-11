@@ -4,6 +4,7 @@ import { generateOtp, hashOtp, OTP_TTL_MINUTES } from '../../../lib/otp';
 import { supabaseAdmin } from '../../../lib/supabaseAdmin';
 
 const MAX_PENDING_OTP = 3;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function buildOtpEmail(otp: string, ttlMinutes: number): { subject: string; text: string; html: string } {
   const subject = 'Your OBAOL OTP Code';
@@ -95,22 +96,51 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const email = String(req.body?.email || '').trim().toLowerCase();
-  if (!email || !email.includes('@')) return res.status(400).json({ error: 'Valid email is required.' });
+  if (!EMAIL_PATTERN.test(email)) return res.status(400).json({ error: 'Valid email is required.' });
 
   const { data: operator, error: operatorError } = await supabaseAdmin
     .from('operators')
     .select('email, invitation_status')
     .eq('email', email)
     .maybeSingle();
-  if (operatorError) return res.status(500).json({ error: 'Unable to verify your invitation right now.' });
-  if (!operator || operator.invitation_status === 'disabled') {
+  if (operatorError) return res.status(500).json({ error: 'Unable to verify access right now.' });
+  if (operator?.invitation_status === 'disabled') {
     return res.status(403).json({
-      code: 'invitation_required',
-      error: 'Use the email address from your OBAOL invitation, or contact OBAOL support for access.',
+      code: 'access_disabled',
+      error: 'Access for this email address has been disabled. Contact OBAOL support for help.',
     });
   }
 
   const nowIso = new Date().toISOString();
+  if (!operator) {
+    const { error: createOperatorError } = await supabaseAdmin.from('operators').insert({
+      email,
+      invitation_status: 'invited',
+      invited_at: nowIso,
+      disabled_at: null,
+    });
+
+    if (createOperatorError) {
+      // A concurrent request may have created the record after our lookup.
+      if (createOperatorError.code !== '23505') {
+        return res.status(500).json({ error: 'Unable to create your operator account right now.' });
+      }
+
+      const { data: concurrentOperator, error: concurrentLookupError } = await supabaseAdmin
+        .from('operators')
+        .select('invitation_status')
+        .eq('email', email)
+        .maybeSingle();
+      if (concurrentLookupError) return res.status(500).json({ error: 'Unable to verify access right now.' });
+      if (concurrentOperator?.invitation_status === 'disabled') {
+        return res.status(403).json({
+          code: 'access_disabled',
+          error: 'Access for this email address has been disabled. Contact OBAOL support for help.',
+        });
+      }
+    }
+  }
+
   const { count, error: countError } = await supabaseAdmin
     .from('otp_codes')
     .select('*', { count: 'exact', head: true })

@@ -8,7 +8,7 @@ export default function App({ Component, pageProps }: AppProps) {
     <>
       <Head>
         <title>OBAOL Operator Workspace</title>
-        <meta name="description" content="OBAOL Getting Started, Training Courses, and Practical Operator Journey for invited operators." />
+        <meta name="description" content="Open OBAOL Getting Started, Training Courses, and Practical Operator Journey for aspiring operators." />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="alternate icon" type="image/png" href="/favicon.png" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />

@@ -20,11 +20,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .select('email, name, invitation_status')
     .eq('email', email)
     .maybeSingle();
-  if (eligibilityError) return res.status(500).json({ error: 'Unable to verify your invitation right now.' });
+  if (eligibilityError) return res.status(500).json({ error: 'Unable to verify access right now.' });
   if (!eligibleOperator || eligibleOperator.invitation_status === 'disabled') {
     return res.status(403).json({
-      code: 'invitation_required',
-      error: 'Use the email address from your OBAOL invitation, or contact OBAOL support for access.',
+      code: eligibleOperator ? 'access_disabled' : 'signup_required',
+      error: eligibleOperator
+        ? 'Access for this email address has been disabled. Contact OBAOL support for help.'
+        : 'Request a new sign-in code to create your operator account.',
     });
   }
 

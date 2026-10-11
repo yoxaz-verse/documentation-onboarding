@@ -41,7 +41,7 @@ export type AdminOverview = {
   completedOperators: number;
   inProgressOperators: number;
   completionRate: number;
-  invitationCounts: Record<'invited' | 'active' | 'disabled', number>;
+  accessCounts: Record<'invited' | 'active' | 'disabled', number>;
   funnel: {
     days: number;
     stages: Array<{ event: string; label: string; count: number; conversionFromPrevious: number | null }>;

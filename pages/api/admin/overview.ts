@@ -79,7 +79,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       templates: journeyTemplates,
     });
   });
-  const invitationCounts = (operators || []).reduce<Record<'invited' | 'active' | 'disabled', number>>((counts, operator) => {
+  const accessCounts = (operators || []).reduce<Record<'invited' | 'active' | 'disabled', number>>((counts, operator) => {
     const status = (operator.invitation_status || 'invited') as 'invited' | 'active' | 'disabled';
     counts[status] += 1;
     return counts;
@@ -108,7 +108,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     completedOperators,
     inProgressOperators,
     completionRate,
-    invitationCounts,
+    accessCounts,
     funnel: { days, stages: funnelStages },
     stepCompletion,
     journey: buildAdminJourneyAnalytics(journeySnapshots, journeyTemplates.length || 30),

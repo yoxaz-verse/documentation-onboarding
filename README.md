@@ -2,7 +2,7 @@
 
 This project provides a full onboarding and training flow with:
 
-- Custom SMTP Email OTP login (no password auth)
+- Open email signup with custom SMTP OTP login (no password auth)
 - Server-side HTTP-only session cookies
 - Sectioned onboarding progression (Onboarding + Courses)
 - Embedded Typebot profile form
@@ -10,7 +10,7 @@ This project provides a full onboarding and training flow with:
 - In-app Step 3 email credential submission (encrypted at rest)
 - Final completion submission with stored completion code
 - Supabase as onboarding data store keyed by operator email
-- Admin dashboard with env-based credentials and operator progress reporting
+- Admin dashboard with env-based credentials, operator access controls, and progress reporting
 
 ## Local Development
 
