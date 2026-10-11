@@ -1,5 +1,7 @@
 import { expectJson } from './http';
 import type { OperatorProfile, OperatorProfileInput } from './types';
+import { mutate } from 'swr';
+import { PROFILE_KEY } from './clientData';
 
 type ProfilePayload = {
   profile: OperatorProfile;
@@ -9,7 +11,9 @@ type ProfilePayload = {
 export async function getProfile(): Promise<OperatorProfile> {
   const response = await fetch('/api/profile');
   const payload = await expectJson<ProfilePayload & { error?: string }>(response, 'Failed to fetch profile.');
-  return (payload as ProfilePayload).profile;
+  const profile = (payload as ProfilePayload).profile;
+  await mutate(PROFILE_KEY, { profile }, { revalidate: false });
+  return profile;
 }
 
 export async function saveProfile(input: Partial<OperatorProfileInput>): Promise<OperatorProfile> {
@@ -31,5 +35,6 @@ export async function submitProfile(input: OperatorProfileInput): Promise<Profil
   });
 
   const payload = await expectJson<ProfilePayload & { error?: string }>(response, 'Failed to submit profile.');
+  await mutate(PROFILE_KEY, { profile: payload.profile }, { revalidate: false });
   return payload as ProfilePayload;
 }

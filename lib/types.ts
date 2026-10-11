@@ -29,6 +29,10 @@ export type ProgressResponse = {
   courseProgress: CourseProgressSummary;
 };
 
+export type WorkspaceBootstrapResponse = ProgressResponse & {
+  user: SessionUser;
+};
+
 export type JourneyResponse =
   | {
       access: 'locked';

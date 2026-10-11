@@ -201,7 +201,7 @@ export const COURSES: Course[] = [
           {
             id: 'q3',
             question: 'What helps associates trust you enough to send inquiries through you?',
-            options: ['Reliable support, tools, and relationship building', 'Aggressive pricing promises only', 'Avoiding communication after onboarding'],
+            options: ['Reliable support, tools, and relationship building', 'Aggressive pricing promises only', 'Avoiding communication after Getting Started'],
             correctAnswer: 'Reliable support, tools, and relationship building',
           },
         ],

@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import nodemailer from 'nodemailer';
-import { ensureOperatorSeed } from '../../../lib/ensureOperatorSeed';
 import { generateOtp, hashOtp, OTP_TTL_MINUTES } from '../../../lib/otp';
 import { supabaseAdmin } from '../../../lib/supabaseAdmin';
 
@@ -98,9 +97,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const email = String(req.body?.email || '').trim().toLowerCase();
   if (!email || !email.includes('@')) return res.status(400).json({ error: 'Valid email is required.' });
 
-  const seedError = await ensureOperatorSeed(email);
-  if (seedError) {
-    return res.status(500).json({ error: `Failed to prepare operator record: ${seedError}` });
+  const { data: operator, error: operatorError } = await supabaseAdmin
+    .from('operators')
+    .select('email, invitation_status')
+    .eq('email', email)
+    .maybeSingle();
+  if (operatorError) return res.status(500).json({ error: 'Unable to verify your invitation right now.' });
+  if (!operator || operator.invitation_status === 'disabled') {
+    return res.status(403).json({
+      code: 'invitation_required',
+      error: 'Use the email address from your OBAOL invitation, or contact OBAOL support for access.',
+    });
   }
 
   const nowIso = new Date().toISOString();

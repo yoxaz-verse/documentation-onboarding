@@ -9,7 +9,7 @@ import { getSubModuleById, isSubModuleUnlocked } from '../../../config/courses';
 type ActionType = 'save_draft' | 'submit_quiz';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = requireSession(req, res);
+  const session = await requireSession(req, res);
   if (!session) return;
 
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });

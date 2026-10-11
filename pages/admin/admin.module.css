@@ -179,6 +179,23 @@
   margin-bottom: 1.1rem;
 }
 
+.inviteForm {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 0.8rem;
+}
+
+.inviteForm .search { width: min(100%, 28rem); }
+
+.funnelStageGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.8rem;
+}
+
 .sectionHeader {
   display: flex;
   align-items: baseline;
@@ -1246,6 +1263,7 @@
 }
 
 @media (max-width: 760px) {
+  .funnelStageGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .shell {
     padding-left: 0.82rem;
     padding-right: 0.82rem;
@@ -1326,6 +1344,7 @@
 }
 
 @media (max-width: 520px) {
+  .funnelStageGrid { grid-template-columns: 1fr; }
   .grid {
     grid-template-columns: 1fr;
   }

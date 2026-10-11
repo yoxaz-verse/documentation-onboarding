@@ -5,7 +5,7 @@ import { requireSession } from '../../../lib/serverAuth';
 import { supabaseAdmin } from '../../../lib/supabaseAdmin';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = requireSession(req, res);
+  const session = await requireSession(req, res);
   if (!session) return;
 
   const seedError = await ensureOperatorSeed(session.email);
@@ -32,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (progressError) return res.status(500).json({ error: progressError.message });
 
     if (getCurrentStep(progress) <= FINAL_MILESTONE) {
-      return res.status(403).json({ error: 'Complete the full guided onboarding flow before final submission.' });
+      return res.status(403).json({ error: 'Complete every Getting Started step before final submission.' });
     }
 
     const code = String(req.body?.completionCode || '').trim() || generateCompletionCode();

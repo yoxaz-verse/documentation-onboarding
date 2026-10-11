@@ -1,8 +1,11 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { mutate } from 'swr';
+import { WORKSPACE_KEY } from '../../lib/clientData';
 import { useRouter } from 'next/router';
 import ThemeToggle from '../../components/theme/ThemeToggle';
 import { LoadingButtonContent } from '../../components/LoadingState';
 import styles from './login.module.css';
+import { trackFunnelEvent } from '../../lib/clientFunnel';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function getStatusTone(message: string): 'info' | 'success' | 'error' {
@@ -109,6 +112,7 @@ export default function LoginPage() {
       setOtpDigits(Array(6).fill(''));
       setResendCooldown(RESEND_COOLDOWN_SECONDS);
       setStatus(mode === 'resend' ? 'OTP resent. Check your email.' : 'OTP sent. Check your email.');
+      if (mode === 'initial') trackFunnelEvent('otp_requested', normalizedEmail);
       return true;
     } catch {
       setStatus('Unable to send OTP right now. Please try again.');
@@ -166,6 +170,8 @@ export default function LoginPage() {
 
       setEmail(normalizedEmail);
       setStatus('Login successful. Redirecting...');
+      trackFunnelEvent('otp_verified', normalizedEmail);
+      await mutate(WORKSPACE_KEY);
       router.replace(payload?.next || '/');
     } catch {
       setStatus('Unable to verify OTP right now. Please try again.');
@@ -225,19 +231,19 @@ export default function LoginPage() {
       <div className={styles.topControls}>
         <ThemeToggle size="sm" variant="surface" />
       </div>
-      <section className={styles.heroLayout} aria-label="Operator onboarding and login">
-        <section className={styles.heroPanel} aria-label="Operator onboarding overview">
+      <section className={styles.heroLayout} aria-label="Operator training and login">
+        <section className={styles.heroPanel} aria-label="Operator program overview">
           <div className={styles.brandContainer}>
             <img src="/obaol-logo-light.png" alt="OBAOL" className={`${styles.brandLogoImg} ${styles.logoLight}`} />
             <img src="/obaol-logo-dark.png" alt="OBAOL" className={`${styles.brandLogoImg} ${styles.logoDark}`} />
           </div>
-          <p className={styles.heroKicker}>Operator workspace</p>
+          <p className={styles.heroKicker}>OBAOL Operator Program</p>
           <h1 className={styles.heroTitle}>
-            <span>One workspace.</span>
-            <span>Everything an operator needs.</span>
+            <span>Learn the system.</span>
+            <span>Become a successful operator.</span>
           </h1>
           <p className={styles.heroSubtitle}>
-            Enter a guided operator workspace built for onboarding steps, profile readiness, credentials, and classroom course access in one place.
+            This guided program prepares invited operators to understand OBAOL, complete required setup, build practical knowledge, and apply it in real operator work.
           </p>
           
           <div className={styles.timeline}>
@@ -249,8 +255,8 @@ export default function LoginPage() {
                 </svg>
               </div>
               <div className={styles.timelineContent}>
-                <h3 className={styles.timelineStepTitle}>Build your profile</h3>
-                <p className={styles.timelineStepDesc}>Set up your operator identity so the workspace can track required steps and readiness clearly.</p>
+                <h3 className={styles.timelineStepTitle}>Understand the operator model</h3>
+                <p className={styles.timelineStepDesc}>Learn how OBAOL works, what an operator does, and what successful participation requires.</p>
               </div>
             </div>
 
@@ -262,8 +268,8 @@ export default function LoginPage() {
                 </svg>
               </div>
               <div className={styles.timelineContent}>
-                <h3 className={styles.timelineStepTitle}>Complete onboarding tasks</h3>
-                <p className={styles.timelineStepDesc}>Move through required steps, unlock the right checkpoints, and keep progress visible from one dashboard.</p>
+                <h3 className={styles.timelineStepTitle}>Complete Getting Started</h3>
+                <p className={styles.timelineStepDesc}>Finish your profile, setup, registration, and communication readiness checks in the correct order.</p>
               </div>
             </div>
 
@@ -274,8 +280,8 @@ export default function LoginPage() {
                 </svg>
               </div>
               <div className={styles.timelineContent}>
-                <h3 className={styles.timelineStepTitle}>Access courses and credentials</h3>
-                <p className={styles.timelineStepDesc}>Open classroom courses, submit required credentials, and finish the operator setup flow cleanly.</p>
+                <h3 className={styles.timelineStepTitle}>Learn through Training Courses</h3>
+                <p className={styles.timelineStepDesc}>Build operator-specific knowledge through guided lessons and quizzes, with progress saved automatically.</p>
               </div>
             </div>
 
@@ -286,8 +292,8 @@ export default function LoginPage() {
                 </svg>
               </div>
               <div className={styles.timelineContent}>
-                <h3 className={styles.timelineStepTitle}>Resume anytime</h3>
-                <p className={styles.timelineStepDesc}>Your progress stays saved, so you can come back and continue onboarding or classroom work without losing place.</p>
+                <h3 className={styles.timelineStepTitle}>Apply it in the practical journey</h3>
+                <p className={styles.timelineStepDesc}>Use the 30-level Operator Journey to turn training into practical, trackable operator activity.</p>
               </div>
             </div>
           </div>
@@ -306,17 +312,17 @@ export default function LoginPage() {
             <p className={styles.kicker}>Secure Operator Access</p>
           </div>
           <h2 id="operator-login-title" className={styles.title}>
-            Enter operator workspace
+            Start or continue your operator training
           </h2>
           <p className={styles.subtitle}>
-            {otpRequested ? 'Verify your one-time code to unlock the next required step in your operator workspace.' : 'Sign in with your work email OTP to continue onboarding, operator tasks, and classroom access.'}
+            {otpRequested ? 'Enter the six-digit sign-in code sent to your invited email address.' : 'Use the email address that received your OBAOL invitation. We will send a six-digit sign-in code.'}
           </p>
 
           {!otpRequested ? (
             <form onSubmit={requestOtp} className={styles.form} noValidate>
               <div className={styles.labelRow}>
                 <label className={styles.label} htmlFor="email">
-                  Work Email
+                  Invited Email Address
                 </label>
                 <span className={styles.hint}>Step 1 of 2</span>
               </div>
@@ -328,7 +334,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   className={styles.input}
-                  placeholder="name@company.com"
+                placeholder="invited.name@company.com"
                   disabled={loading}
                   autoComplete="email"
                 />

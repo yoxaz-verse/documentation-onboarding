@@ -283,7 +283,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           : 'upcoming';
 
     const fields: AdminOperatorDetail['stepSections'][number]['fields'] = [];
-    let note = 'This step records milestone progress in the onboarding flow.';
+    let note = 'This step records milestone progress in Getting Started.';
 
     if (milestone.number === 3) {
       note = 'Individual expectation acknowledgements are not persisted in the current system.';

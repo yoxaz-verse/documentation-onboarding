@@ -105,7 +105,7 @@ export const MILESTONES: MilestoneDefinition[] = [
     slug: 'courses-unlocked',
     label: 'Courses Unlocked',
     shortLabel: 'Courses',
-    summary: 'Enter the operator training library once all guided onboarding is complete.',
+    summary: 'Enter the Training Courses library once Getting Started is complete.',
     route: '/step11',
   },
 ];

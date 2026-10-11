@@ -5,7 +5,7 @@ import { requireSession } from '../../../lib/serverAuth';
 import { supabaseAdmin } from '../../../lib/supabaseAdmin';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = requireSession(req, res);
+  const session = await requireSession(req, res);
   if (!session) return;
 
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });

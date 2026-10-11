@@ -57,7 +57,7 @@ function DetailContent() {
   useEffect(() => { loadDetail(); }, [loadDetail]);
 
   const stats = useMemo(() => detail ? [
-    { label: 'Onboarding', value: `${detail.progress?.completedMilestones || 0}/${detail.summary.totalOnboardingSteps}` },
+    { label: 'Getting Started', value: `${detail.progress?.completedMilestones || 0}/${detail.summary.totalOnboardingSteps}` },
     { label: 'Courses', value: `${detail.summary.completedCourses}/${detail.summary.totalCourses}` },
     { label: 'Lessons', value: `${detail.summary.completedLessons}/${detail.summary.totalLessons}` },
     { label: 'Journey days', value: `${detail.summary.completedJourneyDays}/${detail.summary.totalJourneyDays}` },
@@ -102,14 +102,14 @@ function DetailContent() {
       <div className={styles.bgOrbA} aria-hidden="true" /><div className={styles.bgOrbB} aria-hidden="true" />
       <div className={styles.container}>
         <header className={styles.header}>
-          <div className={styles.headingBlock}><p className={styles.kicker}>Operator activity record</p><h1 className={styles.title}>{detail?.summary.displayName || 'Operator Detail'}</h1><p className={styles.subtitle}>{email || 'Operator'} · onboarding, learning, submissions, and reviews</p></div>
+          <div className={styles.headingBlock}><p className={styles.kicker}>Operator activity record</p><h1 className={styles.title}>{detail?.summary.displayName || 'Operator Detail'}</h1><p className={styles.subtitle}>{email || 'Operator'} · Getting Started, learning, submissions, and reviews</p></div>
           <div className={styles.actions}><Link className={styles.linkButton} href="/admin">Back to dashboard</Link><ThemeToggle size="sm" variant="surface" /></div>
         </header>
         {error ? <article className={styles.card}>{error}</article> : null}
-        {!detail && !error ? <LoadingState title="Loading operator activity" message="Preparing onboarding, courses, attempts, and journey submissions…" preset="metrics" /> : null}
+        {!detail && !error ? <LoadingState title="Loading operator activity" message="Preparing Getting Started, courses, attempts, and journey submissions…" preset="metrics" /> : null}
 
         {detail ? <>
-          <nav className={styles.detailNav} aria-label="Operator detail sections"><a href="#overview" onClick={(event) => navigateToSection(event, 'overview')}>Overview</a><a href="#onboarding" onClick={(event) => navigateToSection(event, 'onboarding')}>Onboarding</a><a href="#courses" onClick={(event) => navigateToSection(event, 'courses')}>Courses</a><a href="#journey" onClick={(event) => navigateToSection(event, 'journey')}>30-day challenge</a></nav>
+          <nav className={styles.detailNav} aria-label="Operator detail sections"><a href="#overview" onClick={(event) => navigateToSection(event, 'overview')}>Overview</a><a href="#onboarding" onClick={(event) => navigateToSection(event, 'onboarding')}>Getting Started</a><a href="#courses" onClick={(event) => navigateToSection(event, 'courses')}>Training Courses</a><a href="#journey" onClick={(event) => navigateToSection(event, 'journey')}>Practical Journey</a></nav>
           {reviewMessage ? <article className={styles.reviewSuccess} role="status">{reviewMessage}</article> : null}
           {pendingReviews.length ? (
             <section id="admin-review" className={styles.adminReviewPanel} aria-labelledby="admin-review-title">
@@ -144,7 +144,7 @@ function DetailContent() {
           </section>
 
           <details id="onboarding" className={`${styles.timelineSection} ${styles.collapsibleSection}`} open={openSections.onboarding} onToggle={(event) => handleSectionToggle(event, 'onboarding')}>
-            <summary className={styles.collapsibleSummary}><div><p className={styles.kicker}>Foundation</p><h2 className={styles.funnelTitle}>Onboarding steps</h2></div><div className={styles.collapsibleMeta}><span className={styles.sectionMeta}>{detail.progress?.completedMilestones || 0}/{detail.summary.totalOnboardingSteps} complete</span><span className={styles.collapseChevron} aria-hidden="true">⌄</span></div></summary>
+            <summary className={styles.collapsibleSummary}><div><p className={styles.kicker}>Foundation</p><h2 className={styles.funnelTitle}>Getting Started steps</h2></div><div className={styles.collapsibleMeta}><span className={styles.sectionMeta}>{detail.progress?.completedMilestones || 0}/{detail.summary.totalOnboardingSteps} complete</span><span className={styles.collapseChevron} aria-hidden="true">⌄</span></div></summary>
             <div className={styles.collapsibleBody}><div className={styles.accordionStack}>{detail.stepSections.map((section) => <details key={section.step} className={styles.activityDetails} open={section.status === 'current'}><summary><span className={styles.timelineStepNumber}>{section.step}</span><span className={styles.summaryText}><strong>{section.label}</strong><small>{section.summary}</small></span><span className={badgeClass(section.status)}>{section.statusLabel}</span></summary><div className={styles.detailsBody}><p className={styles.timelineNote}>{section.note}</p>{section.fields.length ? <div className={styles.fieldGrid}>{section.fields.map((field) => <div key={field.label} className={styles.fieldPair}><span className={styles.fieldLabel}>{field.label}</span><span className={styles.fieldValue}>{field.value}</span></div>)}</div> : <p className={styles.meta}>No additional stored inputs for this step.</p>}</div></details>)}</div></div>
           </details>
 

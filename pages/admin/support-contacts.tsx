@@ -113,7 +113,7 @@ function SupportContactsAdminContent() {
           <div className={styles.headingBlock}>
             <p className={styles.kicker}>Communication Directory</p>
             <h1 className={styles.title}>Support Contacts</h1>
-            <p className={styles.subtitle}>Manage the onboarding and operator support people visible across the operator workspace.</p>
+            <p className={styles.subtitle}>Manage the Getting Started and operator support people visible across the operator workspace.</p>
           </div>
           <div className={styles.actions}>
             <Link className={styles.linkButton} href="/admin">Dashboard</Link>
@@ -138,8 +138,8 @@ function SupportContactsAdminContent() {
           <div className={styles.inquiryFormGrid}>
             <label className={styles.adminInputGroup}><span>Name *</span><input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></label>
             <label className={styles.adminInputGroup}><span>Phone *</span><input value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} placeholder="+919876543210" /></label>
-            <label className={styles.adminInputGroup}><span>Designation</span><input value={form.designation} onChange={(event) => setForm({ ...form, designation: event.target.value })} placeholder="Operator Onboarding" /></label>
-            <label className={styles.adminInputGroup}><span>Category</span><input value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} placeholder="Onboarding or Operator Support" /></label>
+            <label className={styles.adminInputGroup}><span>Designation</span><input value={form.designation} onChange={(event) => setForm({ ...form, designation: event.target.value })} placeholder="Operator Getting Started" /></label>
+            <label className={styles.adminInputGroup}><span>Category</span><input value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} placeholder="Getting Started or Operator Support" /></label>
             <label className={styles.adminInputGroup}><span>Display order</span><input type="number" min="0" value={form.displayOrder} onChange={(event) => setForm({ ...form, displayOrder: event.target.value })} /></label>
             <label className={`${styles.adminInputGroup} ${styles.adminInputWide}`}><span>Operator-facing note</span><textarea rows={3} value={form.note} onChange={(event) => setForm({ ...form, note: event.target.value })} /></label>
           </div>

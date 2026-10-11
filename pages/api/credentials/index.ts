@@ -24,7 +24,7 @@ function toView(record: OperatorCredentialRecord | null): OperatorCredentialView
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = requireSession(req, res);
+  const session = await requireSession(req, res);
   if (!session) return;
 
   const seedError = await ensureOperatorSeed(session.email);

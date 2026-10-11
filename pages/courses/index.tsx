@@ -8,7 +8,7 @@ import styles from '../onboarding.module.css';
 import { getAllCourses } from '../../config/courses';
 import { isUnauthorizedError } from '../../lib/http';
 import { areCoursesUnlocked } from '../../lib/onboarding';
-import { getProgressBundle } from '../../lib/progress';
+import { useWorkspace } from '../../hooks/useWorkspace';
 import type { CourseProgressSummary, LeaderboardEntry, ProgressRecord } from '../../lib/types';
 
 function statusLabel(summary?: { status: 'locked' | 'in_progress' | 'passed'; completedSubModules: number }) {
@@ -27,6 +27,7 @@ function courseThemeClass(theme: string) {
 }
 
 function ClassroomCatalogContent() {
+  const { data: workspace } = useWorkspace();
   const [ready, setReady] = useState(false);
   const [progress, setProgress] = useState<ProgressRecord | null>(null);
   const [courseProgress, setCourseProgress] = useState<CourseProgressSummary | null>(null);
@@ -41,10 +42,9 @@ function ClassroomCatalogContent() {
 
     const load = async () => {
       try {
-        const [bundle, leaderboardResponse] = await Promise.all([
-          getProgressBundle(),
-          fetch('/api/leaderboard', { credentials: 'include' }),
-        ]);
+        const bundle = workspace;
+        if (!bundle) return;
+        const leaderboardResponse = await fetch('/api/leaderboard', { credentials: 'include' });
 
         if (!active) return;
 
@@ -86,7 +86,7 @@ function ClassroomCatalogContent() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [workspace]);
 
   if (!ready) {
     return (
@@ -99,7 +99,7 @@ function ClassroomCatalogContent() {
   return (
     <OnboardingLayout
       title="Operator Training Library"
-      subtitle="Access operator-specific training tracks, keep every lesson saved, and build readiness only after the guided onboarding path is complete."
+      subtitle="Build operator-specific knowledge through structured lessons and quizzes after completing Getting Started."
       progress={progress}
       courseProgress={courseProgress}
       loading={!ready}

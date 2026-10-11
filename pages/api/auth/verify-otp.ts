@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { ensureOperatorSeed } from '../../../lib/ensureOperatorSeed';
 import { buildProgressUpdate } from '../../../lib/onboarding';
 import { hashOtp } from '../../../lib/otp';
 import { setSessionCookie } from '../../../lib/session';
@@ -15,6 +14,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const email = String(req.body?.email || '').trim().toLowerCase();
   const otp = String(req.body?.otp || '').trim();
   if (!email || !otp) return res.status(400).json({ error: 'Email and OTP are required.' });
+
+  const { data: eligibleOperator, error: eligibilityError } = await supabaseAdmin
+    .from('operators')
+    .select('email, name, invitation_status')
+    .eq('email', email)
+    .maybeSingle();
+  if (eligibilityError) return res.status(500).json({ error: 'Unable to verify your invitation right now.' });
+  if (!eligibleOperator || eligibleOperator.invitation_status === 'disabled') {
+    return res.status(403).json({
+      code: 'invitation_required',
+      error: 'Use the email address from your OBAOL invitation, or contact OBAOL support for access.',
+    });
+  }
 
   const nowIso = new Date().toISOString();
   const { data: codeRow, error } = await supabaseAdmin
@@ -99,14 +111,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
   console.debug('verify-otp: code consumed', { email, codeId: codeRow.id, consumedAt });
 
-  const { data: operator } = await supabaseAdmin
+  const activatedAt = new Date().toISOString();
+  const { error: activationError } = await supabaseAdmin
     .from('operators')
-    .select('name')
-    .eq('email', email)
-    .maybeSingle();
-
-  const seedError = await ensureOperatorSeed(email);
-  if (seedError) return res.status(500).json({ error: `Failed to prepare operator record: ${seedError}` });
+    .update({ invitation_status: 'active', activated_at: activatedAt, disabled_at: null })
+    .eq('email', email);
+  if (activationError) return res.status(500).json({ error: 'Failed to activate operator access.' });
 
   const { data: existingProgress, error: progressLookupError } = await supabaseAdmin
     .from('operator_progress')
@@ -124,7 +134,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (progressInsertError) return res.status(500).json({ error: progressInsertError.message });
   }
 
-  setSessionCookie(res, { email, name: operator?.name || null });
+  setSessionCookie(res, { email, name: eligibleOperator.name || null });
   console.debug('verify-otp: session cookie issued', {
     email,
     hasCookieHeader: Boolean(res.getHeader('Set-Cookie')),
@@ -134,6 +144,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     authenticated: true,
     next: '/',
     message: 'OTP verified.',
-    user: { email, name: operator?.name || null },
+    user: { email, name: eligibleOperator.name || null },
   });
 }

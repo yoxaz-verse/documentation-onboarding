@@ -3,8 +3,10 @@ import { useRouter } from 'next/router';
 import OnboardingLayout from './OnboardingLayout';
 import LoadingState, { LoadingButtonContent } from './LoadingState';
 import SupportContactList from './SupportContactList';
+import LazyVideoEmbed from './LazyVideoEmbed';
 import styles from '../pages/onboarding.module.css';
 import { isUnauthorizedError } from '../lib/http';
+import { useProfile, useWorkspace } from '../hooks/useWorkspace';
 import {
   areCoursesUnlocked,
   canAccessStep,
@@ -14,9 +16,10 @@ import {
   isMilestoneCompleted,
   type MilestoneNumber,
 } from '../lib/onboarding';
-import { completeStep, getProgressBundle } from '../lib/progress';
-import { getProfile, saveProfile } from '../lib/profile';
-import type { CourseProgressSummary, ProgressRecord } from '../lib/types';
+import { completeStep } from '../lib/progress';
+import { saveProfile } from '../lib/profile';
+import type { OperatorProfile } from '../lib/types';
+import { trackFunnelEvent } from '../lib/clientFunnel';
 
 const WHATSAPP_GROUP_URL = 'https://chat.whatsapp.com/LO1Hq98MF1X9lVc1PIlAwn?mode=gi_t';
 
@@ -28,9 +31,9 @@ function nextRouteAfter(step: MilestoneNumber) {
 export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }) {
   const router = useRouter();
   const milestone = getMilestone(step);
-  const [progress, setProgress] = useState<ProgressRecord | null>(null);
-  const [courseProgress, setCourseProgress] = useState<CourseProgressSummary | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { progress, courseProgress, loading: loadingWorkspace, mutate: mutateWorkspace } = useWorkspace();
+  const { data: profileData, isLoading: loadingProfile, mutate: mutateProfile } = useProfile();
+  const loading = loadingWorkspace || loadingProfile;
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [operatorPageOpened, setOperatorPageOpened] = useState(false);
@@ -65,10 +68,7 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
     return true;
   }, [step, operatorPageOpened, expectationsChecked]);
 
-  const load = async () => {
-    const [bundle, currentProfile] = await Promise.all([getProgressBundle(), getProfile()]);
-    setProgress(bundle.progress);
-    setCourseProgress(bundle.courseProgress);
+  const applyProfile = (currentProfile: OperatorProfile) => {
     setExperienceForm({
       full_name: currentProfile.full_name || '',
       phone: currentProfile.phone || '',
@@ -83,31 +83,13 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
   };
 
   useEffect(() => {
-    let active = true;
+    if (profileData?.profile) applyProfile(profileData.profile);
+  }, [profileData?.profile?.updated_at, step]);
 
-    const run = async () => {
-      try {
-        await load();
-        if (!active) return;
-        setMessage('');
-      } catch (error) {
-        if (!active) return;
-        if (isUnauthorizedError(error)) {
-          router.replace('/');
-          return;
-        }
-        setMessage(error instanceof Error ? error.message : 'Failed to load onboarding step.');
-      } finally {
-        if (active) setLoading(false);
-      }
-    };
-
-    run();
-
-    return () => {
-      active = false;
-    };
-  }, [router, step]);
+  const load = async () => {
+    const [, refreshedProfile] = await Promise.all([mutateWorkspace(), mutateProfile()]);
+    if (refreshedProfile?.profile) applyProfile(refreshedProfile.profile);
+  };
 
   useEffect(() => {
     if (!progress || loading) return;
@@ -116,6 +98,10 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
       router.replace(next?.route || '/courses');
     }
   }, [progress, loading, router, step]);
+
+  useEffect(() => {
+    if (step === 1 && !loading && progress) trackFunnelEvent('getting_started_step_1_viewed');
+  }, [loading, progress, step]);
 
   if (!milestone) return null;
 
@@ -130,6 +116,7 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
     try {
       await completeStep(step);
       await load();
+      if (step === 1) trackFunnelEvent('getting_started_step_1_completed');
       setMessage('Step completed.');
       router.push(nextRouteAfter(step));
     } catch (error) {
@@ -265,18 +252,12 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
     1: (
       <>
         <section className={styles.embedWrap}>
-          <iframe
-            className={styles.embed}
-            src="https://www.youtube.com/embed/RpDVucls7uw"
-            title="Company overview"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+          <LazyVideoEmbed className={styles.embed} videoId="RpDVucls7uw" title="Company overview" />
         </section>
         <section className={styles.callout}>
           <h2 className={styles.calloutTitle}>Why this comes first</h2>
           <p className={styles.calloutText}>
-            Before someone starts operating, they need context on what the company does, what the system supports, and why this onboarding exists.
+            Before someone starts operating, they need context on what the company does, what the system supports, and why Getting Started comes first.
           </p>
         </section>
         <ul className={styles.stepList}>
@@ -289,13 +270,7 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
     2: (
       <>
         <section className={styles.embedWrap}>
-          <iframe
-            className={styles.embed}
-            src="https://www.youtube.com/embed/k9EXz9oULcc"
-            title="Operator Model Overview"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+          <LazyVideoEmbed className={styles.embed} videoId="k9EXz9oULcc" title="Operator Model Overview" />
         </section>
         <section className={styles.callout}>
           <h2 className={styles.calloutTitle}>What the operator model means</h2>
@@ -382,13 +357,7 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
           <p className={styles.calloutHint}>You can replace this link later if the final public page changes.</p>
         </section>
         <section className={styles.embedWrap}>
-          <iframe
-            className={styles.embed}
-            src="https://www.youtube.com/embed/-08ODNSg8io"
-            title="Commission Structure Overview"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+          <LazyVideoEmbed className={styles.embed} videoId="-08ODNSg8io" title="Commission Structure Overview" />
         </section>
       </>
     ),
@@ -490,7 +459,7 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
         <section className={styles.callout}>
           <h2 className={styles.calloutTitle}>Join the official operator WhatsApp group</h2>
           <p className={styles.calloutText}>
-            Join the group to receive operator updates, coordinate with the team, and ask relevant questions during onboarding and execution.
+            Join the group to receive operator updates, coordinate with the team, and ask relevant questions during Getting Started and execution.
           </p>
           <div className={styles.actionRow}>
             <a href={WHATSAPP_GROUP_URL} className={styles.cta} target="_blank" rel="noopener noreferrer">
@@ -514,7 +483,7 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
         <section className={styles.callout}>
           <h2 className={styles.calloutTitle}>Register on the operator platform next</h2>
           <p className={styles.calloutText}>
-            Go to the operator registration page and create your OBAOL operator account. Complete the registration there, then return to this page to confirm and continue onboarding.
+            Go to the operator registration page and create your OBAOL operator account. Complete the registration there, then return to this page to confirm and continue Getting Started.
           </p>
           <div className={styles.actionRow}>
             <a href="https://www.obaol.com/auth/operator/register" className={styles.cta} target="_blank" rel="noreferrer">
@@ -525,7 +494,7 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
         </section>
         <label className={styles.message}>
           <input type="checkbox" checked={registrationChecked} onChange={(event) => setRegistrationChecked(event.target.checked)} />
-          {' '}I completed my operator registration on obaol.com and came back to continue onboarding.
+          {' '}I completed my operator registration on obaol.com and came back to continue Getting Started.
         </label>
         <div className={styles.actionRow}>
           <button type="button" className={styles.primaryButton} onClick={confirmOperatorRegistration} disabled={saving}>
@@ -542,7 +511,7 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
           </p>
         </section>
         <SupportContactList
-          title="Need onboarding or operator support?"
+          title="Need Getting Started or operator support?"
           description="Contact an available team member before confirming your communication readiness."
         />
         <label className={styles.message}>
@@ -560,7 +529,7 @@ export default function OnboardingStepScreen({ step }: { step: MilestoneNumber }
         <section className={styles.callout}>
           <h2 className={styles.calloutTitle}>Your training library is now available</h2>
           <p className={styles.calloutText}>
-            You have completed the guided onboarding checkpoints. The operator courses are now unlocked so you can begin structured training.
+            You have completed Getting Started. The Training Courses are now unlocked so you can begin structured learning.
           </p>
         </section>
         <div className={styles.kpiGrid}>

@@ -1,22 +1,16 @@
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
 import AuthGate from '../components/AuthGate';
 import OnboardingLayout from '../components/OnboardingLayout';
 import LoadingState from '../components/LoadingState';
 import styles from './onboarding.module.css';
-import { isUnauthorizedError } from '../lib/http';
 import { areCoursesUnlocked } from '../lib/onboarding';
-import { getOrCreateProgress } from '../lib/progress';
-import { getProfile } from '../lib/profile';
-import type { OperatorProfile, ProgressRecord } from '../lib/types';
+import { useProfile, useWorkspace } from '../hooks/useWorkspace';
 
 function ProfileContent() {
-  const router = useRouter();
-  const [progress, setProgress] = useState<ProgressRecord | null>(null);
-  const [profile, setProfile] = useState<OperatorProfile | null>(null);
-  const [loadingProfile, setLoadingProfile] = useState(true);
-  const [message, setMessage] = useState('');
+  const { progress, loading: loadingWorkspace } = useWorkspace();
+  const { data, error, isLoading } = useProfile();
+  const profile = data?.profile || null;
+  const loadingProfile = loadingWorkspace || isLoading;
   const profileFields = profile
     ? [
         ['Full name', profile.full_name || 'Not set'],
@@ -31,34 +25,14 @@ function ProfileContent() {
       ]
     : [];
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [currentProgress, currentProfile] = await Promise.all([getOrCreateProgress(), getProfile()]);
-        setProgress(currentProgress);
-        setProfile(currentProfile);
-      } catch (error) {
-        if (isUnauthorizedError(error)) {
-          router.replace('/');
-          return;
-        }
-
-        setMessage(error instanceof Error ? error.message : 'Failed to load profile.');
-      } finally {
-        setLoadingProfile(false);
-      }
-    };
-    load();
-  }, [router]);
-
   return (
     <OnboardingLayout
       title="Operator Profile"
-      subtitle="Review the details tied to your operator workspace and keep them accurate as you move through onboarding."
+      subtitle="Review the details tied to your operator workspace and keep them accurate as you move through Getting Started."
       progress={progress}
       loading={loadingProfile}
     >
-      {message ? <p className={`${styles.message} ${styles.messageError}`}>{message}</p> : null}
+      {error ? <p className={`${styles.message} ${styles.messageError}`}>{error.message || 'Failed to load profile.'}</p> : null}
 
       {profile ? (
         <section className={styles.profileCard}>
@@ -78,7 +52,7 @@ function ProfileContent() {
 
           <div className={styles.actionRow}>
             <Link href="/step6" className={styles.cta}>Update Profile Details</Link>
-            {!areCoursesUnlocked(progress) ? <Link href="/step1" className={styles.secondaryButton}>Return to onboarding</Link> : null}
+            {!areCoursesUnlocked(progress) ? <Link href="/step1" className={styles.secondaryButton}>Return to Getting Started</Link> : null}
           </div>
         </section>
       ) : (
@@ -89,5 +63,7 @@ function ProfileContent() {
 }
 
 export default function ProfilePage() {
+  // Warm profile data in parallel with the workspace bootstrap.
+  useProfile();
   return <AuthGate>{() => <ProfileContent />}</AuthGate>;
 }

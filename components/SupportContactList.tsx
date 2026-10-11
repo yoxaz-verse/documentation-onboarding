@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import useSWR from 'swr';
+import { apiFetcher } from '../lib/clientData';
 import { whatsappHref, type SupportContact } from '../lib/supportContacts';
 import styles from './SupportContactList.module.css';
 
@@ -8,27 +9,20 @@ type Props = {
   compact?: boolean;
 };
 
+export function useSupportContacts() {
+  return useSWR<{ contacts: SupportContact[] }>('/api/support-contacts', apiFetcher, {
+    dedupingInterval: 30_000,
+    revalidateOnFocus: false,
+  });
+}
+
 export default function SupportContactList({
   title = 'Operator support contacts',
-  description = 'Reach an available onboarding or operator support contact when you need help.',
+  description = 'Reach an available Getting Started or operator support contact when you need help.',
 }: Props) {
-  const [contacts, setContacts] = useState<SupportContact[]>([]);
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-
-  useEffect(() => {
-    let active = true;
-    fetch('/api/support-contacts', { credentials: 'include', cache: 'no-store' })
-      .then(async (response) => {
-        const payload = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(payload?.error || 'Failed to load support contacts.');
-        if (active) {
-          setContacts((payload.contacts || []) as SupportContact[]);
-          setStatus('ready');
-        }
-      })
-      .catch(() => active && setStatus('error'));
-    return () => { active = false; };
-  }, []);
+  const { data, error, isLoading } = useSupportContacts();
+  const contacts = data?.contacts || [];
+  const status = isLoading ? 'loading' : error ? 'error' : 'ready';
 
   return (
     <section className={styles.section} aria-label={title}>

@@ -1,6 +1,9 @@
 import { HttpError, expectJson, readJsonResponse } from './http';
 import type { ProgressRecord, ProgressResponse } from './types';
 import type { StepKey } from './onboarding';
+import { mutate } from 'swr';
+import { WORKSPACE_KEY } from './clientData';
+import type { WorkspaceBootstrapResponse } from './types';
 
 export async function getProgressBundle(): Promise<ProgressResponse> {
   const response = await fetch('/api/progress');
@@ -31,5 +34,11 @@ export async function completeStep(step: StepKey) {
 
   const payload = await expectJson<{ progress: ProgressRecord; error?: string }>(response, 'Failed to update progress.');
 
-  return payload.progress as ProgressRecord;
+  const progress = payload.progress as ProgressRecord;
+  await mutate<WorkspaceBootstrapResponse>(
+    WORKSPACE_KEY,
+    (current) => current ? { ...current, progress } : current,
+    { revalidate: false }
+  );
+  return progress;
 }

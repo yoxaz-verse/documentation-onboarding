@@ -84,7 +84,7 @@ export default function AdminLoginPage() {
             <span>Admin Dashboard</span>
             <span>Operator Progress Console</span>
           </h1>
-          <p className={styles.heroSubtitle}>Secure admin-only view for onboarding funnel and operator status.</p>
+          <p className={styles.heroSubtitle}>Secure admin-only view for the Getting Started funnel and operator status.</p>
         </section>
 
         <section className={styles.formPanel}>

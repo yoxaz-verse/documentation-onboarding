@@ -7,12 +7,16 @@ import { normalizeJourneyDayTemplates, type JourneyMilestoneRecord, type Journey
 import { FINAL_MILESTONE, getCompletedMilestoneCount, MILESTONES, normalizeProgressRecord } from '../../../lib/onboarding';
 import { isMissingSupabaseTableError } from '../../../lib/supabaseErrors';
 import { supabaseAdmin } from '../../../lib/supabaseAdmin';
+import { FUNNEL_EVENTS, FUNNEL_EVENT_LABELS, type FunnelEventName } from '../../../lib/funnel';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = requireAdminSession(req, res);
   if (!session) return;
 
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+  const requestedDays = Number(req.query.days || 30);
+  const days = [7, 30, 90].includes(requestedDays) ? requestedDays : 30;
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
   const [
     { data: operators, error: operatorsError },
@@ -21,13 +25,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     { data: journeyMilestoneRows, error: journeyMilestoneError },
     { data: journeySubmissionRows, error: journeySubmissionError },
     { data: templateRows, error: templateError },
+    { data: funnelRows, error: funnelError },
   ] = await Promise.all([
-    supabaseAdmin.from('operators').select('email'),
+    supabaseAdmin.from('operators').select('email, invitation_status'),
     supabaseAdmin.from('operator_progress').select('email, current_step, step1_completed, step2_completed, step3_completed, step4_completed, updated_at'),
     supabaseAdmin.from('operator_journey_state').select('email, started_at, updated_at'),
     supabaseAdmin.from('operator_journey_milestone_state').select('email, milestone_id, completed_at, updated_at'),
     supabaseAdmin.from('operator_journey_day_submissions').select('email, template_id, day_number, status, submitted_at, reviewed_at, created_at, updated_at'),
     supabaseAdmin.from('operator_journey_day_templates').select('template_id, day_number, title, description, category, href, action_label, is_active, rich_template, review_required, button_text, completion_message'),
+    supabaseAdmin.from('operator_funnel_events').select('event_name, visitor_id, email').gte('created_at', since),
   ]);
 
   if (operatorsError) return res.status(500).json({ error: operatorsError.message });
@@ -36,6 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (journeyMilestoneError && !isMissingSupabaseTableError(journeyMilestoneError)) return res.status(500).json({ error: journeyMilestoneError.message });
   if (journeySubmissionError && !isMissingSupabaseTableError(journeySubmissionError)) return res.status(500).json({ error: journeySubmissionError.message });
   if (templateError && !isMissingSupabaseTableError(templateError)) return res.status(500).json({ error: templateError.message });
+  if (funnelError && !isMissingSupabaseTableError(funnelError)) return res.status(500).json({ error: funnelError.message });
 
   const progressMap = new Map((progressData || []).map((row) => [row.email, row]));
   const journeyMap = new Map((journeyRows || []).map((row) => [row.email, row]));
@@ -72,12 +79,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       templates: journeyTemplates,
     });
   });
+  const invitationCounts = (operators || []).reduce<Record<'invited' | 'active' | 'disabled', number>>((counts, operator) => {
+    const status = (operator.invitation_status || 'invited') as 'invited' | 'active' | 'disabled';
+    counts[status] += 1;
+    return counts;
+  }, { invited: 0, active: 0, disabled: 0 });
+  const funnelStages = FUNNEL_EVENTS.map((event, index) => {
+    const identities = new Set(
+      (funnelRows || [])
+        .filter((row) => row.event_name === event)
+        .map((row) => row.email || row.visitor_id)
+        .filter(Boolean)
+    );
+    const previousEvent = FUNNEL_EVENTS[index - 1];
+    const previousCount = previousEvent
+      ? new Set((funnelRows || []).filter((row) => row.event_name === previousEvent).map((row) => row.email || row.visitor_id).filter(Boolean)).size
+      : 0;
+    return {
+      event,
+      label: FUNNEL_EVENT_LABELS[event as FunnelEventName],
+      count: identities.size,
+      conversionFromPrevious: index === 0 ? null : previousCount > 0 ? Math.round((identities.size / previousCount) * 100) : 0,
+    };
+  });
 
   const overview: AdminOverview = {
     totalOperators,
     completedOperators,
     inProgressOperators,
     completionRate,
+    invitationCounts,
+    funnel: { days, stages: funnelStages },
     stepCompletion,
     journey: buildAdminJourneyAnalytics(journeySnapshots, journeyTemplates.length || 30),
   };

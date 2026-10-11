@@ -4,7 +4,7 @@ import OnboardingLayout from '../components/OnboardingLayout';
 import LoadingState from '../components/LoadingState';
 import { isUnauthorizedError } from '../lib/http';
 import { areCoursesUnlocked } from '../lib/onboarding';
-import { getProgressBundle } from '../lib/progress';
+import { useWorkspace } from '../hooks/useWorkspace';
 import type { CourseProgressSummary, ProgressRecord, PublicLiveInquiry, SessionUser } from '../lib/types';
 import styles from './onboarding.module.css';
 
@@ -21,6 +21,7 @@ function formatDate(value: string | null) {
 }
 
 function InquiriesContent({ user }: { user: SessionUser }) {
+  const { data: workspace } = useWorkspace();
   const [state, setState] = useState<PageState>({ status: 'loading' });
 
   useEffect(() => {
@@ -28,7 +29,8 @@ function InquiriesContent({ user }: { user: SessionUser }) {
 
     const load = async () => {
       try {
-        const progressBundle = await getProgressBundle();
+        const progressBundle = workspace;
+        if (!progressBundle) return;
         if (!active) return;
 
         if (!areCoursesUnlocked(progressBundle.progress)) {
@@ -76,7 +78,7 @@ function InquiriesContent({ user }: { user: SessionUser }) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [workspace]);
 
   const progress = state.status === 'ready' ? state.progress : null;
   const courseProgress = state.status === 'ready' ? state.courseProgress : null;

@@ -22,7 +22,7 @@ function schemaError(res: NextApiResponse, table: string) {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = requireSession(req, res);
+  const session = await requireSession(req, res);
   if (!session) return;
 
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });

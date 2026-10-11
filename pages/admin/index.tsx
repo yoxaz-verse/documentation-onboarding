@@ -46,6 +46,11 @@ function DashboardContent() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [funnelDays, setFunnelDays] = useState(30);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteMessage, setInviteMessage] = useState('');
+  const [inviteSaving, setInviteSaving] = useState(false);
+  const [refreshVersion, setRefreshVersion] = useState(0);
 
   useEffect(() => {
     const load = async () => {
@@ -63,7 +68,7 @@ function DashboardContent() {
         if (submissionStatusFilter) params.set('submissionStatus', submissionStatusFilter);
 
         const [overviewResponse, operatorsResponse] = await Promise.all([
-          fetch('/api/admin/overview', { credentials: 'include', cache: 'no-store' }),
+          fetch(`/api/admin/overview?days=${funnelDays}`, { credentials: 'include', cache: 'no-store' }),
           fetch(`/api/admin/operators?${params.toString()}`, { credentials: 'include', cache: 'no-store' }),
         ]);
 
@@ -82,7 +87,31 @@ function DashboardContent() {
     };
 
     load();
-  }, [page, query, stepFilter, stepStateFilter, journeyDayFilter, journeyStatusFilter, submissionStatusFilter]);
+  }, [page, query, stepFilter, stepStateFilter, journeyDayFilter, journeyStatusFilter, submissionStatusFilter, funnelDays, refreshVersion]);
+
+  const updateInvitation = async (email: string, status?: 'invited' | 'disabled') => {
+    setInviteSaving(true);
+    setInviteMessage('');
+    try {
+      const response = await fetch('/api/admin/operators/invitations', {
+        method: status ? 'PATCH' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(status ? { email, status } : { email }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || 'Failed to update invitation.');
+      setInviteMessage(status === 'disabled' ? 'Operator access disabled.' : status === 'invited' ? 'Invitation reactivated.' : 'Operator invited successfully.');
+      if (!status) setInviteEmail('');
+      setOperators((current) => current.map((row) => row.email === email ? { ...row, invitationStatus: status || 'invited' } : row));
+      setPage(1);
+      setRefreshVersion((current) => current + 1);
+    } catch (error) {
+      setInviteMessage(error instanceof Error ? error.message : 'Failed to update invitation.');
+    } finally {
+      setInviteSaving(false);
+    }
+  };
 
   const funnelRows = useMemo(() => {
     if (!overview) return [];
@@ -134,7 +163,7 @@ function DashboardContent() {
           <div className={styles.headingBlock}>
             <p className={styles.kicker}>Operations Overview</p>
             <h1 className={styles.title}>Admin Dashboard</h1>
-            <p className={styles.subtitle}>Monitor the guided operator onboarding funnel and course unlock readiness in real time.</p>
+            <p className={styles.subtitle}>Monitor invitations, Getting Started progress, training readiness, and the practical journey in real time.</p>
           </div>
           <div className={styles.actions}>
             <Link className={styles.linkButton} href="/admin/inquiries">Live Inquiries</Link>
@@ -171,6 +200,33 @@ function DashboardContent() {
             <p className={styles.cardLabel}>Needs Attention</p>
             <p className={styles.cardValue}>{attentionCount}</p>
           </article>
+        </section>
+
+        <section className={styles.funnel}>
+          <div className={styles.sectionHeader}>
+            <div><h2 className={styles.funnelTitle}>Invite an operator</h2><p className={styles.sectionMeta}>Only invited email addresses can receive a sign-in code</p></div>
+          </div>
+          <form className={styles.inviteForm} onSubmit={(event) => { event.preventDefault(); void updateInvitation(inviteEmail.trim().toLowerCase()); }}>
+            <input className={styles.search} type="email" required value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} placeholder="operator@company.com" aria-label="Operator email to invite" />
+            <button className={styles.actionButton} type="submit" disabled={inviteSaving}>{inviteSaving ? 'Saving…' : 'Invite operator'}</button>
+            {inviteMessage ? <span className={styles.meta} role="status">{inviteMessage}</span> : null}
+          </form>
+        </section>
+
+        <section className={styles.funnel}>
+          <div className={styles.sectionHeader}>
+            <div><h2 className={styles.funnelTitle}>Entry conversion funnel</h2><p className={styles.sectionMeta}>Unique visitors or operators at each stage</p></div>
+            <label className={styles.filterControl}><span>Period</span><select value={funnelDays} onChange={(event) => setFunnelDays(Number(event.target.value))}><option value={7}>7 days</option><option value={30}>30 days</option><option value={90}>90 days</option></select></label>
+          </div>
+          <div className={styles.funnelStageGrid}>
+            {(overview?.funnel.stages || []).map((stage) => (
+              <article key={stage.event} className={styles.card}>
+                <p className={styles.cardLabel}>{stage.label}</p>
+                <p className={styles.cardValue}>{stage.count}</p>
+                <p className={styles.meta}>{stage.conversionFromPrevious === null ? 'Entry point' : `${stage.conversionFromPrevious}% from previous stage`}</p>
+              </article>
+            ))}
+          </div>
         </section>
 
         <section className={styles.funnel}>
@@ -258,7 +314,7 @@ function DashboardContent() {
             </label>
             <div className={styles.filterGrid}>
               <label className={styles.filterControl}>
-                <span>Onboarding step</span>
+                <span>Getting Started step</span>
                 <select value={stepFilter} onChange={(event) => { setPage(1); setStepFilter(event.target.value); }}>
                   <option value="">All steps</option>
                   {Array.from({ length: 11 }, (_, index) => index + 1).map((step) => <option key={step} value={step}>Step {step}</option>)}
@@ -310,6 +366,7 @@ function DashboardContent() {
               <thead>
                 <tr>
                   <th>Operator</th>
+                  <th>Invitation</th>
                   <th>Current Step</th>
                   <th>Completion</th>
                   <th>Journey</th>
@@ -327,8 +384,12 @@ function DashboardContent() {
                       <div className={styles.meta}>{row.email}</div>
                     </td>
                     <td>
+                      <span className={row.invitationStatus === 'disabled' ? styles.badgePending : styles.badgeDone}>{row.invitationStatus}</span>
+                      <div className={styles.meta}>{row.invitedAt ? `Invited ${formatDate(row.invitedAt)}` : 'Legacy invitation'}</div>
+                    </td>
+                    <td>
                       <div className={styles.operatorName}>Step {Math.min(row.currentStep, 11)}</div>
-                      <div className={styles.meta}>{row.currentStep > 11 ? 'Courses unlocked' : 'Onboarding active'}</div>
+                      <div className={styles.meta}>{row.currentStep > 11 ? 'Training Courses unlocked' : 'Getting Started active'}</div>
                     </td>
                     <td>
                       <span className={row.completedMilestones >= 11 ? styles.badgeDone : styles.badgePending}>
@@ -367,6 +428,7 @@ function DashboardContent() {
                     </td>
                     <td>{formatDate(row.latestActivityAt)}</td>
                     <td>
+                      <div className={styles.adminActionCell}>
                       {row.journeyPendingReviewCount > 0 ? (
                         <div className={styles.adminActionCell}>
                           <span>Operator blocked</span>
@@ -377,12 +439,16 @@ function DashboardContent() {
                       ) : (
                         <Link className={styles.linkButton} href={`/admin/operators/${encodeURIComponent(row.email)}`}>Open details</Link>
                       )}
+                      <button className={styles.linkButton} type="button" disabled={inviteSaving} onClick={() => void updateInvitation(row.email, row.invitationStatus === 'disabled' ? 'invited' : 'disabled')}>
+                        {row.invitationStatus === 'disabled' ? 'Reactivate' : 'Disable access'}
+                      </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
                 {!loading && operators.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className={styles.emptyState}>No operators found.</td>
+                    <td colSpan={9} className={styles.emptyState}>No operators found.</td>
                   </tr>
                 ) : null}
               </tbody>

@@ -9,7 +9,7 @@ import styles from '../onboarding.module.css';
 import { getCourseById, getSubModuleById } from '../../config/courses';
 import { isUnauthorizedError } from '../../lib/http';
 import { areCoursesUnlocked } from '../../lib/onboarding';
-import { getProgressBundle } from '../../lib/progress';
+import { useWorkspace } from '../../hooks/useWorkspace';
 import type { CourseProgressSummary, LeaderboardEntry, ProgressRecord } from '../../lib/types';
 
 function lessonWord(count: number) {
@@ -39,6 +39,7 @@ function accordionStatusLabel(status?: 'locked' | 'in_progress' | 'passed') {
 
 function ClassroomDetailContent() {
   const router = useRouter();
+  const { data: workspace, mutate: mutateWorkspace } = useWorkspace();
   const [ready, setReady] = useState(false);
   const [progress, setProgress] = useState<ProgressRecord | null>(null);
   const [courseProgress, setCourseProgress] = useState<CourseProgressSummary | null>(null);
@@ -51,9 +52,11 @@ function ClassroomDetailContent() {
 
   const reload = async (completedSubModuleId?: string) => {
     const [bundle, leaderboardResponse] = await Promise.all([
-      getProgressBundle(),
+      completedSubModuleId ? mutateWorkspace() : Promise.resolve(workspace),
       fetch('/api/leaderboard', { credentials: 'include' }),
     ]);
+
+    if (!bundle) return;
 
     const leaderboardPayload = leaderboardResponse.ok ? await leaderboardResponse.json() : await leaderboardResponse.json().catch(() => ({}));
     if (!areCoursesUnlocked(bundle.progress)) {
@@ -82,7 +85,7 @@ function ClassroomDetailContent() {
   };
 
   useEffect(() => {
-    if (!router.isReady) return;
+    if (!router.isReady || !workspace) return;
 
     let active = true;
     const load = async () => {
@@ -112,7 +115,7 @@ function ClassroomDetailContent() {
     return () => {
       active = false;
     };
-  }, [router.isReady, courseId]);
+  }, [router.isReady, courseId, workspace]);
 
   if (!ready) {
     return (

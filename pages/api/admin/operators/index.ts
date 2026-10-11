@@ -39,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     { data: journeySubmissionRows, error: journeySubmissionError },
     { data: templateRows, error: templateError },
   ] = await Promise.all([
-    supabaseAdmin.from('operators').select('email, name'),
+    supabaseAdmin.from('operators').select('email, name, invitation_status, invited_at'),
     supabaseAdmin.from('operator_profiles').select('email, full_name'),
     supabaseAdmin
       .from('operator_progress')
@@ -123,6 +123,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       email: operator.email,
       name: operator.name || null,
       profileName: profile?.full_name || null,
+      invitationStatus: operator.invitation_status || 'invited',
+      invitedAt: operator.invited_at || null,
       currentStep,
       completedMilestones,
       journeyStartedAt: journey?.started_at || null,

@@ -657,7 +657,7 @@ function JourneyContent() {
     return (
       <OnboardingLayout
         title="Operator Journey"
-        subtitle="The 30-level journey unlocks after the guided onboarding path reaches Step 10 completion."
+        subtitle="The Practical Operator Journey unlocks after Step 10 of Getting Started is complete."
         progress={state.progress}
         courseProgress={state.courseProgress}
       >
@@ -893,7 +893,7 @@ function JourneyContent() {
                 {selectedTemplate.day === 1 ? (
                   <SupportContactList
                     title="Available operator support"
-                    description="If you have an access or onboarding problem, call or WhatsApp an available support person before submitting Level 1."
+                    description="If you have an access or Getting Started problem, call or WhatsApp an available support person before submitting Level 1."
                   />
                 ) : null}
               </div>

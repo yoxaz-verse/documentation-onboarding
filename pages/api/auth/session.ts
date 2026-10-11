@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getSessionFromRequest } from '../../../lib/session';
+import { supabaseAdmin } from '../../../lib/supabaseAdmin';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
@@ -24,6 +25,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         reason: hasSessionCookie ? 'invalid_or_expired_cookie' : 'missing_cookie',
       });
       return res.status(401).json({ authenticated: false });
+    }
+
+    const { data: operator, error: operatorError } = await supabaseAdmin
+      .from('operators')
+      .select('invitation_status')
+      .eq('email', session.email)
+      .maybeSingle();
+    if (operatorError || !operator || operator.invitation_status === 'disabled') {
+      return res.status(operatorError ? 500 : 401).json({ authenticated: false, error: operatorError ? 'Session check failed' : 'Operator access is disabled.' });
     }
 
     console.debug('session: authenticated request', { email: session.email, hasSessionCookie });

@@ -1,33 +1,25 @@
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import ThemeToggle from '../components/theme/ThemeToggle';
 import authStyles from '../components/AuthGate.module.css';
 import OnboardingLayout from '../components/OnboardingLayout';
 import LoadingState from '../components/LoadingState';
 import styles from './onboarding.module.css';
-import { isHttpError, isUnauthorizedError } from '../lib/http';
 import { areCoursesUnlocked, getCompletedMilestoneCount, getNextMilestone, MILESTONES } from '../lib/onboarding';
-import { getProgressBundle } from '../lib/progress';
+import { isUnauthorizedError } from '../lib/http';
+import { useWorkspace } from '../hooks/useWorkspace';
 import type { CourseProgressSummary, ProgressRecord, SessionUser } from '../lib/types';
-
-type HomeState =
-  | { status: 'loading' }
-  | { status: 'signed_out' }
-  | { status: 'error'; message: string }
-  | { status: 'authenticated'; user: SessionUser };
-
-type SessionPayload = {
-  authenticated?: boolean;
-  error?: string;
-  user?: SessionUser;
-};
+import { trackFunnelEvent } from '../lib/clientFunnel';
 
 type HomeContentProps = {
   user: SessionUser;
-  onSessionExpired: () => void;
 };
 
 function SignedOutHome() {
+  useEffect(() => {
+    trackFunnelEvent('landing_view');
+  }, []);
+
   return (
     <main className={authStyles.loadingPage}>
       <div className={authStyles.glowA} aria-hidden="true" />
@@ -43,16 +35,22 @@ function SignedOutHome() {
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
             </svg>
           </div>
-          <span className={authStyles.logoText}>OBAOL Workspace</span>
+          <span className={authStyles.logoText}>OBAOL Operator Program</span>
         </div>
 
-        <h1 className={authStyles.heading}>Enter your operator workspace</h1>
+        <h1 className={authStyles.heading}>Learn how to become a successful OBAOL operator</h1>
         <p className={authStyles.message}>
-          Sign in with your OTP to continue onboarding, manage your operator profile, and return to classroom courses from one workspace.
+          A guided program for invited operators: complete Getting Started, learn through operator-specific training courses, then apply your skills in the practical 30-level Operator Journey.
         </p>
-        <Link href="/auth/login" className={styles.cta}>
-          Enter workspace
+        <ol className={authStyles.programStages} aria-label="Operator program stages">
+          <li><strong>1. Getting Started</strong><span>Understand the model and complete required setup.</span></li>
+          <li><strong>2. Training Courses</strong><span>Build the knowledge required to operate confidently.</span></li>
+          <li><strong>3. Practical Operator Journey</strong><span>Apply the learning through 30 guided levels.</span></li>
+        </ol>
+        <Link href="/auth/login" className={styles.cta} onClick={() => trackFunnelEvent('getting_started_cta_clicked')}>
+          Start Getting Started
         </Link>
+        <p className={authStyles.invitationHint}>Returning operator? Use the same button to continue. Have your invitation email ready.</p>
       </section>
     </main>
   );
@@ -87,41 +85,9 @@ function HomeError({ message }: { message: string }) {
   );
 }
 
-function HomeContent({ user, onSessionExpired }: HomeContentProps) {
-  const [progress, setProgress] = useState<ProgressRecord | null>(null);
-  const [courseProgress, setCourseProgress] = useState<CourseProgressSummary | null>(null);
-  const [loadingProgress, setLoadingProgress] = useState(true);
-  const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    let active = true;
-
-    const load = async () => {
-      try {
-        const bundle = await getProgressBundle();
-        if (!active) return;
-        setProgress(bundle.progress);
-        setCourseProgress(bundle.courseProgress);
-        setMessage('');
-      } catch (error) {
-        if (!active) return;
-        if (isUnauthorizedError(error)) {
-          onSessionExpired();
-          return;
-        }
-
-        setMessage(error instanceof Error ? error.message : 'Failed to load onboarding progress.');
-      } finally {
-        if (active) setLoadingProgress(false);
-      }
-    };
-
-    load();
-
-    return () => {
-      active = false;
-    };
-  }, [onSessionExpired]);
+function HomeContent({ user, progress, courseProgress }: HomeContentProps & { progress: ProgressRecord; courseProgress: CourseProgressSummary }) {
+  const loadingProgress = false;
+  const message = '';
 
   const nextMilestone = getNextMilestone(progress);
   const completedMilestones = getCompletedMilestoneCount(progress);
@@ -131,8 +97,8 @@ function HomeContent({ user, onSessionExpired }: HomeContentProps) {
   const nextActionLabel = nextMilestone ? `Go to Step ${nextMilestone.number}` : 'Start operator journey';
   const nextActionTitle = nextMilestone ? `Step ${nextMilestone.number}: ${nextMilestone.label}` : 'Operator journey unlocked';
   const nextActionText = nextMilestone
-    ? `Complete ${nextMilestone.label} next so the onboarding path keeps moving and the training library unlocks in order.`
-    : 'Your required onboarding is complete, so you can begin Level 1, track journey milestones, and keep courses tied to real operator actions.';
+    ? `Complete ${nextMilestone.label} next to continue Getting Started and unlock the Training Courses in order.`
+    : 'Getting Started is complete. Continue with Training Courses and apply your learning in the Practical Operator Journey.';
   const nextActionReason = nextMilestone
     ? 'This page stays focused on the one step you need right now.'
     : 'Courses remain available, and the journey now gives them a guided operating path.';
@@ -140,7 +106,7 @@ function HomeContent({ user, onSessionExpired }: HomeContentProps) {
   return (
     <OnboardingLayout
       title="Welcome back to your operator workspace"
-      subtitle="Use this page to see the next required move and continue without extra distractions."
+      subtitle="Follow one clear path: Getting Started, Training Courses, then the Practical Operator Journey."
       progress={progress}
       courseProgress={courseProgress}
       loading={loadingProgress}
@@ -150,6 +116,14 @@ function HomeContent({ user, onSessionExpired }: HomeContentProps) {
       ) : (
         <>
       {message ? <p className={`${styles.message} ${styles.messageError}`}>{message}</p> : null}
+
+      <section className={styles.homeProgressPanel} aria-label="Operator program roadmap">
+        <div className={styles.homeSummaryGrid}>
+          <span>1. Getting Started</span>
+          <span>2. Training Courses</span>
+          <span>3. Practical Operator Journey</span>
+        </div>
+      </section>
 
       <section className={`${styles.callout} ${styles.homeHeroCard}`}>
         <div className={styles.homeHeroHeader}>
@@ -182,7 +156,7 @@ function HomeContent({ user, onSessionExpired }: HomeContentProps) {
         </div>
       </section>
 
-      <section className={styles.homeProgressPanel} aria-label="Onboarding summary">
+      <section className={styles.homeProgressPanel} aria-label="Getting Started summary">
         <div className={styles.homeProgressMeta}>
           <p className={styles.homeIdentityText}>
             Signed in as <strong>{user.email}</strong>
@@ -207,58 +181,19 @@ function HomeContent({ user, onSessionExpired }: HomeContentProps) {
 }
 
 export default function HomePage() {
-  const [state, setState] = useState<HomeState>({ status: 'loading' });
+  const { data, error, loading } = useWorkspace({ redirectOnUnauthorized: false });
 
-  useEffect(() => {
-    let active = true;
-
-    const loadSession = async () => {
-      try {
-        const response = await fetch('/api/auth/session', {
-          credentials: 'include',
-          cache: 'no-store',
-        });
-        const payload = (await response.json().catch(() => ({}))) as SessionPayload;
-        if (!active) return;
-
-        if (response.ok && payload.authenticated && payload.user) {
-          setState({ status: 'authenticated', user: payload.user });
-          return;
-        }
-
-        if (response.status === 401) {
-          setState({ status: 'signed_out' });
-          return;
-        }
-
-        setState({ status: 'error', message: payload.error || 'We could not load the home page right now. Please try again shortly.' });
-      } catch (error) {
-        if (!active) return;
-        setState({
-          status: 'error',
-          message: isHttpError(error) ? error.message : 'We could not load the home page right now. Please try again shortly.',
-        });
-      }
-    };
-
-    loadSession();
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  if (state.status === 'loading') {
+  if (loading) {
     return <LoadingState variant="page" title="Loading home" message="Checking your session and preparing the correct landing view…" />;
   }
 
-  if (state.status === 'signed_out') {
+  if (isUnauthorizedError(error)) {
     return <SignedOutHome />;
   }
 
-  if (state.status === 'error') {
-    return <HomeError message={state.message} />;
+  if (error || !data) {
+    return <HomeError message={error?.message || 'We could not load the home page right now. Please try again shortly.'} />;
   }
 
-  return <HomeContent user={state.user} onSessionExpired={() => setState({ status: 'signed_out' })} />;
+  return <HomeContent user={data.user} progress={data.progress} courseProgress={data.courseProgress} />;
 }

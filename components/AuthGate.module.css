@@ -143,6 +143,30 @@
   line-height: 1.45;
 }
 
+.programStages {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.55rem;
+  text-align: left;
+}
+
+.programStages li {
+  display: grid;
+  gap: 0.16rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--surface-border);
+  border-radius: 0.7rem;
+  background: var(--surface-alt);
+}
+
+.programStages strong { color: var(--ink-strong); font-size: 0.85rem; }
+.programStages span,
+.invitationHint { color: var(--ink-muted); font-size: 0.78rem; line-height: 1.4; }
+.invitationHint { margin: -0.45rem 0 0; }
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
